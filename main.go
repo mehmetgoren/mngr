@@ -7,8 +7,10 @@ import (
 	"github.com/go-redis/redis/v8"
 	"io"
 	"log"
+	"mngr/eb"
 	"mngr/models"
 	"mngr/reps"
+	"mngr/utils"
 	"mngr/ws"
 	"net/http"
 	"os"
@@ -49,6 +51,12 @@ func main() {
 	connConfig := createRedisConnection(MAIN)
 	configRep := reps.ConfigRepository{Connection: connConfig}
 
+	// subscribe to redis channel
+	connPubSub := createRedisConnection(EVENTBUS)
+	eventBusSub := eb.EventBus{Connection: connPubSub, Channel: "streaming_response"}
+	eventSub := eb.StreamingEvent{}
+	go eventBusSub.Subscribe(&eventSub)
+
 	router := gin.Default()
 	f, _ := os.Create("access.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -63,7 +71,7 @@ func main() {
 	}))
 
 	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
-	router.Static("/livestream", "./static/live")
+	router.Static("/livestream", utils.RelativeLiveFolderPath)
 	router.Static("livestreamexample", "./static/live/example.mp4")
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -94,6 +102,29 @@ func main() {
 		ctx.JSON(http.StatusOK, config)
 	})
 
+	router.POST("/startstreaming", func(ctx *gin.Context) {
+		var source models.Source
+		ctx.BindJSON(&source)
+		folderPath, err := utils.CreateDirIfNotExist(utils.LiveFolderPath + "/" + source.Id)
+		if err != nil {
+			log.Println("An error occurred while creating folder: " + err.Error())
+			return
+		}
+
+		folderPathFull, _ := utils.GetExecutablePath()
+		eventPub := eb.StreamingEvent{Source: source, FolderPath: folderPathFull + "/" + folderPath + "/stream.m3u8"}
+		eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "streaming_request"}
+		err = eventBusPub.Publish(&eventPub)
+		if err != nil {
+			log.Println("An error occurred while publishing event: " + err.Error())
+			log.Println("panic you fuck")
+			panic(err)
+			return
+		}
+
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+
 	//websockets
 	router.StaticFile("/home", "./static/live/home.html")
 	hub := ws.NewHub()
@@ -112,5 +143,5 @@ func main() {
 }
 
 func loggingMiddleware(ctx *gin.Context) {
-	fmt.Println("fcuk yea")
+
 }
