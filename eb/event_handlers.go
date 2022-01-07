@@ -16,7 +16,7 @@ func (h *StreamingEvent) Handle(event *redis.Message) error {
 	var eventModel StreamingEvent
 	utils.DeserializeJson(event.Payload, &eventModel)
 
-	eventModel.FolderPath = filepath.Join(eventModel.Id, "stream.m3u8")
+	eventModel.OutputFile = filepath.Join(eventModel.Id, "stream.m3u8")
 	ws.PushStreamServerInfo(&eventModel)
 	return nil
 }

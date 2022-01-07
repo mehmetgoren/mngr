@@ -15,6 +15,10 @@ func CreateDirIfNotExist(dir string) (string, error) {
 	return dir, nil
 }
 
+func DeleteDir(dir string) error {
+	return os.RemoveAll(dir)
+}
+
 func GetExecutablePath() (string, error) {
 	return "/mnt/super/ionix/node/mngr", nil
 	// todo: fix this

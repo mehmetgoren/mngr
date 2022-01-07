@@ -10,7 +10,7 @@ type Event struct {
 
 type StreamingEvent struct {
 	models.Source
-	FolderPath string `json:"folder_path"`
+	OutputFile string `json:"output_file"`
 }
 
 func (s StreamingEvent) MarshalBinary() ([]byte, error) {

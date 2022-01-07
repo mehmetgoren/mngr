@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"io"
+	"io/ioutil"
 	"log"
 	"mngr/eb"
 	"mngr/models"
@@ -44,7 +45,20 @@ func createRedisConnection(db int) *redis.Client {
 	})
 }
 
+func removePrevStreamFolders() {
+	files, _ := ioutil.ReadDir(utils.RelativeLiveFolderPath)
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+		folderPath := utils.RelativeLiveFolderPath + "/" + file.Name()
+		os.RemoveAll(folderPath)
+	}
+}
+
 func main() {
+	removePrevStreamFolders()
+
 	connSources := createRedisConnection(SOURCES)
 	sourceRep := reps.SourceRepository{Connection: connSources}
 
@@ -53,7 +67,7 @@ func main() {
 
 	// subscribe to redis channel
 	connPubSub := createRedisConnection(EVENTBUS)
-	eventBusSub := eb.EventBus{Connection: connPubSub, Channel: "streaming_response"}
+	eventBusSub := eb.EventBus{Connection: connPubSub, Channel: "start_streaming_response"}
 	eventSub := eb.StreamingEvent{}
 	go eventBusSub.Subscribe(&eventSub)
 
@@ -112,18 +126,38 @@ func main() {
 		}
 
 		folderPathFull, _ := utils.GetExecutablePath()
-		eventPub := eb.StreamingEvent{Source: source, FolderPath: folderPathFull + "/" + folderPath + "/stream.m3u8"}
-		eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "streaming_request"}
+		eventPub := eb.StreamingEvent{Source: source, OutputFile: folderPathFull + "/" + folderPath + "/stream.m3u8"}
+		//create file
+		//os.Create(eventPub.OutputFile)
+		eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "start_streaming_request"}
 		err = eventBusPub.Publish(&eventPub)
 		if err != nil {
 			log.Println("An error occurred while publishing event: " + err.Error())
-			log.Println("panic you fuck")
-			panic(err)
 			return
 		}
 
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
+
+	//router.POST("/stopstreaming", func(ctx *gin.Context) {
+	//	var source models.Source
+	//	ctx.BindJSON(&source)
+	//	err := utils.DeleteDir(utils.LiveFolderPath + "/" + source.Id)
+	//	if err != nil {
+	//		log.Println("An error occurred while creating folder: " + err.Error())
+	//		return
+	//	}
+	//
+	//	eventPub := eb.StreamingEvent{Source: source}
+	//	eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "stop_streaming_request"}
+	//	err = eventBusPub.Publish(&eventPub)
+	//	if err != nil {
+	//		log.Println("An error occurred while publishing event: " + err.Error())
+	//		return
+	//	}
+	//
+	//	ctx.Writer.WriteHeader(http.StatusOK)
+	//})
 
 	//websockets
 	router.StaticFile("/home", "./static/live/home.html")
