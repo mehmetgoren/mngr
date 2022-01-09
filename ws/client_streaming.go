@@ -8,6 +8,10 @@ import (
 )
 
 func PushStreamServerInfo(s interface{}) { //s is StreamingEvent
+	if clientStreaming == nil {
+		log.Println("Something may be wrong with the client side, clientStreaming is nil")
+		return
+	}
 	json, err := utils.SerializeJson(s)
 	if err != nil {
 		return
