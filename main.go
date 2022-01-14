@@ -67,9 +67,14 @@ func main() {
 
 	// subscribe to redis channel
 	connPubSub := createRedisConnection(EVENTBUS)
-	eventBusSub := eb.EventBus{Connection: connPubSub, Channel: "start_streaming_response"}
-	eventSub := eb.StreamingEvent{}
-	go eventBusSub.Subscribe(&eventSub)
+
+	streamingEventBusSub := eb.EventBus{Connection: connPubSub, Channel: "start_streaming_response"}
+	streamingEventSub := eb.StreamingEvent{}
+	go streamingEventBusSub.Subscribe(&streamingEventSub)
+
+	recordingEventBus := eb.EventBus{Connection: connPubSub, Channel: "start_recording_response"}
+	recordingEvent := eb.RecordingEvent{}
+	go recordingEventBus.Subscribe(&recordingEvent)
 
 	router := gin.Default()
 	f, _ := os.Create("access.log")
@@ -86,6 +91,7 @@ func main() {
 
 	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
 	router.Static("/livestream", utils.RelativeLiveFolderPath)
+	router.Static("/playback", utils.RelativePlaybackFolderPath)
 	router.Static("livestreamexample", "./static/live/example.mp4")
 
 	router.GET("/ping", func(c *gin.Context) {
@@ -116,12 +122,30 @@ func main() {
 		ctx.JSON(http.StatusOK, config)
 	})
 
+	router.GET("/videos/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		//id = "QLma6mWR3V8"
+		files, _ := ioutil.ReadDir(utils.RelativePlaybackFolderPath + "/" + id)
+		var list = make([]*models.VideoFile, 0)
+		for _, file := range files {
+			videoFile := models.VideoFile{}
+			videoFile.SourceId = id
+			videoFile.Name = file.Name()
+			videoFile.Path = utils.RelativePlaybackFolderPath + "/" + file.Name()
+			videoFile.Size = file.Size()
+			videoFile.CreatedAt = file.Name()
+			videoFile.ModifiedAt = utils.FromDateToString(file.ModTime())
+			list = append(list, &videoFile)
+		}
+		ctx.JSON(http.StatusOK, list)
+	})
+
 	router.POST("/startstreaming", func(ctx *gin.Context) {
 		var source models.Source
 		ctx.BindJSON(&source)
 		folderPath, err := utils.CreateDirIfNotExist(utils.LiveFolderPath + "/" + source.Id)
 		if err != nil {
-			log.Println("An error occurred while creating folder: " + err.Error())
+			log.Println("An error occurred while creating a live stream folder: " + err.Error())
 			return
 		}
 
@@ -132,32 +156,35 @@ func main() {
 		eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "start_streaming_request"}
 		err = eventBusPub.Publish(&eventPub)
 		if err != nil {
-			log.Println("An error occurred while publishing event: " + err.Error())
+			log.Println("An error occurred while publishing a streaming event: " + err.Error())
 			return
 		}
 
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 
-	//router.POST("/stopstreaming", func(ctx *gin.Context) {
-	//	var source models.Source
-	//	ctx.BindJSON(&source)
-	//	err := utils.DeleteDir(utils.LiveFolderPath + "/" + source.Id)
-	//	if err != nil {
-	//		log.Println("An error occurred while creating folder: " + err.Error())
-	//		return
-	//	}
-	//
-	//	eventPub := eb.StreamingEvent{Source: source}
-	//	eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "stop_streaming_request"}
-	//	err = eventBusPub.Publish(&eventPub)
-	//	if err != nil {
-	//		log.Println("An error occurred while publishing event: " + err.Error())
-	//		return
-	//	}
-	//
-	//	ctx.Writer.WriteHeader(http.StatusOK)
-	//})
+	router.POST("/startrecording", func(ctx *gin.Context) {
+		var source models.Source
+		ctx.BindJSON(&source)
+		folderPath, err := utils.CreateDirIfNotExist(utils.PlaybackFolderPath + "/" + source.Id)
+		if err != nil {
+			log.Println("An error occurred while creating a playback folder: " + err.Error())
+			return
+		}
+
+		folderPathFull, _ := utils.GetExecutablePath()
+		eventPub := eb.RecordingEvent{Source: source, Duration: 3, OutputFile: folderPathFull + "/" + folderPath}
+		eventBusPub := eb.EventBus{Connection: connPubSub, Channel: "start_recording_request"}
+		err = eventBusPub.Publish(&eventPub)
+		if err != nil {
+			log.Println("An error occurred while publishing a playback event: " + err.Error())
+			return
+		}
+
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+
+	//router.POST("/stopstreaming", func(ctx *gin.Context) { ...}
 
 	//websockets
 	router.StaticFile("/home", "./static/live/home.html")
@@ -169,6 +196,10 @@ func main() {
 	})
 	router.GET("/wsstreaming", func(ctx *gin.Context) {
 		ws.HandlerStreaming(hub, ctx.Writer, ctx.Request)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsrecording", func(ctx *gin.Context) {
+		ws.HandlerRecording(hub, ctx.Writer, ctx.Request)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	//end websockets

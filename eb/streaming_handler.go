@@ -7,12 +7,7 @@ import (
 	"path/filepath"
 )
 
-// EventHandler needs desperately generics
-type EventHandler interface {
-	Handle(event *redis.Message) error
-}
-
-func (h *StreamingEvent) Handle(event *redis.Message) error {
+func (s *StreamingEvent) Handle(event *redis.Message) error {
 	var eventModel StreamingEvent
 	utils.DeserializeJson(event.Payload, &eventModel)
 
