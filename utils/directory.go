@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +12,17 @@ const LiveFolderPath = "static/live"
 const RelativeLiveFolderPath = "./" + LiveFolderPath
 const PlaybackFolderPath = "static/playback"
 const RelativePlaybackFolderPath = "./" + PlaybackFolderPath
+
+func RemovePrevStreamFolders() {
+	files, _ := ioutil.ReadDir(RelativeLiveFolderPath)
+	for _, file := range files {
+		if !file.IsDir() {
+			continue
+		}
+		folderPath := RelativeLiveFolderPath + "/" + file.Name()
+		os.RemoveAll(folderPath)
+	}
+}
 
 func CreateDirIfNotExist(dir string) (string, error) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {

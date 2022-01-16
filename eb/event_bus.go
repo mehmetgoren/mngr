@@ -23,8 +23,8 @@ func (eb *EventBus) Subscribe(handler EventHandler) error {
 		return err
 	}
 
-	log.Println("ping: " + pong)
-	log.Println("redis pubsub is listening")
+	log.Println("ping: " + pong + " for " + eb.Channel)
+	log.Println("redis pubsub is listening for " + eb.Channel)
 
 	channel := eb.Channel
 	subscribe := eb.Connection.Subscribe(context.Background(), channel)
