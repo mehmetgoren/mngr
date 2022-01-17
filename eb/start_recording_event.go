@@ -8,21 +8,21 @@ import (
 	"mngr/utils"
 )
 
-type RecordingEvent struct {
+type StartRecordingEvent struct {
 	models.Source
 	Duration   int            `json:"duration"`
 	OutputFile string         `json:"output_file"`
 	Pusher     utils.WsPusher `json:"-"`
 }
 
-func (r RecordingEvent) MarshalBinary() ([]byte, error) {
+func (r StartRecordingEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(r)
 }
-func (r RecordingEvent) UnmarshalBinary(data []byte) error {
+func (r StartRecordingEvent) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, &r)
 }
 
-func (r *RecordingEvent) Publish() error {
+func (r *StartRecordingEvent) Publish() error {
 	folderPath, err := utils.CreateDirIfNotExist(utils.PlaybackFolderPath + "/" + r.Source.Id)
 	if err != nil {
 		log.Println("An error occurred while creating a playback folder: " + err.Error())
@@ -44,8 +44,8 @@ func (r *RecordingEvent) Publish() error {
 	return nil
 }
 
-func (r *RecordingEvent) Handle(event *redis.Message) error {
-	var eventModel RecordingEvent
+func (r *StartRecordingEvent) Handle(event *redis.Message) error {
+	var eventModel StartRecordingEvent
 	utils.DeserializeJson(event.Payload, &eventModel)
 
 	eventModel.OutputFile = eventModel.Id

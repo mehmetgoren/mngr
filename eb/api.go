@@ -12,8 +12,14 @@ func SubscribeStreamingEvents(pusherStreaming utils.WsPusher) {
 	go streamingEventBusSub.Subscribe(&streamingEventSub)
 }
 
-func SubscribeRecordingEvents(pusherRecording utils.WsPusher) {
+func SubscribeStartRecordingEvents(pusherRecording utils.WsPusher) {
 	recordingEventBus := EventBus{Connection: connPubSub, Channel: "start_recording_response"}
-	recordingEvent := RecordingEvent{Pusher: pusherRecording}
+	recordingEvent := StartRecordingEvent{Pusher: pusherRecording}
+	go recordingEventBus.Subscribe(&recordingEvent)
+}
+
+func SubscribeStopRecordingEvents(pusherRecording utils.WsPusher) {
+	recordingEventBus := EventBus{Connection: connPubSub, Channel: "stop_recording_response"}
+	recordingEvent := StopRecordingEvent{Pusher: pusherRecording}
 	go recordingEventBus.Subscribe(&recordingEvent)
 }

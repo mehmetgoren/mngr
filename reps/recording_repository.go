@@ -13,8 +13,13 @@ type RecordingRepository struct {
 var redisKeyRecording = "recording:"
 
 func (r *RecordingRepository) Get(id string) (*models.Recording, error) {
+	key := redisKeyRecording + id
+	_, err := r.Connection.Get(context.Background(), key).Result()
+	if err == redis.Nil {
+		return nil, nil
+	}
 	recording := &models.Recording{}
-	err := r.Connection.HGetAll(context.Background(), redisKeyRecording+id).Scan(recording)
+	err = r.Connection.HGetAll(context.Background(), redisKeyRecording+id).Scan(recording)
 	if err != nil {
 		return nil, err
 	}

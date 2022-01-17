@@ -11,7 +11,6 @@ func RegisterApiEndpoints(router *gin.Engine) {
 	router.POST("/startstreaming", func(ctx *gin.Context) {
 		var source models.Source
 		ctx.BindJSON(&source)
-
 		eventPub := eb.StreamingEvent{Source: source}
 		err := eventPub.Publish()
 		if err == nil {
@@ -22,15 +21,22 @@ func RegisterApiEndpoints(router *gin.Engine) {
 	router.POST("/startrecording", func(ctx *gin.Context) {
 		var source models.Source
 		ctx.BindJSON(&source)
-
-		eventPub := eb.RecordingEvent{Source: source}
+		eventPub := eb.StartRecordingEvent{Source: source}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
 
-	//router.POST("/stopstreaming", func(ctx *gin.Context) { ...}
+	router.POST("/stoprecording", func(ctx *gin.Context) {
+		var source models.Source
+		ctx.BindJSON(&source)
+		eventPub := eb.StopRecordingEvent{Source: source}
+		err := eventPub.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+	})
 }
 
 func RegisterWsEndpoints(router *gin.Engine) {
@@ -47,9 +53,14 @@ func RegisterWsEndpoints(router *gin.Engine) {
 		eb.SubscribeStreamingEvents(clientStreaming)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	router.GET("/wsrecording", func(ctx *gin.Context) {
-		clientsRecording := CreateClient(hub, ctx.Writer, ctx.Request)
-		eb.SubscribeRecordingEvents(clientsRecording)
+	router.GET("/wsstartrecording", func(ctx *gin.Context) {
+		clientsStartRecording := CreateClient(hub, ctx.Writer, ctx.Request)
+		eb.SubscribeStartRecordingEvents(clientsStartRecording)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsstoprecording", func(ctx *gin.Context) {
+		clientsStopRecording := CreateClient(hub, ctx.Writer, ctx.Request)
+		eb.SubscribeStopRecordingEvents(clientsStopRecording)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	//end websockets
