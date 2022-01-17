@@ -19,7 +19,7 @@ type Client struct {
 	send chan []byte
 }
 
-func (c *Client) Push(s interface{}) error { //s is StreamingEvent
+func (c *Client) Push(s interface{}) error {
 	if c == nil {
 		log.Println("Something may be wrong with the client side, Client is nil")
 		return errors.New("client is nil")

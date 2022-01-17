@@ -9,20 +9,20 @@ import (
 	"path/filepath"
 )
 
-type StreamingEvent struct {
+type StartStreamingEvent struct {
 	models.Source
 	OutputFile string         `json:"output_file"`
 	Pusher     utils.WsPusher `json:"-"`
 }
 
-func (s StreamingEvent) MarshalBinary() ([]byte, error) {
+func (s StartStreamingEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
 }
-func (s StreamingEvent) UnmarshalBinary(data []byte) error {
+func (s StartStreamingEvent) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, &s)
 }
 
-func (s *StreamingEvent) Publish() error {
+func (s *StartStreamingEvent) Publish() error {
 	folderPath, err := utils.CreateDirIfNotExist(utils.LiveFolderPath + "/" + s.Source.Id)
 	if err != nil {
 		log.Println("An error occurred while creating a live stream folder: " + err.Error())
@@ -43,8 +43,8 @@ func (s *StreamingEvent) Publish() error {
 	return nil
 }
 
-func (s *StreamingEvent) Handle(event *redis.Message) error {
-	var eventModel StreamingEvent
+func (s *StartStreamingEvent) Handle(event *redis.Message) error {
+	var eventModel StartStreamingEvent
 	utils.DeserializeJson(event.Payload, &eventModel)
 
 	eventModel.OutputFile = filepath.Join(eventModel.Id, "stream.m3u8")
