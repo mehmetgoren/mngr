@@ -5,14 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"mngr/api"
-	"mngr/utils"
 	"mngr/ws"
 	"net/http"
 	"os"
 )
 
 func main() {
-	utils.RemovePrevStreamFolders()
+	//utils.RemovePrevStreamFolders()
 
 	router := gin.Default()
 	f, _ := os.Create("access.log")
