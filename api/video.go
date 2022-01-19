@@ -7,6 +7,7 @@ import (
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
+	"path"
 )
 
 func RegisterVideoEndpoints(router *gin.Engine) {
@@ -19,7 +20,7 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 			videoFile := models.VideoFile{}
 			videoFile.SourceId = id
 			videoFile.Name = file.Name()
-			videoFile.Path = utils.RelativePlaybackFolderPath + "/" + file.Name()
+			videoFile.Path = path.Join("/playback", id, file.Name()) //utils.RelativePlaybackFolderPath + "/" + file.Name()
 			videoFile.Size = utils.Round(float64(file.Size()) * 0.000001)
 			videoFile.CreatedAt = file.Name()
 			videoFile.ModifiedAt = utils.FromDateToString(file.ModTime())

@@ -42,14 +42,19 @@ func (e *EditorEvent) Publish() error {
 func (e *EditorEvent) Handle(event *redis.Message) error {
 	var eventModel EditorEvent
 	utils.DeserializeJson(event.Payload, &eventModel)
-	switch eventModel.EventType {
-	case TAKE_SCREENSHOT:
-	case GENERATE_THUMBNAIL:
+	push := func() {
 		responseModel := models.EditorImageResponseModel{}
 		responseModel.EventType = eventModel.EventType
 		responseModel.Source = eventModel.Source
 		utils.DeserializeJson(eventModel.ResponseJson, &responseModel)
 		e.Pusher.Push(&responseModel)
+	}
+	switch eventModel.EventType {
+	case TAKE_SCREENSHOT:
+		push()
+		break
+	case GENERATE_THUMBNAIL:
+		push()
 		break
 	}
 	return nil
