@@ -44,6 +44,7 @@ func (e *EditorEvent) Handle(event *redis.Message) error {
 	utils.DeserializeJson(event.Payload, &eventModel)
 	switch eventModel.EventType {
 	case TAKE_SCREENSHOT:
+	case GENERATE_THUMBNAIL:
 		responseModel := models.EditorImageResponseModel{}
 		responseModel.EventType = eventModel.EventType
 		responseModel.Source = eventModel.Source
