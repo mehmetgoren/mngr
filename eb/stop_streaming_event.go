@@ -21,7 +21,7 @@ func (s StopStreamingEvent) UnmarshalBinary(data []byte) error {
 }
 
 func (s *StopStreamingEvent) Publish() error {
-	eventBusPub := EventBus{Connection: connPubSub, Channel: "stop_streaming_request"}
+	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "stop_streaming_request"}
 	err := eventBusPub.Publish(s)
 	if err != nil {
 		log.Println("An error occurred while publishing a streaming event: " + err.Error())

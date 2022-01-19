@@ -29,3 +29,9 @@ type VideoFile struct {
 	CreatedAt  string  `json:"created_at"`
 	ModifiedAt string  `json:"modified_at"`
 }
+
+type EditorImageResponseModel struct {
+	Source      Source `json:"source"`
+	EventType   int    `json:"event_type"`
+	ImageBase64 string `json:"image_base64"`
+}

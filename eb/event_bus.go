@@ -4,7 +4,10 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"log"
+	"mngr/utils"
 )
+
+var ConnPubSub = utils.CreateRedisConnection(utils.EVENTBUS)
 
 type EventBus struct {
 	Connection *redis.Client

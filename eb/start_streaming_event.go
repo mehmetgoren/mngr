@@ -33,7 +33,7 @@ func (s *StartStreamingEvent) Publish() error {
 	s.OutputFile = folderPathFull + "/" + folderPath + "/stream.m3u8"
 	//create file
 	//os.Create(eventPub.OutputFile)
-	eventBusPub := EventBus{Connection: connPubSub, Channel: "start_streaming_request"}
+	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "start_streaming_request"}
 	err = eventBusPub.Publish(s)
 	if err != nil {
 		log.Println("An error occurred while publishing a streaming event: " + err.Error())

@@ -34,7 +34,7 @@ func (r *StartRecordingEvent) Publish() error {
 	r.Duration = 3
 	r.OutputFile = folderPathFull + "/" + folderPath
 
-	eventBusPub := EventBus{Connection: connPubSub, Channel: "start_recording_request"}
+	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "start_recording_request"}
 	err = eventBusPub.Publish(r)
 	if err != nil {
 		log.Println("An error occurred while publishing a playback event: " + err.Error())
