@@ -1,30 +1,25 @@
 package utils
 
 import (
-	"io/ioutil"
+	"log"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 )
 
-const LiveFolderPath = "static/live"
-const RelativeLiveFolderPath = "./" + LiveFolderPath
-const PlaybackFolderPath = "static/playback"
-const RelativePlaybackFolderPath = "./" + PlaybackFolderPath
-
-func RemovePrevStreamFolders() {
-	files, _ := ioutil.ReadDir(RelativeLiveFolderPath)
-	for _, file := range files {
-		if !file.IsDir() {
-			continue
-		}
-		folderPath := RelativeLiveFolderPath + "/" + file.Name()
-		os.RemoveAll(folderPath)
+func GetStreamingFolderPath() (string, error) {
+	folderPath, err := os.Getwd()
+	if err != nil {
+		return "", err
 	}
+	return path.Join(folderPath, "static/live"), nil
 }
 
-func CreateDirIfNotExist(dir string) (string, error) {
+func CreateStreamingFolderIfNotExist(id string) (string, error) {
+	folderPath, _ := GetStreamingFolderPath()
+	dir := path.Join(folderPath, id)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, 0777)
 		if err != nil {
@@ -35,14 +30,27 @@ func CreateDirIfNotExist(dir string) (string, error) {
 	return dir, nil
 }
 
-func GetExecutablePath() (string, error) {
-	return "/mnt/super/ionix/node/mngr", nil
-	// todo: fix this
-	//path, err := os.Executable()
-	//if err != nil {
-	//	return "", err
-	//}
-	//return path, nil
+func GetRecordingFolderPath() (string, error) {
+	config, err := ConfigRep.GetConfig()
+	if err != nil {
+		log.Println("GetRecordingFolderPath:", err)
+		return "", err
+	}
+
+	return config.Recording.FolderPath, nil // "/mnt/sde1/playback", nil
+}
+
+func CreateRecordingFolderIfNotExist(id string) (string, error) {
+	folderPath, _ := GetRecordingFolderPath()
+	dir := path.Join(folderPath, id)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0777)
+		if err != nil {
+			return dir, err
+		}
+	}
+
+	return dir, nil
 }
 
 func FromDateToString(t time.Time) string {
@@ -64,6 +72,16 @@ func FromDateToString(t time.Time) string {
 	return sb.String()
 }
 
+//func RemovePrevStreamFolders() {
+//	files, _ := ioutil.ReadDir(RelativeLiveFolderPath)
+//	for _, file := range files {
+//		if !file.IsDir() {
+//			continue
+//		}
+//		folderPath := RelativeLiveFolderPath + "/" + file.Name()
+//		os.RemoveAll(folderPath)
+//	}
+//}
 //func ParseVideoFileName(fileName string) time.Time {
 //	splits := strings.Split(fileName, ".")
 //	splits = strings.Split(splits[0], "_")

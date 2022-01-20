@@ -21,7 +21,7 @@ func (r StopRecordingEvent) UnmarshalBinary(data []byte) error {
 }
 
 func (r *StopRecordingEvent) Publish() error {
-	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "stop_recording_request"}
+	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "stop_recording_request"}
 	err := eventBusPub.Publish(r)
 	if err != nil {
 		log.Println("An error occurred while publishing a playback event: " + err.Error())

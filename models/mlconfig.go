@@ -1,6 +1,6 @@
 package models
 
-type MlConfig struct {
+type Config struct {
 	DeviceConfig struct {
 		DeviceName     string `json:"device_name"`
 		DeviceServices []int  `json:"device_services"`
@@ -45,4 +45,7 @@ type MlConfig struct {
 		Threshold         float64 `json:"threshold"`
 		WhiteList         []int   `json:"white_list"`
 	} `json:"torch"`
+	Recording struct {
+		FolderPath string `json:"folder_path"`
+	} `json:"recording"`
 }

@@ -23,18 +23,17 @@ func (r StartRecordingEvent) UnmarshalBinary(data []byte) error {
 }
 
 func (r *StartRecordingEvent) Publish() error {
-	folderPath, err := utils.CreateDirIfNotExist(utils.PlaybackFolderPath + "/" + r.Source.Id)
+	folderPath, err := utils.CreateRecordingFolderIfNotExist(r.Source.Id)
 	if err != nil {
 		log.Println("An error occurred while creating a playback folder: " + err.Error())
 		return err
 	}
 
-	folderPathFull, _ := utils.GetExecutablePath()
 	//todo: move it to config
 	r.Duration = 3
-	r.OutputFile = folderPathFull + "/" + folderPath
+	r.OutputFile = folderPath
 
-	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "start_recording_request"}
+	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "start_recording_request"}
 	err = eventBusPub.Publish(r)
 	if err != nil {
 		log.Println("An error occurred while publishing a playback event: " + err.Error())

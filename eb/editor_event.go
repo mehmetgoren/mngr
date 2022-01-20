@@ -29,7 +29,7 @@ func (e EditorEvent) UnmarshalBinary(data []byte) error {
 }
 
 func (e *EditorEvent) Publish() error {
-	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "editor_request"}
+	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "editor_request"}
 	err := eventBusPub.Publish(e)
 	if err != nil {
 		log.Println("An error occurred while publishing a editor event: " + err.Error())

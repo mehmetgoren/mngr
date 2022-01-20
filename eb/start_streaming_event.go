@@ -6,6 +6,7 @@ import (
 	"log"
 	"mngr/models"
 	"mngr/utils"
+	"path"
 	"path/filepath"
 )
 
@@ -23,17 +24,16 @@ func (s StartStreamingEvent) UnmarshalBinary(data []byte) error {
 }
 
 func (s *StartStreamingEvent) Publish() error {
-	folderPath, err := utils.CreateDirIfNotExist(utils.LiveFolderPath + "/" + s.Source.Id)
+	folderPath, err := utils.CreateStreamingFolderIfNotExist(s.Source.Id)
 	if err != nil {
 		log.Println("An error occurred while creating a live stream folder: " + err.Error())
 		return err
 	}
 
-	folderPathFull, _ := utils.GetExecutablePath()
-	s.OutputFile = folderPathFull + "/" + folderPath + "/stream.m3u8"
+	s.OutputFile = path.Join(folderPath, "stream.m3u8")
 	//create file
 	//os.Create(eventPub.OutputFile)
-	eventBusPub := EventBus{Connection: ConnPubSub, Channel: "start_streaming_request"}
+	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "start_streaming_request"}
 	err = eventBusPub.Publish(s)
 	if err != nil {
 		log.Println("An error occurred while publishing a streaming event: " + err.Error())

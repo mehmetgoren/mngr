@@ -32,7 +32,7 @@ func main() {
 
 	api.RegisterStaticResources(router)
 	api.RegisterSourceEndpoints(router)
-	api.RegisterMlConfigEndpoints(router)
+	api.RegisterConfigEndpoints(router)
 	api.RegisterVideoEndpoints(router)
 
 	ws.RegisterApiEndpoints(router)
