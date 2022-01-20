@@ -7,6 +7,7 @@ import (
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -27,6 +28,21 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 			list = append(list, &videoFile)
 		}
 		ctx.JSON(http.StatusOK, list)
+	})
+
+	router.DELETE("/videos/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		var fileNames []string
+		ctx.BindJSON(&fileNames)
+		//id = "QLma6mWR3V8"
+		for _, fileName := range fileNames {
+			err := os.Remove(path.Join(utils.RelativePlaybackFolderPath, id, fileName))
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, err)
+				return
+			}
+		}
+		ctx.JSON(http.StatusOK, nil)
 	})
 
 	router.GET("/recording/:id", func(ctx *gin.Context) {
