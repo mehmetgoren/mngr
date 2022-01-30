@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	//utils.RemovePrevStreamFolders()
 	router := gin.Default()
 	f, _ := os.Create("access.log")
 	gin.DefaultWriter = io.MultiWriter(f)

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mngr/models"
-	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"os"
@@ -47,14 +46,14 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 		ctx.JSON(http.StatusOK, nil)
 	})
 
-	router.GET("/recording/:id", func(ctx *gin.Context) {
-		id := ctx.Param("id")
-		rep := reps.RecordingRepository{Connection: utils.ConnSources}
-		model, err := rep.Get(id)
-		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusOK, model)
-	})
+	//router.GET("/streaming/:id", func(ctx *gin.Context) {
+	//	id := ctx.Param("id")
+	//	rep := reps.StreamingRepository{Connection: utils.ConnSources}
+	//	model, err := rep.Get(id)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	//		return
+	//	}
+	//	ctx.JSON(http.StatusOK, model)
+	//})
 }

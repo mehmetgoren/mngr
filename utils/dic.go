@@ -3,29 +3,29 @@ package utils
 import (
 	"log"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func GetStreamingFolderPath() (string, error) {
-	folderPath, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(folderPath, "static/live"), nil
-}
-
-func CreateStreamingFolderIfNotExist(id string) (string, error) {
-	folderPath, _ := GetStreamingFolderPath()
-	dir := path.Join(folderPath, id)
+func CreateDicIfNotExist(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, 0777)
 		if err != nil {
-			return dir, err
+			return err
 		}
 	}
+	return nil
+}
+
+func GetStreamingFolderPath() (string, error) {
+	config, err := ConfigRep.GetConfig()
+	if err != nil {
+		log.Println("GetRecordingFolderPath:", err)
+		return "", err
+	}
+	dir := config.Path.Streaming
+	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
@@ -36,19 +36,9 @@ func GetRecordingFolderPath() (string, error) {
 		log.Println("GetRecordingFolderPath:", err)
 		return "", err
 	}
-
-	return config.Recording.FolderPath, nil // "/mnt/sde1/playback", nil
-}
-
-func CreateRecordingFolderIfNotExist(id string) (string, error) {
-	folderPath, _ := GetRecordingFolderPath()
-	dir := path.Join(folderPath, id)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.MkdirAll(dir, 0777)
-		if err != nil {
-			return dir, err
-		}
-	}
+	// create if it doesn't exist
+	dir := config.Path.Recording
+	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
@@ -72,16 +62,6 @@ func FromDateToString(t time.Time) string {
 	return sb.String()
 }
 
-//func RemovePrevStreamFolders() {
-//	files, _ := ioutil.ReadDir(RelativeLiveFolderPath)
-//	for _, file := range files {
-//		if !file.IsDir() {
-//			continue
-//		}
-//		folderPath := RelativeLiveFolderPath + "/" + file.Name()
-//		os.RemoveAll(folderPath)
-//	}
-//}
 //func ParseVideoFileName(fileName string) time.Time {
 //	splits := strings.Split(fileName, ".")
 //	splits = strings.Split(splits[0], "_")

@@ -4,23 +4,17 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"log"
-	"mngr/models"
 	"mngr/utils"
 )
 
-type StopStreamingEvent struct {
-	models.Source
-	Pusher utils.WsPusher `json:"-"`
+type StopStreamingRequestEvent struct {
+	Id string `json:"id"`
 }
 
-func (s StopStreamingEvent) MarshalBinary() ([]byte, error) {
+func (s StopStreamingRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
 }
-func (s StopStreamingEvent) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, &s)
-}
-
-func (s *StopStreamingEvent) Publish() error {
+func (s *StopStreamingRequestEvent) Publish() error {
 	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "stop_streaming_request"}
 	err := eventBusPub.Publish(s)
 	if err != nil {
@@ -31,9 +25,13 @@ func (s *StopStreamingEvent) Publish() error {
 	return nil
 }
 
-func (s *StopStreamingEvent) Handle(event *redis.Message) error {
-	var eventModel StopStreamingEvent
-	utils.DeserializeJson(event.Payload, &eventModel)
-	s.Pusher.Push(&eventModel)
+type StopStreamingResponseEvent struct {
+	Id     string         `json:"id"`
+	Pusher utils.WsPusher `json:"-"`
+}
+
+func (s *StopStreamingResponseEvent) Handle(event *redis.Message) error {
+	utils.DeserializeJson(event.Payload, s)
+	s.Pusher.Push(s)
 	return nil
 }

@@ -4,10 +4,10 @@ import (
 	"mngr/reps"
 )
 
-var connMain = CreateRedisConnection(MAIN)
+var connMain = reps.CreateRedisConnection(reps.MAIN)
 var ConfigRep = reps.ConfigRepository{Connection: connMain}
 
-var ConnSources = CreateRedisConnection(SOURCES)
+var ConnSources = reps.CreateRedisConnection(reps.SOURCES)
 var SourceRep = reps.SourceRepository{Connection: ConnSources}
 
-var ConnPubSub = CreateRedisConnection(EVENTBUS)
+var ConnPubSub = reps.CreateRedisConnection(reps.EVENTBUS)

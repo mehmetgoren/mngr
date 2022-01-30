@@ -3,8 +3,8 @@ package ws
 import (
 	"errors"
 	"github.com/gorilla/websocket"
-	"github.com/lithammer/shortuuid/v3"
 	"log"
+	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"sync"
@@ -82,7 +82,7 @@ func CreateClient(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 	//	log.Println("Client connection closed with code: ", code, " and text: ", text)
 	//	return nil
 	//})
-	clientStreaming := &Client{id: shortuuid.New(), hub: hub, conn: conn, send: make(chan []byte, 256)}
+	clientStreaming := &Client{id: reps.NewId(), hub: hub, conn: conn, send: make(chan []byte, 256)}
 	clientStreaming.hub.register <- clientStreaming
 	go readLoop(clientStreaming)
 

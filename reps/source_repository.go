@@ -13,13 +13,25 @@ type SourceRepository struct {
 
 var redisKeySources = "sources:"
 
-func (r *SourceRepository) GetAllSources() ([]*models.Source, error) {
+func (r *SourceRepository) Save(model *models.SourceModel) (*models.SourceModel, error) {
 	conn := r.Connection
-	//jsonList, err := conn.Get(context.Background(), redisKeySources).Result()
+	if len(model.Id) == 0 {
+		model.Id = NewId()
+	}
+	_, err := conn.HSet(context.Background(), redisKeySources+model.Id, Map(model)).Result()
+	if err != nil {
+		log.Println("Error while adding source: ", err)
+		return nil, err
+	}
+	return model, nil
+}
+
+func (r *SourceRepository) GetAll() ([]*models.SourceModel, error) {
+	conn := r.Connection
 	keys, err := conn.Keys(context.Background(), redisKeySources+"*").Result()
 	if err != nil {
 		if err.Error() == "redis: nil" {
-			emptyList := make([]*models.Source, 0)
+			emptyList := make([]*models.SourceModel, 0)
 			conn.Set(context.Background(), redisKeySources, emptyList, 0)
 			return emptyList, nil
 		} else {
@@ -27,16 +39,47 @@ func (r *SourceRepository) GetAllSources() ([]*models.Source, error) {
 			return nil, err
 		}
 	}
-	var list []*models.Source
+	list := make([]*models.SourceModel, 0, 5)
 	for _, key := range keys {
-		dic, _ := conn.HGetAll(context.Background(), key).Result()
-		var p models.Source
-		p.TypeName = dic["type_name"]
-		p.Name = dic["name"]
-		p.Brand = dic["brand"]
-		p.RtspAddress = dic["rtsp_address"]
-		p.Id = dic["id"]
+		var p models.SourceModel
+		err := conn.HGetAll(context.Background(), key).Scan(&p)
+		if err != nil {
+			log.Println("Error getting source from redis: ", err)
+			return nil, err
+		}
 		list = append(list, &p)
 	}
 	return list, nil
+}
+
+func (r *SourceRepository) GetById(id string) (*models.SourceModel, error) {
+	conn := r.Connection
+	key := redisKeySources + id
+	var p models.SourceModel
+	err := conn.HGetAll(context.Background(), key).Scan(&p)
+	if err != nil {
+		log.Println("Error getting source from redis: ", err)
+		return nil, err
+	}
+	return &p, err
+	//conn := r.Connection
+	//key := redisKeySources + id
+	//values, err := conn.HGetAll(context.Background(), key).Result()
+	//if err != nil {
+	//	log.Println("Error getting source from redis: ", err)
+	//	return nil, err
+	//}
+	//var p models.SourceModel
+	//err = p.Map(values)
+	//return &p, err
+}
+
+func (r *SourceRepository) RemoveById(id string) error {
+	conn := r.Connection
+	_, err := conn.Del(context.Background(), redisKeySources+id).Result()
+	if err != nil {
+		log.Println("Error while deleting source: ", err)
+		return err
+	}
+	return nil
 }

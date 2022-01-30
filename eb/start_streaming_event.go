@@ -6,35 +6,19 @@ import (
 	"log"
 	"mngr/models"
 	"mngr/utils"
-	"path"
-	"path/filepath"
+	"strings"
 )
 
-type StartStreamingEvent struct {
-	models.Source
-	OutputFile string         `json:"output_file"`
-	Pusher     utils.WsPusher `json:"-"`
+type StartStreamingRequestEvent struct {
+	models.SourceModel
 }
 
-func (s StartStreamingEvent) MarshalBinary() ([]byte, error) {
+func (s StartStreamingRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
 }
-func (s StartStreamingEvent) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, &s)
-}
-
-func (s *StartStreamingEvent) Publish() error {
-	folderPath, err := utils.CreateStreamingFolderIfNotExist(s.Source.Id)
-	if err != nil {
-		log.Println("An error occurred while creating a live stream folder: " + err.Error())
-		return err
-	}
-
-	s.OutputFile = path.Join(folderPath, "stream.m3u8")
-	//create file
-	//os.Create(eventPub.OutputFile)
+func (s *StartStreamingRequestEvent) Publish() error {
 	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "start_streaming_request"}
-	err = eventBusPub.Publish(s)
+	err := eventBusPub.Publish(s)
 	if err != nil {
 		log.Println("An error occurred while publishing a streaming event: " + err.Error())
 		return err
@@ -43,12 +27,16 @@ func (s *StartStreamingEvent) Publish() error {
 	return nil
 }
 
-func (s *StartStreamingEvent) Handle(event *redis.Message) error {
-	var eventModel StartStreamingEvent
-	utils.DeserializeJson(event.Payload, &eventModel)
+type StartStreamingResponseEvent struct {
+	models.StreamingModel
+	Pusher utils.WsPusher `json:"-"`
+}
 
-	eventModel.OutputFile = filepath.Join(eventModel.Id, "stream.m3u8")
-	s.Pusher.Push(&eventModel)
-	//ws.PushStreamServerInfo(&eventModel)
+func (s *StartStreamingResponseEvent) Handle(event *redis.Message) error {
+	utils.DeserializeJson(event.Payload, s)
+	//from full path to web server relative path
+	config, _ := utils.ConfigRep.GetConfig()
+	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, config.Path.Streaming, "", -1)
+	s.Pusher.Push(s)
 	return nil
 }
