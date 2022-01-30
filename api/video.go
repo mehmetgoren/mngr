@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 func RegisterVideoEndpoints(router *gin.Engine) {
@@ -23,7 +25,7 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 			videoFile.Name = file.Name()
 			videoFile.Path = path.Join("/playback", id, file.Name()) //utils.RelativePlaybackFolderPath + "/" + file.Name()
 			videoFile.Size = utils.Round(float64(file.Size()) * 0.000001)
-			videoFile.CreatedAt = file.Name()
+			videoFile.CreatedAt = strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 			videoFile.ModifiedAt = utils.FromDateToString(file.ModTime())
 			list = append(list, &videoFile)
 		}
