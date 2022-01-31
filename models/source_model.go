@@ -25,22 +25,23 @@ type SourceModel struct {
 	VideoDecoder        int    `json:"video_decoder" redis:"video_decoder"`
 	HwaccelDevice       string `json:"hwaccel_device" redis:"hwaccel_device"`
 
-	StreamType            int `json:"stream_type" redis:"stream_type"`
-	RtmpServerType        int `json:"rtmp_server_type" redis:"rtmp_server_type"`
-	StreamVideoCodec      int `json:"stream_video_codec" redis:"stream_video_codec"`
-	HlsTime               int `json:"hls_time" redis:"hls_time"`
-	HlsListSize           int `json:"hls_list_size" redis:"hls_list_size"`
-	HlsPreset             int `json:"hls_preset" redis:"hls_preset"`
-	StreamQuality         int `json:"stream_quality" redis:"stream_quality"`
-	StreamFrameRate       int `json:"stream_frame_rate" redis:"stream_frame_rate"`
-	StreamWidth           int `json:"stream_width" redis:"stream_width"`
-	StreamHeight          int `json:"stream_height" redis:"stream_height"`
-	StreamRotate          int `json:"stream_rotate" redis:"stream_rotate"`
-	StreamAudioCodec      int `json:"stream_audio_codec" redis:"stream_audio_codec"`
-	StreamAudioChannel    int `json:"stream_audio_channel" redis:"stream_audio_channel"`
-	StreamAudioQuality    int `json:"stream_audio_quality" redis:"stream_audio_quality"`
-	StreamAudioSampleRate int `json:"stream_audio_sample_rate" redis:"stream_audio_sample_rate"`
-	StreamAudioVolume     int `json:"stream_audio_volume" redis:"stream_audio_volume"`
+	StreamType              int `json:"stream_type" redis:"stream_type"`
+	RtmpServerType          int `json:"rtmp_server_type" redis:"rtmp_server_type"`
+	FlvPlayerConnectionType int `json:"flv_player_connection_type" redis:"flv_player_connection_type"`
+	StreamVideoCodec        int `json:"stream_video_codec" redis:"stream_video_codec"`
+	HlsTime                 int `json:"hls_time" redis:"hls_time"`
+	HlsListSize             int `json:"hls_list_size" redis:"hls_list_size"`
+	HlsPreset               int `json:"hls_preset" redis:"hls_preset"`
+	StreamQuality           int `json:"stream_quality" redis:"stream_quality"`
+	StreamFrameRate         int `json:"stream_frame_rate" redis:"stream_frame_rate"`
+	StreamWidth             int `json:"stream_width" redis:"stream_width"`
+	StreamHeight            int `json:"stream_height" redis:"stream_height"`
+	StreamRotate            int `json:"stream_rotate" redis:"stream_rotate"`
+	StreamAudioCodec        int `json:"stream_audio_codec" redis:"stream_audio_codec"`
+	StreamAudioChannel      int `json:"stream_audio_channel" redis:"stream_audio_channel"`
+	StreamAudioQuality      int `json:"stream_audio_quality" redis:"stream_audio_quality"`
+	StreamAudioSampleRate   int `json:"stream_audio_sample_rate" redis:"stream_audio_sample_rate"`
+	StreamAudioVolume       int `json:"stream_audio_volume" redis:"stream_audio_volume"`
 
 	FlvAddress    string `json:"flv_address" redis:"flv_address"`
 	JpegEnabled   bool   `json:"jpeg_enabled" redis:"jpeg_enabled"`
