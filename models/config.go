@@ -50,4 +50,7 @@ type Config struct {
 		Recording string `json:"recording"`
 		Reading   string `json:"reading"`
 	} `json:"path"`
+	FFmpeg struct {
+		UseDoubleQuotesForPath bool `json:"use_double_quotes_for_path"`
+	} `json:"ffmpeg"`
 }
