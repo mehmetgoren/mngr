@@ -16,7 +16,7 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 	})
 	router.GET("/sources/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		source, err := utils.SourceRep.GetById(id)
+		source, err := utils.SourceRep.Get(id)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return

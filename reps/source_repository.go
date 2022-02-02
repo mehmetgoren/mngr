@@ -52,7 +52,7 @@ func (r *SourceRepository) GetAll() ([]*models.SourceModel, error) {
 	return list, nil
 }
 
-func (r *SourceRepository) GetById(id string) (*models.SourceModel, error) {
+func (r *SourceRepository) Get(id string) (*models.SourceModel, error) {
 	conn := r.Connection
 	key := redisKeySources + id
 	var p models.SourceModel

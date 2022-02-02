@@ -22,6 +22,10 @@ func RegisterApiEndpoints(router *gin.Engine) {
 	router.POST("/stopstreaming", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
+		if len(source.Id) == 0 {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		eventPub := eb.StopStreamingRequestEvent{Id: source.Id}
 		err := eventPub.Publish()
 		if err == nil {

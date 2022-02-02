@@ -52,5 +52,6 @@ type Config struct {
 	} `json:"path"`
 	FFmpeg struct {
 		UseDoubleQuotesForPath bool `json:"use_double_quotes_for_path"`
+		MaxOperationRetryCount int  `json:"max_operation_retry_count"`
 	} `json:"ffmpeg"`
 }

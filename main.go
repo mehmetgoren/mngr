@@ -31,6 +31,7 @@ func main() {
 
 	api.RegisterStaticResources(router)
 	api.RegisterSourceEndpoints(router)
+	api.RegisterStreamingEndpoints(router)
 	api.RegisterConfigEndpoints(router)
 	api.RegisterVideoEndpoints(router)
 
