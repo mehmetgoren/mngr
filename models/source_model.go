@@ -30,6 +30,9 @@ type SourceModel struct {
 	FlvPlayerConnectionType int    `json:"flv_player_connection_type" redis:"flv_player_connection_type"`
 	RtmpServerAddress       string `json:"rtmp_server_address" redis:"rtmp_server_address"`
 	NeedReloadInterval      int    `json:"need_reload_interval" redis:"need_reload_interval"`
+	DirectReadFrameRate     int    `json:"direct_read_frame_rate" redis:"direct_read_frame_rate"`
+	DirectReadWidth         int    `json:"direct_read_width" redis:"direct_read_width"`
+	DirectReadHeight        int    `json:"direct_read_height" redis:"direct_read_height"`
 	StreamVideoCodec        int    `json:"stream_video_codec" redis:"stream_video_codec"`
 	HlsTime                 int    `json:"hls_time" redis:"hls_time"`
 	HlsListSize             int    `json:"hls_list_size" redis:"hls_list_size"`

@@ -8,3 +8,9 @@ type VideoFile struct {
 	CreatedAt  string  `json:"created_at"`
 	ModifiedAt string  `json:"modified_at"`
 }
+
+type FFmpegReaderModel struct {
+	Name   string `json:"name"`
+	Img    string `json:"img"`
+	Source string `json:"source"`
+}

@@ -84,5 +84,12 @@ func RegisterWsEndpoints(router *gin.Engine) {
 		go editorEventBus.Subscribe(&editorEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
+	router.GET("/wsffmpegreader", func(ctx *gin.Context) {
+		clientEditor := CreateClient(hub, ctx.Writer, ctx.Request)
+		editorEventBus := eb.EventBus{Connection: utils.ConnPubSub, Channel: "read_service"}
+		editorEvent := eb.FFmpegReaderResponseEvent{Pusher: clientEditor}
+		go editorEventBus.Subscribe(&editorEvent)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
 	// End Subscribe
 }
