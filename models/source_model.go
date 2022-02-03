@@ -48,11 +48,13 @@ type SourceModel struct {
 	StreamAudioSampleRate   int    `json:"stream_audio_sample_rate" redis:"stream_audio_sample_rate"`
 	StreamAudioVolume       int    `json:"stream_audio_volume" redis:"stream_audio_volume"`
 
-	FlvAddress    string `json:"flv_address" redis:"flv_address"`
-	JpegEnabled   bool   `json:"jpeg_enabled" redis:"jpeg_enabled"`
-	JpegFrameRate int    `json:"jpeg_frame_rate" redis:"jpeg_frame_rate"`
-	JpegWidth     int    `json:"jpeg_width" redis:"jpeg_width"`
-	JpegHeight    int    `json:"jpeg_height" redis:"jpeg_height"`
+	JpegEnabled               bool `json:"jpeg_enabled" redis:"jpeg_enabled"`
+	JpegFrameRate             int  `json:"jpeg_frame_rate" redis:"jpeg_frame_rate"`
+	JpegUseVsync              bool `json:"jpeg_use_vsync" redis:"jpeg_use_vsync"`
+	JpegQuality               int  `json:"jpeg_quality" redis:"jpeg_quality"`
+	JpegWidth                 int  `json:"jpeg_width" redis:"jpeg_width"`
+	JpegHeight                int  `json:"jpeg_height" redis:"jpeg_height"`
+	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
 
 	RecordFileType        int `json:"record_file_type" redis:"record_file_type"`
 	RecordVideoCodec      int `json:"record_video_codec" redis:"record_video_codec"`

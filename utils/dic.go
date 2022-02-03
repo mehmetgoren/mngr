@@ -43,6 +43,19 @@ func GetRecordingFolderPath() (string, error) {
 	return dir, nil
 }
 
+func GetReadingFolderPath() (string, error) {
+	config, err := ConfigRep.GetConfig()
+	if err != nil {
+		log.Println("GetRecordingFolderPath:", err)
+		return "", err
+	}
+	// create if it doesn't exist
+	dir := config.Path.Reading
+	CreateDicIfNotExist(dir)
+
+	return dir, nil
+}
+
 func FromDateToString(t time.Time) string {
 	var sb strings.Builder
 	sb.WriteString(strconv.Itoa(t.Year()))
