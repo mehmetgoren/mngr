@@ -42,8 +42,6 @@ type Config struct {
 		BufferSize int `json:"buffer_size"`
 		MaxRetry   int `json:"max_retry"`
 		MaxRetryIn int `json:"max_retry_in"`
-		// todo: remove it.
-		KillStarterProc bool `json:"kill_starter_proc"`
 	} `json:"source_reader"`
 	Path struct {
 		Streaming string `json:"streaming"`
@@ -51,7 +49,12 @@ type Config struct {
 		Reading   string `json:"reading"`
 	} `json:"path"`
 	FFmpeg struct {
-		UseDoubleQuotesForPath bool `json:"use_double_quotes_for_path"`
-		MaxOperationRetryCount int  `json:"max_operation_retry_count"`
+		UseDoubleQuotesForPath                     bool    `json:"use_double_quotes_for_path"`
+		MaxOperationRetryCount                     int     `json:"max_operation_retry_count"`
+		CheckLeakyFfmpegProcessesInterval          int     `json:"check_leaky_ffmpeg_processes_interval"`
+		CheckUnstoppedContainersInterval           int     `json:"check_unstopped_containers_interval"`
+		CheckFfmpegStreamingRunningProcessInterval int     `json:"check_ffmpeg_streaming_running_process_interval"`
+		CheckFfmpegRecordingRunningProcessInterval int     `json:"check_ffmpeg_recording_running_process_interval"`
+		StartTaskWaitForInterval                   float32 `json:"start_task_wait_for_interval"`
 	} `json:"ffmpeg"`
 }
