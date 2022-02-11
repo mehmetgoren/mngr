@@ -13,9 +13,8 @@ import (
 
 const (
 	MAIN     = 0
-	SERVICE  = 1
-	SOURCES  = 2
-	EVENTBUS = 3
+	RQ       = 1
+	EVENTBUS = 15
 )
 
 func CreateRedisConnection(db int) *redis.Client {

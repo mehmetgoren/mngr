@@ -7,8 +7,7 @@ import (
 var connMain = reps.CreateRedisConnection(reps.MAIN)
 var ConfigRep = reps.ConfigRepository{Connection: connMain}
 
-var ConnSources = reps.CreateRedisConnection(reps.SOURCES)
-var SourceRep = reps.SourceRepository{Connection: ConnSources}
-var StreamingRep = reps.StreamingRepository{Connection: ConnSources}
+var SourceRep = reps.SourceRepository{Connection: connMain}
+var StreamingRep = reps.StreamingRepository{Connection: connMain}
 
 var ConnPubSub = reps.CreateRedisConnection(reps.EVENTBUS)
