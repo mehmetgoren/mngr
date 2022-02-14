@@ -34,26 +34,26 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//restart the streaming after edit.
+		//restart the stream after edit.
 		if !isNew {
-			eventPub := eb.RestartStreamingRequestEvent{SourceModel: model}
+			eventPub := eb.RestartStreamRequestEvent{SourceModel: model}
 			err := eventPub.Publish()
 			if err == nil {
 				ctx.Writer.WriteHeader(http.StatusOK)
 			}
 		}
-		// Create streaming folder.
-		sf, _ := utils.GetStreamingFolderPath()
+		// Create stream folder.
+		sf, _ := utils.GetStreamFolderPath()
 		dic := path.Join(sf, model.Id)
 		utils.CreateDicIfNotExist(dic)
 
-		// Create recording folder.
-		sf, _ = utils.GetRecordingFolderPath()
+		// Create record folder.
+		sf, _ = utils.GetRecordFolderPath()
 		dic = path.Join(sf, model.Id)
 		utils.CreateDicIfNotExist(dic)
 
-		// Create reading folder.
-		sf, _ = utils.GetReadingFolderPath()
+		// Create read folder.
+		sf, _ = utils.GetReadFolderPath()
 		dic = path.Join(sf, model.Id)
 		utils.CreateDicIfNotExist(dic)
 
@@ -65,8 +65,8 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//stops the streaming after delete.
-		eventPub := eb.StopStreamingRequestEvent{Id: id}
+		//stops the stream after delete.
+		eventPub := eb.StopStreamRequestEvent{Id: id}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)

@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-func RegisterStreamingEndpoints(router *gin.Engine) {
-	router.GET("/streaming", func(c *gin.Context) {
-		modelList, err := utils.StreamingRep.GetAll()
+func RegisterStreamEndpoints(router *gin.Engine) {
+	router.GET("/stream", func(c *gin.Context) {
+		modelList, err := utils.StreamRep.GetAll()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -22,9 +22,9 @@ func RegisterStreamingEndpoints(router *gin.Engine) {
 
 		c.JSON(http.StatusOK, modelList)
 	})
-	router.GET("/streaming/:id", func(ctx *gin.Context) {
+	router.GET("/stream/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		source, err := utils.StreamingRep.Get(id)
+		source, err := utils.StreamRep.Get(id)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return

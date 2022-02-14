@@ -16,8 +16,8 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 	router.GET("/videos/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		//id = "QLma6mWR3V8"
-		recordingFolderPath, _ := utils.GetRecordingFolderPath()
-		files, _ := ioutil.ReadDir(path.Join(recordingFolderPath, id))
+		recordFolderPath, _ := utils.GetRecordFolderPath()
+		files, _ := ioutil.ReadDir(path.Join(recordFolderPath, id))
 		var list = make([]*models.VideoFile, 0)
 		for _, file := range files {
 			videoFile := models.VideoFile{}
@@ -37,9 +37,9 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 		var fileNames []string
 		ctx.BindJSON(&fileNames)
 		//id = "QLma6mWR3V8"
-		recordingFolderPath, _ := utils.GetRecordingFolderPath()
+		recordFolderPath, _ := utils.GetRecordFolderPath()
 		for _, fileName := range fileNames {
-			err := os.Remove(path.Join(recordingFolderPath, id, fileName))
+			err := os.Remove(path.Join(recordFolderPath, id, fileName))
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, err)
 				return
@@ -48,9 +48,9 @@ func RegisterVideoEndpoints(router *gin.Engine) {
 		ctx.JSON(http.StatusOK, nil)
 	})
 
-	//router.GET("/streaming/:id", func(ctx *gin.Context) {
+	//router.GET("/stream/:id", func(ctx *gin.Context) {
 	//	id := ctx.Param("id")
-	//	rep := reps.StreamingRepository{Connection: utils.ConnSources}
+	//	rep := reps.StreamRepository{Connection: utils.ConnSources}
 	//	model, err := rep.Get(id)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

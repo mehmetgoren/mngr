@@ -12,7 +12,7 @@ type SourceModel struct {
 	Description string `json:"description" redis:"description"`
 
 	Enabled       bool `json:"enabled" redis:"enabled"`
-	Recording     bool `json:"recording" redis:"recording"`
+	Record        bool `json:"record" redis:"record"`
 	InputType     int  `json:"input_type" redis:"input_type"`
 	RtspTransport int  `json:"rtsp_transport" redis:"rtsp_transport"`
 

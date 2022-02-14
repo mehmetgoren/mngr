@@ -7,9 +7,9 @@ import (
 
 func RegisterStaticResources(router *gin.Engine) {
 	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
-	streamingFolderPath, _ := utils.GetStreamingFolderPath()
-	router.Static("/livestream", streamingFolderPath)
-	recordingFolderPath, _ := utils.GetRecordingFolderPath()
-	router.Static("/playback", recordingFolderPath)
+	streamFolderPath, _ := utils.GetStreamFolderPath()
+	router.Static("/livestream", streamFolderPath)
+	recordFolderPath, _ := utils.GetRecordFolderPath()
+	router.Static("/playback", recordFolderPath)
 	router.Static("livestreamexample", "./static/live/example.mp4")
 }

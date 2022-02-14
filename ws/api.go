@@ -10,23 +10,23 @@ import (
 
 // Publish Start
 func RegisterApiEndpoints(router *gin.Engine) {
-	router.POST("/startstreaming", func(ctx *gin.Context) {
+	router.POST("/startstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
-		eventPub := eb.StartStreamingRequestEvent{SourceModel: source}
+		eventPub := eb.StartStreamRequestEvent{SourceModel: source}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
-	router.POST("/stopstreaming", func(ctx *gin.Context) {
+	router.POST("/stopstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
 		if len(source.Id) == 0 {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		eventPub := eb.StopStreamingRequestEvent{Id: source.Id}
+		eventPub := eb.StopStreamRequestEvent{Id: source.Id}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -40,11 +40,11 @@ func RegisterApiEndpoints(router *gin.Engine) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
-	// restart does not need to be subscribed to since it is only called by the restart_streaming_request which is just a proxy.
-	router.POST("/restartstreaming", func(ctx *gin.Context) {
+	// restart does not need to be subscribed to since it is only called by the restart_stream_request which is just a proxy.
+	router.POST("/restartstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
-		eventPub := eb.RestartStreamingRequestEvent{SourceModel: source}
+		eventPub := eb.RestartStreamRequestEvent{SourceModel: source}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -63,18 +63,18 @@ func RegisterWsEndpoints(router *gin.Engine) {
 		HandlerChat(hub, ctx.Writer, ctx.Request)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	router.GET("/wsstartstreaming", func(ctx *gin.Context) {
-		clientStreaming := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamingEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "start_streaming_response"}
-		streamingEventSub := eb.StartStreamingResponseEvent{Pusher: clientStreaming}
-		go streamingEventBusSub.Subscribe(&streamingEventSub)
+	router.GET("/wsstartstream", func(ctx *gin.Context) {
+		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
+		streamEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "start_stream_response"}
+		streamEventSub := eb.StartStreamResponseEvent{Pusher: clientStream}
+		go streamEventBusSub.Subscribe(&streamEventSub)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	router.GET("/wsstopstreaming", func(ctx *gin.Context) {
-		clientStreaming := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamingEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "stop_streaming_response"}
-		streamingEventSub := eb.StopStreamingResponseEvent{Pusher: clientStreaming}
-		go streamingEventBusSub.Subscribe(&streamingEventSub)
+	router.GET("/wsstopstream", func(ctx *gin.Context) {
+		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
+		streamEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "stop_stream_response"}
+		streamEventSub := eb.StopStreamResponseEvent{Pusher: clientStream}
+		go streamEventBusSub.Subscribe(&streamEventSub)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wseditor", func(ctx *gin.Context) {

@@ -18,39 +18,39 @@ func CreateDicIfNotExist(dir string) error {
 	return nil
 }
 
-func GetStreamingFolderPath() (string, error) {
+func GetStreamFolderPath() (string, error) {
 	config, err := ConfigRep.GetConfig()
 	if err != nil {
-		log.Println("GetRecordingFolderPath:", err)
+		log.Println("GetRecordFolderPath:", err)
 		return "", err
 	}
-	dir := config.Path.Streaming
+	dir := config.Path.Stream
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
 
-func GetRecordingFolderPath() (string, error) {
+func GetRecordFolderPath() (string, error) {
 	config, err := ConfigRep.GetConfig()
 	if err != nil {
-		log.Println("GetRecordingFolderPath:", err)
+		log.Println("GetRecordFolderPath:", err)
 		return "", err
 	}
 	// create if it doesn't exist
-	dir := config.Path.Recording
+	dir := config.Path.Record
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
 
-func GetReadingFolderPath() (string, error) {
+func GetReadFolderPath() (string, error) {
 	config, err := ConfigRep.GetConfig()
 	if err != nil {
-		log.Println("GetRecordingFolderPath:", err)
+		log.Println("GetReadFolderPath:", err)
 		return "", err
 	}
 	// create if it doesn't exist
-	dir := config.Path.Reading
+	dir := config.Path.Read
 	CreateDicIfNotExist(dir)
 
 	return dir, nil

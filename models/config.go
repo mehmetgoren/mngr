@@ -44,17 +44,17 @@ type Config struct {
 		MaxRetryIn int `json:"max_retry_in"`
 	} `json:"source_reader"`
 	Path struct {
-		Streaming string `json:"streaming"`
-		Recording string `json:"recording"`
-		Reading   string `json:"reading"`
+		Stream string `json:"stream"`
+		Record string `json:"record"`
+		Read   string `json:"read"`
 	} `json:"path"`
 	FFmpeg struct {
-		UseDoubleQuotesForPath                     bool    `json:"use_double_quotes_for_path"`
-		MaxOperationRetryCount                     int     `json:"max_operation_retry_count"`
-		CheckLeakyFfmpegProcessesInterval          int     `json:"check_leaky_ffmpeg_processes_interval"`
-		CheckUnstoppedContainersInterval           int     `json:"check_unstopped_containers_interval"`
-		CheckFfmpegStreamingRunningProcessInterval int     `json:"check_ffmpeg_streaming_running_process_interval"`
-		CheckFfmpegRecordingRunningProcessInterval int     `json:"check_ffmpeg_recording_running_process_interval"`
-		StartTaskWaitForInterval                   float32 `json:"start_task_wait_for_interval"`
+		UseDoubleQuotesForPath                  bool    `json:"use_double_quotes_for_path"`
+		MaxOperationRetryCount                  int     `json:"max_operation_retry_count"`
+		CheckLeakyFfmpegProcessesInterval       int     `json:"check_leaky_ffmpeg_processes_interval"`
+		CheckUnstoppedContainersInterval        int     `json:"check_unstopped_containers_interval"`
+		CheckFfmpegStreamRunningProcessInterval int     `json:"check_ffmpeg_stream_running_process_interval"`
+		CheckFfmpegRecordRunningProcessInterval int     `json:"check_ffmpeg_record_running_process_interval"`
+		StartTaskWaitForInterval                float32 `json:"start_task_wait_for_interval"`
 	} `json:"ffmpeg"`
 }
