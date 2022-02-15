@@ -6,7 +6,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"log"
 	"mngr/models"
-	"mngr/utils"
 )
 
 type ConfigRepository struct {
@@ -27,7 +26,7 @@ func (r *ConfigRepository) GetConfig() (*models.Config, error) {
 		}
 	}
 
-	err = utils.DeserializeJson(data, config)
+	err = json.Unmarshal([]byte(data), config)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +64,7 @@ func (r *ConfigRepository) RestoreConfig() (*models.Config, error) {
 	}
 
 	var config = &models.Config{}
-	err = utils.DeserializeJson(objJson, config)
+	err = json.Unmarshal([]byte(objJson), config)
 	if err != nil {
 		return nil, err
 	}

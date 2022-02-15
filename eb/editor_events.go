@@ -14,12 +14,11 @@ const (
 )
 
 type EditorRequestEvent struct {
-	Id           string `json:"id"`
-	Brand        string `json:"brand"`
-	Name         string `json:"name"`
-	RtspAddress  string `json:"rtsp_address"`
-	EventType    int    `json:"event_type"`
-	ResponseJson string `json:"response_json"`
+	Id          string `json:"id"`
+	Brand       string `json:"brand"`
+	Name        string `json:"name"`
+	RtspAddress string `json:"rtsp_address"`
+	EventType   int    `json:"event_type"`
 }
 
 func (e EditorRequestEvent) MarshalBinary() ([]byte, error) {
