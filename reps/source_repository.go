@@ -83,3 +83,28 @@ func (r *SourceRepository) RemoveById(id string) error {
 	}
 	return nil
 }
+
+func (r *SourceRepository) GetSourceStreamStatus(streamRepository StreamRepository) ([]*models.SourceStatusModel, error) {
+	conn := r.Connection
+	keys, err := conn.Keys(context.Background(), redisKeySources+"*").Result()
+	if err != nil {
+		log.Println("Error occurred while getting source status, err: ", err)
+		emptyList := make([]*models.SourceStatusModel, 0)
+		return emptyList, err
+	}
+	list := make([]*models.SourceStatusModel, 0, 5)
+	for _, key := range keys {
+		var source models.SourceModel
+		err := conn.HGetAll(context.Background(), key).Scan(&source)
+		if err != nil {
+			log.Println("Error getting source from redis: ", err)
+			return nil, err
+		}
+		sourceStatus := models.SourceStatusModel{SourceId: source.Id}
+		stream, _ := streamRepository.Get(source.Id)
+		sourceStatus.Streaming = stream != nil && len(stream.Id) > 0
+
+		list = append(list, &sourceStatus)
+	}
+	return list, nil
+}

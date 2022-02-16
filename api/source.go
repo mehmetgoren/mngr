@@ -77,4 +77,13 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 		}
 		ctx.JSON(http.StatusOK, gin.H{"id": id})
 	})
+	router.GET("/sourcestreamstatus", func(context *gin.Context) {
+		modelList, err := utils.SourceRep.GetSourceStreamStatus(utils.StreamRep)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		context.JSON(http.StatusOK, modelList)
+	})
 }
