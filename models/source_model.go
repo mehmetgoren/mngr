@@ -72,6 +72,10 @@ type SourceModel struct {
 	RecordAudioVolume     int `json:"record_audio_volume" redis:"record_audio_volume"`
 
 	LogLevel int `json:"log_level" redis:"log_level"`
+
+	LastExceptionMsg string `json:"last_exception_msg" redis:"last_exception_msg"`
+	FailedCount      int    `json:"failed_count" redis:"failed_count"`
+	CreatedAt        string `json:"created_at" redis:"created_at"`
 }
 
 func (s SourceModel) MarshalBinary() ([]byte, error) {

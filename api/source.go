@@ -7,6 +7,7 @@ import (
 	"mngr/utils"
 	"net/http"
 	"path"
+	"time"
 )
 
 func RegisterSourceEndpoints(router *gin.Engine) {
@@ -30,6 +31,9 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 			return
 		}
 		isNew := len(model.Id) == 0
+		model.CreatedAt = utils.FromDateToString(time.Now())
+		model.FailedCount = 0
+		model.LastExceptionMsg = ""
 		if _, err := utils.SourceRep.Save(&model); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
