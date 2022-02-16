@@ -6,8 +6,6 @@ type StreamModel struct {
 	Name        string `json:"name" redis:"name"`
 	RtspAddress string `json:"rtsp_address" redis:"rtsp_address"`
 
-	Enabled bool `json:"enabled" redis:"enabled"`
-
 	Pid         int    `json:"pid" redis:"pid"`
 	CreatedAt   string `json:"created_at" redis:"created_at"`
 	Args        string `json:"args" redis:"args"`
