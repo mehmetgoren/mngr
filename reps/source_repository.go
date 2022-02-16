@@ -100,9 +100,12 @@ func (r *SourceRepository) GetSourceStreamStatus(streamRepository StreamReposito
 			log.Println("Error getting source from redis: ", err)
 			return nil, err
 		}
-		sourceStatus := models.SourceStatusModel{SourceId: source.Id}
+		sourceStatus := models.SourceStatusModel{SourceId: source.Id, Recording: false}
 		stream, _ := streamRepository.Get(source.Id)
 		sourceStatus.Streaming = stream != nil && len(stream.Id) > 0
+		if sourceStatus.Streaming {
+			sourceStatus.Recording = stream.Record
+		}
 
 		list = append(list, &sourceStatus)
 	}
