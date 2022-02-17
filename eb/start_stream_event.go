@@ -6,7 +6,6 @@ import (
 	"log"
 	"mngr/models"
 	"mngr/utils"
-	"strings"
 )
 
 type StartStreamRequestEvent struct {
@@ -36,7 +35,7 @@ func (s *StartStreamResponseEvent) Handle(event *redis.Message) error {
 	utils.DeserializeJson(event.Payload, s)
 	//from full path to web server relative path
 	config, _ := utils.ConfigRep.GetConfig()
-	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, config.Path.Stream, "", -1)
+	utils.SetHlsPath(config, &s.StreamModel)
 	s.Pusher.Push(s)
 	return nil
 }

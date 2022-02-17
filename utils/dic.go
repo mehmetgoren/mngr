@@ -2,6 +2,7 @@ package utils
 
 import (
 	"log"
+	"mngr/models"
 	"os"
 	"strconv"
 	"strings"
@@ -73,6 +74,10 @@ func FromDateToString(t time.Time) string {
 	sb.WriteString(strconv.Itoa(t.Nanosecond()))
 
 	return sb.String()
+}
+
+func SetHlsPath(config *models.Config, s *models.StreamModel) {
+	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, config.Path.Stream, "", -1)
 }
 
 //func ParseVideoFileName(fileName string) time.Time {

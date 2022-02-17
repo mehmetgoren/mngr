@@ -19,17 +19,23 @@ func RegisterStreamEndpoints(router *gin.Engine) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		config, _ := utils.ConfigRep.GetConfig()
+		for _, stream := range modelList {
+			utils.SetHlsPath(config, stream)
+		}
 
 		c.JSON(http.StatusOK, modelList)
 	})
 	router.GET("/stream/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		source, err := utils.StreamRep.Get(id)
+		stream, err := utils.StreamRep.Get(id)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusOK, source)
+		config, _ := utils.ConfigRep.GetConfig()
+		utils.SetHlsPath(config, stream)
+		ctx.JSON(http.StatusOK, stream)
 	})
 	router.POST("/ffmpegreader", func(context *gin.Context) {
 		var readerModel models.FFmpegReaderModel
