@@ -56,5 +56,6 @@ type Config struct {
 		CheckFfmpegStreamRunningProcessInterval int     `json:"check_ffmpeg_stream_running_process_interval"`
 		CheckFfmpegRecordRunningProcessInterval int     `json:"check_ffmpeg_record_running_process_interval"`
 		StartTaskWaitForInterval                float32 `json:"start_task_wait_for_interval"`
+		EventListenerHandlerType                int     `json:"event_listener_handler_type"`
 	} `json:"ffmpeg"`
 }
