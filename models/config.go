@@ -58,4 +58,7 @@ type Config struct {
 		StartTaskWaitForInterval                float32 `json:"start_task_wait_for_interval"`
 		EventListenerHandlerType                int     `json:"event_listener_handler_type"`
 	} `json:"ffmpeg"`
+	AiConfig struct {
+		DetectedFolder string `json:"detected_folder"`
+	} `json:"ai"`
 }
