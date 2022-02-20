@@ -11,7 +11,7 @@ type StreamRepository struct {
 	Connection *redis.Client
 }
 
-var redisKeyStream = "stream:"
+var redisKeyStream = "streams:"
 
 func (r *StreamRepository) Get(id string) (*models.StreamModel, error) {
 	conn := r.Connection
