@@ -26,15 +26,22 @@ type StreamModel struct {
 	DirectReadWidth     int `json:"direct_read_width" redis:"direct_read_width"`
 	DirectReadHeight    int `json:"direct_read_height" redis:"direct_read_height"`
 
-	JpegEnabled               bool `json:"jpeg_enabled" redis:"jpeg_enabled"`
-	JpegFrameRate             int  `json:"jpeg_frame_rate" redis:"jpeg_frame_rate"`
-	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
+	JpegEnabled   bool `json:"jpeg_enabled" redis:"jpeg_enabled"`
+	JpegFrameRate int  `json:"jpeg_frame_rate" redis:"jpeg_frame_rate"`
 
 	Record               bool   `json:"record" redis:"record"`
 	RecordDuration       int    `json:"record_duration" redis:"record_duration"`
 	RecordFlvPid         int    `json:"record_flv_pid" redis:"record_flv_pid"`
 	RecordFlvArgs        string `json:"record_flv_args" redis:"record_flv_args"`
 	RecordFlvFailedCount int    `json:"record_flv_failed_count" redis:"record_flv_failed_count"`
+
+	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
+	Reader                    bool `json:"reader" redis:"reader"`
+	ReaderFrameRate           int  `json:"reader_frame_rate" redis:"reader_frame_rate"`
+	ReaderWidth               int  `json:"reader_width" redis:"reader_width"`
+	ReaderHeight              int  `json:"reader_height" redis:"reader_height"`
+	ReaderPid                 int  `json:"reader_pid" redis:"reader_pid"`
+	ReaderFailedCount         int  `json:"reader_failed_count" redis:"reader_failed_count"`
 
 	HlsOutputPath          string `json:"hls_output_path" redis:"hls_output_path"`
 	ReadJpegOutputPath     string `json:"read_jpeg_output_path" redis:"read_jpeg_output_path"`

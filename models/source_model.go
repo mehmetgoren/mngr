@@ -73,14 +73,16 @@ type SourceModel struct {
 	NeedReloadInterval      int  `json:"need_reload_interval" redis:"need_reload_interval"`
 
 	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
+	Reader                    bool `json:"reader" redis:"reader"`
+	ReaderFrameRate           int  `json:"reader_frame_rate" redis:"reader_frame_rate"`
+	ReaderWidth               int  `json:"reader_width" redis:"reader_width"`
+	ReaderHeight              int  `json:"reader_height" redis:"reader_height"`
 
 	DirectReadFrameRate int `json:"direct_read_frame_rate" redis:"direct_read_frame_rate"`
 	DirectReadWidth     int `json:"direct_read_width" redis:"direct_read_width"`
 	DirectReadHeight    int `json:"direct_read_height" redis:"direct_read_height"`
 
-	LastExceptionMsg string `json:"last_exception_msg" redis:"last_exception_msg"`
-	FailedCount      int    `json:"failed_count" redis:"failed_count"`
-	CreatedAt        string `json:"created_at" redis:"created_at"`
+	CreatedAt string `json:"created_at" redis:"created_at"`
 	// SourceModel section ends
 }
 
