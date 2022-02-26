@@ -14,7 +14,6 @@ type StreamModel struct {
 	RtmpServerInitialized   bool   `json:"rtmp_server_initialized" redis:"rtmp_server_initialized"`
 	RtmpServerType          int    `json:"rtmp_server_type" redis:"rtmp_server_type"`
 	FlvPlayerConnectionType int    `json:"flv_player_connection_type" redis:"flv_player_connection_type"`
-	NeedReloadInterval      int    `json:"need_reload_interval" redis:"need_reload_interval"`
 	RtmpImageName           string `json:"rtmp_image_name" redis:"rtmp_image_name"`
 	RtmpContainerName       string `json:"rtmp_container_name" redis:"rtmp_container_name"`
 	RtmpAddress             string `json:"rtmp_address" redis:"rtmp_address"`

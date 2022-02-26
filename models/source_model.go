@@ -70,7 +70,6 @@ type SourceModel struct {
 	Enabled                 bool `json:"enabled" redis:"enabled"`
 	RtmpServerType          int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
 	FlvPlayerConnectionType int  `json:"flv_player_connection_type" redis:"flv_player_connection_type"`
-	NeedReloadInterval      int  `json:"need_reload_interval" redis:"need_reload_interval"`
 
 	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
 	Reader                    bool `json:"reader" redis:"reader"`
