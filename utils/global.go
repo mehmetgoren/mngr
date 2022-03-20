@@ -9,5 +9,6 @@ var ConfigRep = reps.ConfigRepository{Connection: connMain}
 
 var SourceRep = reps.SourceRepository{Connection: connMain}
 var StreamRep = reps.StreamRepository{Connection: connMain}
+var OdRep = reps.OdRepository{Connection: connMain}
 
 var ConnPubSub = reps.CreateRedisConnection(reps.EVENTBUS)

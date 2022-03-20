@@ -62,16 +62,6 @@ func (r *SourceRepository) Get(id string) (*models.SourceModel, error) {
 		return nil, err
 	}
 	return &p, err
-	//conn := r.Connection
-	//key := redisKeySources + id
-	//values, err := conn.HGetAll(context.Background(), key).Result()
-	//if err != nil {
-	//	log.Println("Error getting source from redis: ", err)
-	//	return nil, err
-	//}
-	//var p models.SourceModel
-	//err = p.Map(values)
-	//return &p, err
 }
 
 func (r *SourceRepository) RemoveById(id string) error {

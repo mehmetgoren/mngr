@@ -68,8 +68,23 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 			return
 		}
 		//stops the stream after delete.
-		eventPub := eb.StopStreamRequestEvent{Id: id}
-		err := eventPub.Publish()
+		ssrEvent := eb.StopStreamRequestEvent{Id: id}
+		err := ssrEvent.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+
+		//also remove Object Detection Model
+		if err := utils.OdRep.RemoveById(id); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		//
+
+		mc := eb.ModelChanged{SourceId: id}
+		mcJson, _ := utils.SerializeJson(mc)
+		dcEvent := eb.DataChangedEvent{ModelName: "od", ParamsJson: mcJson, Op: eb.DELETE}
+		err = dcEvent.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
