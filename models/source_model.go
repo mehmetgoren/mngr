@@ -7,7 +7,7 @@ import (
 type SourceModel struct {
 	// FFmpegModel section starts
 	Id            string `json:"id" redis:"id"`
-	RtspAddress   string `json:"rtsp_address" redis:"rtsp_address"`
+	Address       string `json:"address" redis:"address"`
 	Record        bool   `json:"record" redis:"record"`
 	InputType     int    `json:"input_type" redis:"input_type"`
 	RtspTransport int    `json:"rtsp_transport" redis:"rtsp_transport"`

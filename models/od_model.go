@@ -1,10 +1,10 @@
 package models
 
 type OdModel struct {
-	Id          string `json:"id" redis:"id"`
-	Brand       string `json:"brand" redis:"brand"`
-	Name        string `json:"name" redis:"name"`
-	RtspAddress string `json:"rtsp_address" redis:"rtsp_address"`
+	Id      string `json:"id" redis:"id"`
+	Brand   string `json:"brand" redis:"brand"`
+	Name    string `json:"name" redis:"name"`
+	Address string `json:"address" redis:"address"`
 
 	CreatedAt string `json:"created_at" redis:"created_at"`
 
