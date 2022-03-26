@@ -54,11 +54,6 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 		dic = path.Join(sf, model.Id)
 		utils.CreateDicIfNotExist(dic)
 
-		// Create read folder.
-		sf, _ = utils.GetReadFolderPath()
-		dic = path.Join(sf, model.Id)
-		utils.CreateDicIfNotExist(dic)
-
 		ctx.JSON(http.StatusOK, model)
 	})
 	router.DELETE("/sources/:id", func(ctx *gin.Context) {

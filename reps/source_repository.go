@@ -94,7 +94,7 @@ func (r *SourceRepository) GetSourceStreamStatus(streamRepository StreamReposito
 		stream, _ := streamRepository.Get(source.Id)
 		sourceStatus.Streaming = stream != nil && len(stream.Id) > 0
 		if sourceStatus.Streaming {
-			sourceStatus.Recording = stream.Record
+			sourceStatus.Recording = stream.RecordEnabled
 		}
 
 		list = append(list, &sourceStatus)

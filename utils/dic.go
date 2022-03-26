@@ -44,19 +44,6 @@ func GetRecordFolderPath() (string, error) {
 	return dir, nil
 }
 
-func GetReadFolderPath() (string, error) {
-	config, err := ConfigRep.GetConfig()
-	if err != nil {
-		log.Println("GetReadFolderPath:", err)
-		return "", err
-	}
-	// create if it doesn't exist
-	dir := config.Path.Read
-	CreateDicIfNotExist(dir)
-
-	return dir, nil
-}
-
 func FromDateToString(t time.Time) string {
 	var sb strings.Builder
 	sb.WriteString(strconv.Itoa(t.Year()))

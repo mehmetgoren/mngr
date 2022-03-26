@@ -8,8 +8,7 @@ type SourceModel struct {
 	// FFmpegModel section starts
 	Id            string `json:"id" redis:"id"`
 	Address       string `json:"address" redis:"address"`
-	Record        bool   `json:"record" redis:"record"`
-	InputType     int    `json:"input_type" redis:"input_type"`
+	RecordEnabled bool   `json:"record_enabled" redis:"record_enabled"`
 	RtspTransport int    `json:"rtsp_transport" redis:"rtsp_transport"`
 
 	AnalyzationDuration int    `json:"analyzation_duration" redis:"analyzation_duration"`
@@ -22,11 +21,11 @@ type SourceModel struct {
 	HwaccelDevice       string `json:"hwaccel_device" redis:"hwaccel_device"`
 
 	StreamType            int    `json:"stream_type" redis:"stream_type"`
-	RtmpServerAddress     string `json:"rtmp_server_address" redis:"rtmp_server_address"`
+	RtmpAddress           string `json:"rtmp_address" redis:"rtmp_address"`
 	StreamVideoCodec      int    `json:"stream_video_codec" redis:"stream_video_codec"`
+	Preset                int    `json:"preset" redis:"preset"`
 	HlsTime               int    `json:"hls_time" redis:"hls_time"`
 	HlsListSize           int    `json:"hls_list_size" redis:"hls_list_size"`
-	HlsPreset             int    `json:"hls_preset" redis:"hls_preset"`
 	StreamQuality         int    `json:"stream_quality" redis:"stream_quality"`
 	StreamFrameRate       int    `json:"stream_frame_rate" redis:"stream_frame_rate"`
 	StreamWidth           int    `json:"stream_width" redis:"stream_width"`
@@ -37,12 +36,6 @@ type SourceModel struct {
 	StreamAudioQuality    int    `json:"stream_audio_quality" redis:"stream_audio_quality"`
 	StreamAudioSampleRate int    `json:"stream_audio_sample_rate" redis:"stream_audio_sample_rate"`
 	StreamAudioVolume     int    `json:"stream_audio_volume" redis:"stream_audio_volume"`
-	JpegEnabled           bool   `json:"jpeg_enabled" redis:"jpeg_enabled"`
-	JpegFrameRate         int    `json:"jpeg_frame_rate" redis:"jpeg_frame_rate"`
-	JpegUseVsync          bool   `json:"jpeg_use_vsync" redis:"jpeg_use_vsync"`
-	JpegQuality           int    `json:"jpeg_quality" redis:"jpeg_quality"`
-	JpegWidth             int    `json:"jpeg_width" redis:"jpeg_width"`
-	JpegHeight            int    `json:"jpeg_height" redis:"jpeg_height"`
 
 	RecordFileType        int `json:"record_file_type" redis:"record_file_type"`
 	RecordVideoCodec      int `json:"record_video_codec" redis:"record_video_codec"`
@@ -67,19 +60,17 @@ type SourceModel struct {
 	Name        string `json:"name" redis:"name"`
 	Description string `json:"description" redis:"description"`
 
-	Enabled                 bool `json:"enabled" redis:"enabled"`
-	RtmpServerType          int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
-	FlvPlayerConnectionType int  `json:"flv_player_connection_type" redis:"flv_player_connection_type"`
+	Enabled        bool `json:"enabled" redis:"enabled"`
+	RtmpServerType int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
 
-	UseDiskImageReaderService bool `json:"use_disk_image_reader_service" redis:"use_disk_image_reader_service"`
-	Reader                    bool `json:"reader" redis:"reader"`
-	ReaderFrameRate           int  `json:"reader_frame_rate" redis:"reader_frame_rate"`
-	ReaderWidth               int  `json:"reader_width" redis:"reader_width"`
-	ReaderHeight              int  `json:"reader_height" redis:"reader_height"`
+	SnapshotEnabled   bool `json:"snapshot_enabled" redis:"snapshot_enabled"`
+	SnapshotFrameRate int  `json:"snapshot_frame_rate" redis:"snapshot_frame_rate"`
+	SnapshotWidth     int  `json:"snapshot_width" redis:"snapshot_width"`
+	SnapshotHeight    int  `json:"snapshot_height" redis:"snapshot_height"`
 
-	DirectReadFrameRate int `json:"direct_read_frame_rate" redis:"direct_read_frame_rate"`
-	DirectReadWidth     int `json:"direct_read_width" redis:"direct_read_width"`
-	DirectReadHeight    int `json:"direct_read_height" redis:"direct_read_height"`
+	FfmpegReaderFrameRate int `json:"ffmpeg_reader_frame_rate" redis:"ffmpeg_reader_frame_rate"`
+	FfmpegReaderWidth     int `json:"ffmpeg_reader_width" redis:"ffmpeg_reader_width"`
+	FfmpegReaderHeight    int `json:"ffmpeg_reader_height" redis:"ffmpeg_reader_height"`
 
 	CreatedAt string `json:"created_at" redis:"created_at"`
 	// SourceModel section ends
