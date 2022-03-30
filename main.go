@@ -37,6 +37,7 @@ func main() {
 	api.RegisterConfigEndpoints(router)
 	api.RegisterVideoEndpoints(router)
 	api.RegisterOdEndpoints(router)
+	api.RegisterDetectedEndpoints(router)
 
 	ws.RegisterApiEndpoints(router)
 	ws.RegisterWsEndpoints(router)
