@@ -14,8 +14,12 @@ func RegisterOdEndpoints(router *gin.Engine) {
 		id := ctx.Param("id")
 		od, err := utils.OdRep.Get(id)
 		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			//ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusOK, nil)
 			return
+		}
+		if len(od.Id) == 0 {
+			od = nil
 		}
 		ctx.JSON(http.StatusOK, od)
 	})

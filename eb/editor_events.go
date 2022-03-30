@@ -11,6 +11,7 @@ const (
 	NONE               = 0
 	TAKE_SCREENSHOT    = 1
 	GENERATE_THUMBNAIL = 2
+	MASK_SCREENSHOT    = 3
 )
 
 type EditorRequestEvent struct {
@@ -51,6 +52,9 @@ func (e *EditorResponseEvent) Handle(event *redis.Message) error {
 		push()
 		break
 	case GENERATE_THUMBNAIL:
+		push()
+		break
+	case MASK_SCREENSHOT:
 		push()
 		break
 	}

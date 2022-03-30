@@ -10,6 +10,5 @@ type OdModel struct {
 
 	ThresholdList string `json:"threshold_list" redis:"threshold_list"`
 	SelectedList  string `json:"selected_list" redis:"selected_list"`
-	Mask          string `json:"mask" redis:"mask"`
-	Zone          string `json:"zone" redis:"zone"`
+	ZoneList      string `json:"zone_list" redis:"zone_list"`
 }
