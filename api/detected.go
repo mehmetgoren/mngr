@@ -71,6 +71,7 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 type ImageItem struct {
 	FullPath   string  `json:"fullPath"`
 	SourceId   string  `json:"sourceId"`
+	ClassIndex int     `json:"classIndex"`
 	ClassName  string  `json:"className"`
 	Score      float32 `json:"score"`
 	ModifiedAt string  `json:"modifiedAt"`
@@ -105,18 +106,21 @@ func RegisterDetectedEndpoints(router *gin.Engine) {
 			}
 			fileName := file.Name()
 			splits := strings.Split(fileName, "_")
-			if len(splits) != 11 {
+			if len(splits) != 12 {
 				continue
 			}
 			sourceId := splits[0]
 			if sourceId != model.SourceId {
 				continue
 			}
-			item := &ImageItem{FullPath: filepath.Join(model.RootPath, fileName), SourceId: sourceId, ClassName: splits[1]}
-			score, _ := strconv.ParseFloat(splits[2], 32)
+			item := &ImageItem{FullPath: filepath.Join(model.RootPath, fileName), SourceId: sourceId}
+			classIndex, _ := strconv.Atoi(splits[1])
+			item.ClassIndex = classIndex
+			item.ClassName = splits[2]
+			score, _ := strconv.ParseFloat(splits[3], 32)
 			item.Score = float32(score)
-			item.ModifiedAt = strings.Join(splits[3:9], "_")
-			item.Id = splits[10]
+			item.ModifiedAt = strings.Join(splits[4:10], "_")
+			item.Id = splits[11]
 
 			bytes, _ := ioutil.ReadFile(item.FullPath)
 			detectedFolderName := utils.GetDetectedFolderName()
