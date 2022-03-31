@@ -67,6 +67,10 @@ func SetHlsPath(config *models.Config, s *models.StreamModel) {
 	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, config.Path.Stream, "", -1)
 }
 
+func GetDetectedFolderName() string {
+	return "detected"
+}
+
 //func ParseVideoFileName(fileName string) time.Time {
 //	splits := strings.Split(fileName, ".")
 //	splits = strings.Split(splits[0], "_")

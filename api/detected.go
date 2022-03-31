@@ -1,12 +1,12 @@
 package api
 
 import (
-	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mngr/utils"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -69,13 +69,13 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 }
 
 type ImageItem struct {
-	FullPath    string  `json:"fullPath"`
-	SourceId    string  `json:"sourceId"`
-	ClassName   string  `json:"className"`
-	Score       float32 `json:"score"`
-	ModifiedAt  string  `json:"modifiedAt"`
-	Id          string  `json:"id"`
-	Base64Image string  `json:"base64Image"`
+	FullPath   string  `json:"fullPath"`
+	SourceId   string  `json:"sourceId"`
+	ClassName  string  `json:"className"`
+	Score      float32 `json:"score"`
+	ModifiedAt string  `json:"modifiedAt"`
+	Id         string  `json:"id"`
+	ImagePath  string  `json:"imagePath"`
 }
 
 type DetectedImagesParams struct {
@@ -103,18 +103,27 @@ func RegisterDetectedEndpoints(router *gin.Engine) {
 			if file.IsDir() {
 				continue
 			}
-			splits := strings.Split(file.Name(), "_")
+			fileName := file.Name()
+			splits := strings.Split(fileName, "_")
 			if len(splits) != 11 {
 				continue
 			}
-			item := &ImageItem{FullPath: filepath.Join(model.RootPath, file.Name()), SourceId: splits[0], ClassName: splits[1]}
+			sourceId := splits[0]
+			if sourceId != model.SourceId {
+				continue
+			}
+			item := &ImageItem{FullPath: filepath.Join(model.RootPath, fileName), SourceId: sourceId, ClassName: splits[1]}
 			score, _ := strconv.ParseFloat(splits[2], 32)
 			item.Score = float32(score)
 			item.ModifiedAt = strings.Join(splits[3:9], "_")
 			item.Id = splits[10]
 
 			bytes, _ := ioutil.ReadFile(item.FullPath)
-			item.Base64Image = base64.StdEncoding.EncodeToString(bytes)
+			detectedFolderName := utils.GetDetectedFolderName()
+			serverRoot := "./static/" + detectedFolderName
+			imgPath := path.Join(serverRoot, fileName)
+			ioutil.WriteFile(imgPath, bytes, 0777)
+			item.ImagePath = path.Join(detectedFolderName, fileName)
 
 			items = append(items, item)
 

@@ -11,5 +11,7 @@ func RegisterStaticResources(router *gin.Engine) {
 	router.Static("/livestream", streamFolderPath)
 	recordFolderPath, _ := utils.GetRecordFolderPath()
 	router.Static("/playback", recordFolderPath)
+	detectedFolderName := utils.GetDetectedFolderName()
+	router.Static("/"+detectedFolderName, "./static/"+detectedFolderName)
 	router.Static("livestreamexample", "./static/live/example.mp4")
 }
