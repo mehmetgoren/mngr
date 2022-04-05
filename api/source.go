@@ -4,20 +4,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/eb"
 	"mngr/models"
+	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"path"
 	"time"
 )
 
-func RegisterSourceEndpoints(router *gin.Engine) {
+func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/sources", func(ctx *gin.Context) {
-		sources, _ := utils.SourceRep.GetAll()
+		sources, _ := rb.SourceRep.GetAll()
 		ctx.JSON(http.StatusOK, sources)
 	})
 	router.GET("/sources/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		source, err := utils.SourceRep.Get(id)
+		source, err := rb.SourceRep.Get(id)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
@@ -31,46 +32,53 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 			return
 		}
 		isNew := len(model.Id) == 0
-		model.CreatedAt = utils.FromDateToString(time.Now())
-		if _, err := utils.SourceRep.Save(&model); err != nil {
+		model.CreatedAt = utils.TimeToString(time.Now(), true)
+		if _, err := rb.SourceRep.Save(&model); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		//restart the stream after edit.
 		if !isNew {
-			eventPub := eb.RestartStreamRequestEvent{SourceModel: model}
+			eventPub := eb.RestartStreamRequestEvent{Rb: rb, SourceModel: model}
 			err := eventPub.Publish()
 			if err == nil {
 				ctx.Writer.WriteHeader(http.StatusOK)
 			}
 		}
-		// Create stream folder.
-		sf, _ := utils.GetStreamFolderPath()
+
+		config, _ := rb.ConfigRep.GetConfig()
+		// Create HLS stream folder.
+		sf, _ := utils.GetStreamFolderPath(config)
 		dic := path.Join(sf, model.Id)
 		utils.CreateDicIfNotExist(dic)
 
 		// Create record folder.
-		sf, _ = utils.GetRecordFolderPath()
-		dic = path.Join(sf, model.Id)
+		rf, _ := utils.GetRecordFolderPath(config)
+		dic = path.Join(rf, model.Id)
 		utils.CreateDicIfNotExist(dic)
+		//and also short video clips folder
+		vcsDicPath := path.Join(dic, "vcs")
+		utils.CreateDicIfNotExist(vcsDicPath)
+		tempSvcDicPath := path.Join(vcsDicPath, "temp")
+		utils.CreateDicIfNotExist(tempSvcDicPath)
 
 		ctx.JSON(http.StatusOK, model)
 	})
 	router.DELETE("/sources/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		if err := utils.SourceRep.RemoveById(id); err != nil {
+		if err := rb.SourceRep.RemoveById(id); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		//stops the stream after delete.
-		ssrEvent := eb.StopStreamRequestEvent{Id: id}
+		ssrEvent := eb.StopStreamRequestEvent{Rb: rb, Id: id}
 		err := ssrEvent.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 
 		//also remove Object Detection Model
-		if err := utils.OdRep.RemoveById(id); err != nil {
+		if err := rb.OdRep.RemoveById(id); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -78,7 +86,7 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 
 		mc := eb.ModelChanged{SourceId: id}
 		mcJson, _ := utils.SerializeJson(mc)
-		dcEvent := eb.DataChangedEvent{ModelName: "od", ParamsJson: mcJson, Op: eb.DELETE}
+		dcEvent := eb.DataChangedEvent{Rb: rb, ModelName: "od", ParamsJson: mcJson, Op: eb.DELETE}
 		err = dcEvent.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -86,7 +94,7 @@ func RegisterSourceEndpoints(router *gin.Engine) {
 		ctx.JSON(http.StatusOK, gin.H{"id": id})
 	})
 	router.GET("/sourcestreamstatus", func(context *gin.Context) {
-		modelList, err := utils.SourceRep.GetSourceStreamStatus(utils.StreamRep)
+		modelList, err := rb.SourceRep.GetSourceStreamStatus(rb.StreamRep)
 		if err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

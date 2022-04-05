@@ -6,20 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"image/jpeg"
 	"mngr/models"
+	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"os"
 	"time"
 )
 
-func RegisterStreamEndpoints(router *gin.Engine) {
+func RegisterStreamEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/stream", func(c *gin.Context) {
-		modelList, err := utils.StreamRep.GetAll()
+		modelList, err := rb.StreamRep.GetAll()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := utils.ConfigRep.GetConfig()
+		config, _ := rb.ConfigRep.GetConfig()
 		for _, stream := range modelList {
 			utils.SetHlsPath(config, stream)
 		}
@@ -28,12 +29,12 @@ func RegisterStreamEndpoints(router *gin.Engine) {
 	})
 	router.GET("/stream/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
-		stream, err := utils.StreamRep.Get(id)
+		stream, err := rb.StreamRep.Get(id)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := utils.ConfigRep.GetConfig()
+		config, _ := rb.ConfigRep.GetConfig()
 		utils.SetHlsPath(config, stream)
 		ctx.JSON(http.StatusOK, stream)
 	})
@@ -57,7 +58,7 @@ func RegisterStreamEndpoints(router *gin.Engine) {
 			panic("Bad jpeg")
 		}
 
-		f, err := os.OpenFile("/mnt/sdc1/pics/"+utils.FromDateToString(time.Now())+".jpg", os.O_WRONLY|os.O_CREATE, 0777)
+		f, err := os.OpenFile("/mnt/sdc1/pics/"+utils.TimeToString(time.Now(), true)+".jpg", os.O_WRONLY|os.O_CREATE, 0777)
 		if err != nil {
 			panic("Cannot open file")
 		}

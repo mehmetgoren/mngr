@@ -38,6 +38,8 @@ type StreamModel struct {
 	SnapshotWidth     int  `json:"snapshot_width" redis:"snapshot_width"`
 	SnapshotHeight    int  `json:"snapshot_height" redis:"snapshot_height"`
 
+	VideoClipEnabled bool `json:"video_clip_enabled" redis:"video_clip_enabled"`
+
 	HlsOutputPath          string `json:"hls_output_path" redis:"hls_output_path"`
 	RecordOutputFolderPath string `json:"record_output_folder_path" redis:"record_output_folder_path"`
 }

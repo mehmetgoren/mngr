@@ -1,12 +1,11 @@
 package utils
 
 import (
-	"log"
+	"io/ioutil"
 	"mngr/models"
 	"os"
-	"strconv"
+	"path"
 	"strings"
-	"time"
 )
 
 func CreateDicIfNotExist(dir string) error {
@@ -19,49 +18,19 @@ func CreateDicIfNotExist(dir string) error {
 	return nil
 }
 
-func GetStreamFolderPath() (string, error) {
-	config, err := ConfigRep.GetConfig()
-	if err != nil {
-		log.Println("GetRecordFolderPath:", err)
-		return "", err
-	}
+func GetStreamFolderPath(config *models.Config) (string, error) {
 	dir := config.Path.Stream
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
 
-func GetRecordFolderPath() (string, error) {
-	config, err := ConfigRep.GetConfig()
-	if err != nil {
-		log.Println("GetRecordFolderPath:", err)
-		return "", err
-	}
+func GetRecordFolderPath(config *models.Config) (string, error) {
 	// create if it doesn't exist
 	dir := config.Path.Record
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
-}
-
-func FromDateToString(t time.Time) string {
-	sep := "_"
-	var sb strings.Builder
-	sb.WriteString(strconv.Itoa(t.Year()))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(int(t.Month())))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(t.Day()))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(t.Hour()))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(t.Minute()))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(t.Second()))
-	sb.WriteString(sep)
-	sb.WriteString(strconv.Itoa(t.Nanosecond()))
-
-	return sb.String()
 }
 
 func SetHlsPath(config *models.Config, s *models.StreamModel) {
@@ -72,15 +41,16 @@ func GetDetectedFolderName() string {
 	return "detected"
 }
 
-//func ParseVideoFileName(fileName string) time.Time {
-//	splits := strings.Split(fileName, ".")
-//	splits = strings.Split(splits[0], "_")
-//	year, _ := strconv.Atoi(splits[0])
-//	month, _ := strconv.Atoi(splits[1])
-//	day, _ := strconv.Atoi(splits[2])
-//	hour, _ := strconv.Atoi(splits[3])
-//	minute, _ := strconv.Atoi(splits[4])
-//	second, _ := strconv.Atoi(splits[5])
-//
-//	return time.Date(year, time.Month(month), day, hour, minute, second, 0, time.UTC)
-//}
+func GetDetectedFolderPath() string {
+	return "./static/" + GetDetectedFolderName()
+}
+
+func CleanDetectedFolder() error {
+	rootPath := GetDetectedFolderPath()
+	files, _ := ioutil.ReadDir(rootPath)
+	for _, file := range files {
+		os.Remove(path.Join(rootPath, file.Name()))
+	}
+
+	return nil
+}

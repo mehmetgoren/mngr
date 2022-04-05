@@ -5,12 +5,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"mngr/api"
+	"mngr/reps"
+	"mngr/utils"
 	"mngr/ws"
 	"net/http"
 	"os"
 )
 
 func main() {
+	defer utils.HandlePanic()
+
+	rb := reps.RepoBucket{}
+	rb.Init()
+
 	WhoAreYou()
 
 	router := gin.Default()
@@ -20,7 +27,7 @@ func main() {
 	router.Use(loggingMiddleware)
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "PATCH"},
+		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"*"},
 		AllowCredentials: true,
@@ -31,16 +38,17 @@ func main() {
 		})
 	})
 
-	api.RegisterStaticResources(router)
-	api.RegisterSourceEndpoints(router)
-	api.RegisterStreamEndpoints(router)
-	api.RegisterConfigEndpoints(router)
-	api.RegisterVideoEndpoints(router)
-	api.RegisterOdEndpoints(router)
-	api.RegisterDetectedEndpoints(router)
+	api.RegisterStaticResources(router, &rb)
+	api.RegisterSourceEndpoints(router, &rb)
+	api.RegisterStreamEndpoints(router, &rb)
+	api.RegisterConfigEndpoints(router, &rb)
+	api.RegisterRecordEndpoints(router, &rb)
+	api.RegisterOdEndpoints(router, &rb)
+	api.RegisterDetectedEndpoints(router, &rb)
+	api.RegisterVideoClipEndpoints(router, &rb)
 
-	ws.RegisterApiEndpoints(router)
-	ws.RegisterWsEndpoints(router)
+	ws.RegisterApiEndpoints(router, &rb)
+	ws.RegisterWsEndpoints(router, &rb)
 
 	router.Run(":2072")
 }

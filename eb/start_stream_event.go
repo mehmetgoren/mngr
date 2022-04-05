@@ -5,18 +5,20 @@ import (
 	"github.com/go-redis/redis/v8"
 	"log"
 	"mngr/models"
+	"mngr/reps"
 	"mngr/utils"
 )
 
 type StartStreamRequestEvent struct {
 	models.SourceModel
+	Rb *reps.RepoBucket `json:"-"`
 }
 
 func (s StartStreamRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
 }
 func (s *StartStreamRequestEvent) Publish() error {
-	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "start_stream_request"}
+	eventBusPub := EventBus{PubSubConnection: s.Rb.PubSubConnection, Channel: "start_stream_request"}
 	err := eventBusPub.Publish(s)
 	if err != nil {
 		log.Println("An error occurred while publishing a stream event: " + err.Error())
@@ -28,13 +30,14 @@ func (s *StartStreamRequestEvent) Publish() error {
 
 type StartStreamResponseEvent struct {
 	models.StreamModel
-	Pusher utils.WsPusher `json:"-"`
+	Rb     *reps.RepoBucket `json:"-"`
+	Pusher utils.WsPusher   `json:"-"`
 }
 
 func (s *StartStreamResponseEvent) Handle(event *redis.Message) error {
 	utils.DeserializeJson(event.Payload, s)
 	//from full path to web server relative path
-	config, _ := utils.ConfigRep.GetConfig()
+	config, _ := s.Rb.ConfigRep.GetConfig()
 	utils.SetHlsPath(config, &s.StreamModel)
 	s.Pusher.Push(s)
 	return nil

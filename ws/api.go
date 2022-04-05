@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/eb"
 	"mngr/models"
-	"mngr/utils"
+	"mngr/reps"
 	"net/http"
 )
 
 // Publish Start
-func RegisterApiEndpoints(router *gin.Engine) {
+func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.POST("/startstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
-		eventPub := eb.StartStreamRequestEvent{SourceModel: source}
+		eventPub := eb.StartStreamRequestEvent{Rb: rb, SourceModel: source}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -26,7 +26,7 @@ func RegisterApiEndpoints(router *gin.Engine) {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		eventPub := eb.StopStreamRequestEvent{Id: source.Id}
+		eventPub := eb.StopStreamRequestEvent{Rb: rb, Id: source.Id}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -35,6 +35,7 @@ func RegisterApiEndpoints(router *gin.Engine) {
 	router.POST("/editor", func(ctx *gin.Context) {
 		var event eb.EditorRequestEvent
 		ctx.BindJSON(&event)
+		event.Rb = rb
 		err := event.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -44,7 +45,7 @@ func RegisterApiEndpoints(router *gin.Engine) {
 	router.POST("/restartstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
-		eventPub := eb.RestartStreamRequestEvent{SourceModel: source}
+		eventPub := eb.RestartStreamRequestEvent{Rb: rb, SourceModel: source}
 		err := eventPub.Publish()
 		if err == nil {
 			ctx.Writer.WriteHeader(http.StatusOK)
@@ -55,7 +56,7 @@ func RegisterApiEndpoints(router *gin.Engine) {
 // Publish End
 
 // Subscribe Start
-func RegisterWsEndpoints(router *gin.Engine) {
+func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")
 	hub := NewHub()
 	go hub.Run()
@@ -65,28 +66,28 @@ func RegisterWsEndpoints(router *gin.Engine) {
 	})
 	router.GET("/wsstartstream", func(ctx *gin.Context) {
 		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "start_stream_response"}
-		streamEventSub := eb.StartStreamResponseEvent{Pusher: clientStream}
+		streamEventBusSub := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "start_stream_response"}
+		streamEventSub := eb.StartStreamResponseEvent{Rb: rb, Pusher: clientStream}
 		go streamEventBusSub.Subscribe(&streamEventSub)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsstopstream", func(ctx *gin.Context) {
 		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamEventBusSub := eb.EventBus{Connection: utils.ConnPubSub, Channel: "stop_stream_response"}
+		streamEventBusSub := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "stop_stream_response"}
 		streamEventSub := eb.StopStreamResponseEvent{Pusher: clientStream}
 		go streamEventBusSub.Subscribe(&streamEventSub)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wseditor", func(ctx *gin.Context) {
 		clientEditor := CreateClient(hub, ctx.Writer, ctx.Request)
-		editorEventBus := eb.EventBus{Connection: utils.ConnPubSub, Channel: "editor_response"}
+		editorEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "editor_response"}
 		editorEvent := eb.EditorResponseEvent{Pusher: clientEditor}
 		go editorEventBus.Subscribe(&editorEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsffmpegreader", func(ctx *gin.Context) {
 		clientEditor := CreateClient(hub, ctx.Writer, ctx.Request)
-		editorEventBus := eb.EventBus{Connection: utils.ConnPubSub, Channel: "read_service"}
+		editorEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "read_service"}
 		editorEvent := eb.FFmpegReaderResponseEvent{Pusher: clientEditor}
 		go editorEventBus.Subscribe(&editorEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)

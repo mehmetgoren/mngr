@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"log"
 	"mngr/models"
-	"mngr/utils"
+	"mngr/reps"
 )
 
 type RestartStreamRequestEvent struct {
 	models.SourceModel
+	Rb *reps.RepoBucket `json:"-"`
 }
 
 func (r RestartStreamRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(r)
 }
 func (r *RestartStreamRequestEvent) Publish() error {
-	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "restart_stream_request"}
+	eventBusPub := EventBus{PubSubConnection: r.Rb.PubSubConnection, Channel: "restart_stream_request"}
 	err := eventBusPub.Publish(r)
 	if err != nil {
 		log.Println("An error occurred while publishing a restart stream event: " + err.Error())

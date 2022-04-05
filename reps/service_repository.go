@@ -3,6 +3,7 @@ package reps
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
+	"mngr/utils"
 	"os"
 	"runtime"
 	"time"
@@ -47,7 +48,7 @@ func (r *ServiceRepository) Add(serviceName string) (int64, error) {
 		CpuCount:        runtime.NumCPU(),
 		Ram:             "unknown",
 		Pid:             os.Getpid(),
-		CreatedAt:       DatetimeNow(&now),
+		CreatedAt:       utils.TimeToString(now, true),
 		Heartbeat:       "",
 	}
 

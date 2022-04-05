@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"os"
@@ -41,7 +42,7 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 			FullPath:   path,
 			Label:      info.Name(),
 			Size:       info.Size(),
-			ModifiedAt: utils.FromDateToString(info.ModTime()),
+			ModifiedAt: utils.TimeToString(info.ModTime(), true),
 			Children:   make([]*FolderTreeItem, 0),
 			Icon:       "folder",
 		}
@@ -84,9 +85,9 @@ type DetectedImagesParams struct {
 	SourceId string `json:"sourceId"`
 }
 
-func RegisterDetectedEndpoints(router *gin.Engine) {
+func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/detectedfolders", func(ctx *gin.Context) {
-		config, _ := utils.ConfigRep.GetConfig()
+		config, _ := rb.ConfigRep.GetConfig()
 		path := config.AiConfig.DetectedFolder
 		items, _ := newTree(path, true)
 		ctx.JSON(http.StatusOK, items)
@@ -106,7 +107,7 @@ func RegisterDetectedEndpoints(router *gin.Engine) {
 			}
 			fileName := file.Name()
 			splits := strings.Split(fileName, "_")
-			if len(splits) != 12 {
+			if len(splits) != 9 {
 				continue
 			}
 			sourceId := splits[0]
@@ -114,20 +115,17 @@ func RegisterDetectedEndpoints(router *gin.Engine) {
 				continue
 			}
 			item := &ImageItem{FullPath: filepath.Join(model.RootPath, fileName), SourceId: sourceId}
-			classIndex, _ := strconv.Atoi(splits[1])
-			item.ClassIndex = classIndex
-			item.ClassName = splits[2]
-			score, _ := strconv.ParseFloat(splits[3], 32)
-			item.Score = float32(score)
-			item.ModifiedAt = strings.Join(splits[4:10], "_")
-			item.Id = splits[11]
+			item.ClassIndex = -1
+			item.ClassName = ""
+			item.Score = .0
+			item.ModifiedAt = strings.Join(splits[1:7], "_")
+			item.Id = splits[8]
 
 			bytes, _ := ioutil.ReadFile(item.FullPath)
-			detectedFolderName := utils.GetDetectedFolderName()
-			serverRoot := "./static/" + detectedFolderName
+			serverRoot := utils.GetDetectedFolderPath()
 			imgPath := path.Join(serverRoot, fileName)
 			ioutil.WriteFile(imgPath, bytes, 0777)
-			item.ImagePath = path.Join(detectedFolderName, fileName)
+			item.ImagePath = path.Join(utils.GetDetectedFolderName(), fileName)
 
 			items = append(items, item)
 

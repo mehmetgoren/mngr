@@ -24,3 +24,12 @@ func DeserializeJson(data string, result interface{}) error {
 	}
 	return nil
 }
+
+func DeserializeJsonB(data []byte, result interface{}) error {
+	err := json.Unmarshal(data, result)
+	if err != nil {
+		log.Println("Error deserializing json: ", err)
+		return err
+	}
+	return nil
+}

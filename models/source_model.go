@@ -52,6 +52,8 @@ type SourceModel struct {
 	RecordAudioSampleRate int `json:"record_audio_sample_rate" redis:"record_audio_sample_rate"`
 	RecordAudioVolume     int `json:"record_audio_volume" redis:"record_audio_volume"`
 
+	VideoClipEnabled bool `json:"video_clip_enabled" redis:"video_clip_enabled"`
+
 	LogLevel int `json:"log_level" redis:"log_level"`
 	// FFmpegModel section ends
 

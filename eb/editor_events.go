@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"log"
+	"mngr/reps"
 	"mngr/utils"
 )
 
@@ -15,18 +16,19 @@ const (
 )
 
 type EditorRequestEvent struct {
-	Id        string `json:"id"`
-	Brand     string `json:"brand"`
-	Name      string `json:"name"`
-	Address   string `json:"address"`
-	EventType int    `json:"event_type"`
+	Id        string           `json:"id"`
+	Brand     string           `json:"brand"`
+	Name      string           `json:"name"`
+	Address   string           `json:"address"`
+	EventType int              `json:"event_type"`
+	Rb        *reps.RepoBucket `json:"-"`
 }
 
 func (e EditorRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(e)
 }
 func (e *EditorRequestEvent) Publish() error {
-	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "editor_request"}
+	eventBusPub := EventBus{PubSubConnection: e.Rb.PubSubConnection, Channel: "editor_request"}
 	err := eventBusPub.Publish(e)
 	if err != nil {
 		log.Println("An error occurred while publishing a editor event: " + err.Error())

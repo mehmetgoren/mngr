@@ -3,7 +3,7 @@ package eb
 import (
 	"encoding/json"
 	"log"
-	"mngr/utils"
+	"mngr/reps"
 )
 
 const (
@@ -16,9 +16,10 @@ type ModelChanged struct {
 }
 
 type DataChangedEvent struct {
-	ModelName  string `json:"model_name" redis:"model_name"`
-	ParamsJson string `json:"params_json" redis:"params_json"`
-	Op         int    `json:"op" redis:"op"`
+	ModelName  string           `json:"model_name" redis:"model_name"`
+	ParamsJson string           `json:"params_json" redis:"params_json"`
+	Op         int              `json:"op" redis:"op"`
+	Rb         *reps.RepoBucket `json:"-"`
 }
 
 func (d DataChangedEvent) MarshalBinary() ([]byte, error) {
@@ -26,7 +27,7 @@ func (d DataChangedEvent) MarshalBinary() ([]byte, error) {
 }
 
 func (d *DataChangedEvent) Publish() error {
-	eventBusPub := EventBus{Connection: utils.ConnPubSub, Channel: "data_changed"}
+	eventBusPub := EventBus{PubSubConnection: d.Rb.PubSubConnection, Channel: "data_changed"}
 	err := eventBusPub.Publish(d)
 	if err != nil {
 		log.Println("An error occurred while publishing a data changed event: " + err.Error())

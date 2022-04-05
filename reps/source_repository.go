@@ -74,7 +74,7 @@ func (r *SourceRepository) RemoveById(id string) error {
 	return nil
 }
 
-func (r *SourceRepository) GetSourceStreamStatus(streamRepository StreamRepository) ([]*models.SourceStatusModel, error) {
+func (r *SourceRepository) GetSourceStreamStatus(streamRepository *StreamRepository) ([]*models.SourceStatusModel, error) {
 	conn := r.Connection
 	keys, err := conn.Keys(context.Background(), redisKeySources+"*").Result()
 	if err != nil {
