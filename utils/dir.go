@@ -19,26 +19,32 @@ func CreateDicIfNotExist(dir string) error {
 }
 
 func GetStreamFolderPath(config *models.Config) (string, error) {
-	dir := config.Path.Stream
+	dir := path.Join(config.General.RootFolderPath, "stream")
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
 
 func GetRecordFolderPath(config *models.Config) (string, error) {
-	// create if it doesn't exist
-	dir := config.Path.Record
+	dir := path.Join(config.General.RootFolderPath, "record")
+	CreateDicIfNotExist(dir)
+
+	return dir, nil
+}
+
+func GetOdFolder(config *models.Config) (string, error) {
+	dir := path.Join(config.General.RootFolderPath, GetDetectedFolderName())
 	CreateDicIfNotExist(dir)
 
 	return dir, nil
 }
 
 func SetHlsPath(config *models.Config, s *models.StreamModel) {
-	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, config.Path.Stream, "", -1)
+	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, path.Join(config.General.RootFolderPath, "stream"), "", -1)
 }
 
 func GetDetectedFolderName() string {
-	return "detected"
+	return "od"
 }
 
 func GetDetectedFolderPath() string {

@@ -88,8 +88,8 @@ type DetectedImagesParams struct {
 func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/detectedfolders", func(ctx *gin.Context) {
 		config, _ := rb.ConfigRep.GetConfig()
-		path := config.AiConfig.DetectedFolder
-		items, _ := newTree(path, true)
+		odPath, _ := utils.GetOdFolder(config)
+		items, _ := newTree(odPath, true)
 		ctx.JSON(http.StatusOK, items)
 	})
 	// it has potential security risk

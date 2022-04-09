@@ -9,7 +9,7 @@ import (
 )
 
 type HeartbeatRepository struct {
-	Client      *redis.Client
+	Connection  *redis.Client
 	TimeSecond  int64
 	ServiceName string
 }
@@ -24,7 +24,7 @@ func (h *HeartbeatRepository) Start() {
 			heartbeatObj := map[string]interface{}{
 				"heartbeat": utils.TimeToString(timeTicker, true),
 			}
-			h.Client.HSet(context.Background(), "services:"+h.ServiceName, heartbeatObj)
+			h.Connection.HSet(context.Background(), "services:"+h.ServiceName, heartbeatObj)
 			log.Println("Heartbeat was beaten at " + timeTicker.Format(time.ANSIC))
 			//case <- quit:
 			//	ticker.Stop()

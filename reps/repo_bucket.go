@@ -15,8 +15,8 @@ type RepoBucket struct {
 }
 
 func (r *RepoBucket) Init() *RepoBucket {
-	r.connMain = CreateRedisConnection(MAIN)
-	r.PubSubConnection = CreateRedisConnection(EVENTBUS)
+	r.connMain = createRedisConnection(MAIN)
+	r.PubSubConnection = createRedisConnection(EVENTBUS)
 
 	r.ConfigRep = &ConfigRepository{Connection: r.connMain}
 	r.SourceRep = &SourceRepository{Connection: r.connMain}
@@ -24,4 +24,8 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.OdRep = &OdRepository{Connection: r.connMain}
 
 	return r
+}
+
+func (r *RepoBucket) GetMainConnection() *redis.Client {
+	return r.connMain
 }

@@ -18,7 +18,7 @@ func main() {
 	rb := reps.RepoBucket{}
 	rb.Init()
 
-	WhoAreYou()
+	WhoAreYou(&rb)
 
 	router := gin.Default()
 	f, _ := os.Create("access.log")

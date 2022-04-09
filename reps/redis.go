@@ -17,7 +17,7 @@ const (
 	EVENTBUS = 15
 )
 
-func CreateRedisConnection(db int) *redis.Client {
+func createRedisConnection(db int) *redis.Client {
 	host := os.Getenv("REDIS_HOST")
 	fmt.Println("Redis host: ", host)
 	if len(host) == 0 {
