@@ -9,8 +9,8 @@ import (
 	"path"
 )
 
-func RegisterVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/videoclips/:sourceid/:date", func(ctx *gin.Context) {
+func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+	router.GET("/odvideoclips/:sourceid/:date", func(ctx *gin.Context) {
 		config, _ := rb.ConfigRep.GetConfig()
 
 		sourceId := ctx.Param("sourceid")
@@ -24,7 +24,7 @@ func RegisterVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	})
 
 	//potential security risk -> filename
-	router.DELETE("/videoclips", func(ctx *gin.Context) {
+	router.DELETE("/odvideoclips", func(ctx *gin.Context) {
 		var vm view_models.OdVideoClipsViewModel
 		if err := ctx.ShouldBindJSON(&vm); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

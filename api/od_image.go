@@ -82,8 +82,8 @@ type DetectedImagesParams struct {
 	SourceId string `json:"sourceId"`
 }
 
-func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/detectedfolders/:id", func(ctx *gin.Context) {
+func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+	router.GET("/odimagesfolders/:id", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
 		config, _ := rb.ConfigRep.GetConfig()
 		odPath := utils.GetOdImagesPathBySourceId(config, sourceId)
@@ -91,7 +91,7 @@ func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, items)
 	})
 	// it has potential security risk
-	router.POST("detectedimages", func(ctx *gin.Context) {
+	router.POST("odimages", func(ctx *gin.Context) {
 		var model DetectedImagesParams
 		if err := ctx.ShouldBindJSON(&model); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
