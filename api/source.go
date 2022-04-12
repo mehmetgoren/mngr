@@ -7,7 +7,6 @@ import (
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
-	"path"
 	"time"
 )
 
@@ -47,20 +46,7 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 
 		config, _ := rb.ConfigRep.GetConfig()
-		// Create HLS stream folder.
-		sf, _ := utils.GetStreamFolderPath(config)
-		dic := path.Join(sf, model.Id)
-		utils.CreateDicIfNotExist(dic)
-
-		// Create record folder.
-		rf, _ := utils.GetRecordFolderPath(config)
-		dic = path.Join(rf, model.Id)
-		utils.CreateDicIfNotExist(dic)
-		//and also short video clips folder
-		vcsDicPath := path.Join(dic, "vcs")
-		utils.CreateDicIfNotExist(vcsDicPath)
-		tempSvcDicPath := path.Join(vcsDicPath, "temp")
-		utils.CreateDicIfNotExist(tempSvcDicPath)
+		utils.CreateSourceDefaultDirectories(config, model.Id)
 
 		ctx.JSON(http.StatusOK, model)
 	})

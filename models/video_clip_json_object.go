@@ -1,8 +1,6 @@
 package models
 
-import (
-	"time"
-)
+import "time"
 
 type DetectedObject struct {
 	PredScore   float32 `json:"pred_score"`
@@ -10,21 +8,27 @@ type DetectedObject struct {
 	PredClsName string  `json:"pred_cls_name"`
 }
 
-type DetectedImage struct {
-	Id               string           `json:"id"`
-	SourceId         string           `json:"source_id"`
-	CreatedAt        string           `json:"created_at"`
-	DetectedObjects  []DetectedObject `json:"detected_objects"`
-	Base64Image      string           `json:"base64_image"`
-	VideoClipEnabled bool             `json:"video_clip_enabled"`
+type ObjectDetectionJsonBaseObject struct {
+	Id               string            `json:"id"`
+	SourceId         string            `json:"source_id"`
+	CreatedAt        string            `json:"created_at"`
+	DetectedObjects  []*DetectedObject `json:"detected_objects"`
+	VideoClipEnabled bool              `json:"video_clip_enabled"`
+	ImageFileName    string            `json:"image_file_name"`
+	DataFileName     string            `json:"data_file_name"`
 }
 
 type VideoClipJsonObject struct {
-	DetectedImage    *DetectedImage `json:"detected_image"`
-	FileName         string         `json:"file_name"`
-	CreatedAt        string         `json:"created_at"`
-	LastModified     string         `json:"last_modified"`
-	Duration         int            `json:"duration"`
-	CreatedAtTime    time.Time      `json:"-"`
-	LastModifiedTime time.Time      `json:"-"`
+	FileName       string `json:"file_name"`
+	CreatedAt      string `json:"created_at"`
+	LastModifiedAt string `json:"last_modified_at"`
+	Duration       int    `json:"duration"`
+
+	CreatedAtTime      time.Time `json:"-"`
+	LastModifiedAtTime time.Time `json:"-"`
+}
+
+type ObjectDetectionJsonObject struct {
+	ObjectDetection *ObjectDetectionJsonBaseObject `json:"object_detection"`
+	Video           *VideoClipJsonObject           `json:"video"`
 }

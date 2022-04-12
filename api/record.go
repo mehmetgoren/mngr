@@ -17,7 +17,7 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/records/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath, _ := utils.GetRecordFolderPath(config)
+		recordFolderPath := utils.GetRecordPath(config)
 		files, _ := ioutil.ReadDir(path.Join(recordFolderPath, id))
 		var list = make([]*models.VideoFile, 0)
 		for _, file := range files {
@@ -41,7 +41,7 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		var fileNames []string
 		ctx.BindJSON(&fileNames)
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath, _ := utils.GetRecordFolderPath(config)
+		recordFolderPath := utils.GetRecordPath(config)
 		for _, fileName := range fileNames {
 			err := os.Remove(path.Join(recordFolderPath, id, fileName))
 			if err != nil {

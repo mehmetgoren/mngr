@@ -9,14 +9,15 @@ import (
 func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 	config, _ := rb.ConfigRep.GetConfig()
 
-	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
-	streamFolderPath, _ := utils.GetStreamFolderPath(config)
-	router.Static("/livestream", streamFolderPath)
-	recordFolderPath, _ := utils.GetRecordFolderPath(config)
-	router.Static("/playback", recordFolderPath)
-	router.Static("/"+utils.GetDetectedFolderName(), utils.GetDetectedFolderPath())
-	utils.GetOdFolder(config)
-	router.Static("livestreamexample", "./static/live/example.mp4")
+	utils.CreateRequiredDirectories(config)
 
-	utils.CleanDetectedFolder()
+	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
+	streamFolderPath := utils.GetStreamPath(config)
+	router.Static("/livestream", streamFolderPath)
+
+	recordFolderPath := utils.GetRecordPath(config)
+	router.Static("/playback", recordFolderPath)
+
+	// od is not used here since od images are loaded from a temp file since the gallery performs better on non hierarchical filename instead of base64 strings
+	router.Static("/od", utils.GetOdPath(config))
 }

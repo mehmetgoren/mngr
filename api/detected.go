@@ -2,12 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -38,8 +36,13 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 		if onlyFolder && !info.IsDir() {
 			return err
 		}
+
+		splits := strings.Split(path, "/")
+		l := len(splits)
+		sep := "_"
+		newPath := splits[l-4] + sep + splits[l-3] + sep + splits[l-2] + sep + splits[l-1]
 		parents[path] = &FolderTreeItem{
-			FullPath:   path,
+			FullPath:   newPath,
 			Label:      info.Name(),
 			Size:       info.Size(),
 			ModifiedAt: utils.TimeToString(info.ModTime(), true),
@@ -62,7 +65,7 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 			sort.Slice(parent.Children, func(i, j int) bool {
 				item1, _ := strconv.Atoi(parent.Children[i].Label)
 				item2, _ := strconv.Atoi(parent.Children[j].Label)
-				return item1 < item2
+				return item1 > item2
 			})
 		}
 	}
@@ -70,14 +73,8 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 }
 
 type ImageItem struct {
-	FullPath   string  `json:"fullPath"`
-	SourceId   string  `json:"sourceId"`
-	ClassIndex int     `json:"classIndex"`
-	ClassName  string  `json:"className"`
-	Score      float32 `json:"score"`
-	ModifiedAt string  `json:"modifiedAt"`
-	Id         string  `json:"id"`
-	ImagePath  string  `json:"imagePath"`
+	Id        string `json:"id"`
+	ImagePath string `json:"imagePath"`
 }
 
 type DetectedImagesParams struct {
@@ -86,9 +83,10 @@ type DetectedImagesParams struct {
 }
 
 func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/detectedfolders", func(ctx *gin.Context) {
+	router.GET("/detectedfolders/:id", func(ctx *gin.Context) {
+		sourceId := ctx.Param("id")
 		config, _ := rb.ConfigRep.GetConfig()
-		odPath, _ := utils.GetOdFolder(config)
+		odPath := utils.GetOdImagesPathBySourceId(config, sourceId)
 		items, _ := newTree(odPath, true)
 		ctx.JSON(http.StatusOK, items)
 	})
@@ -99,41 +97,14 @@ func RegisterDetectedEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		files, _ := ioutil.ReadDir(model.RootPath)
+		config, _ := rb.ConfigRep.GetConfig()
+		odhRep := reps.OdHandlerRepository{Config: config}
+		jsonObjects := odhRep.GetJsonObjects(model.SourceId, model.RootPath, true)
 		items := make([]*ImageItem, 0)
-		for _, file := range files {
-			if file.IsDir() {
-				continue
-			}
-			fileName := file.Name()
-			splits := strings.Split(fileName, "_")
-			if len(splits) != 9 {
-				continue
-			}
-			sourceId := splits[0]
-			if sourceId != model.SourceId {
-				continue
-			}
-			item := &ImageItem{FullPath: filepath.Join(model.RootPath, fileName), SourceId: sourceId}
-			item.ClassIndex = -1
-			item.ClassName = ""
-			item.Score = .0
-			item.ModifiedAt = strings.Join(splits[1:7], "_")
-			item.Id = splits[8]
-
-			bytes, _ := ioutil.ReadFile(item.FullPath)
-			serverRoot := utils.GetDetectedFolderPath()
-			imgPath := path.Join(serverRoot, fileName)
-			ioutil.WriteFile(imgPath, bytes, 0777)
-			item.ImagePath = path.Join(utils.GetDetectedFolderName(), fileName)
-
+		for _, jsonObject := range jsonObjects {
+			od := jsonObject.ObjectDetection
+			item := &ImageItem{Id: od.Id, ImagePath: od.ImageFileName}
 			items = append(items, item)
-
-			sort.Slice(items, func(i, j int) bool {
-				item1 := items[i].ModifiedAt
-				item2 := items[j].ModifiedAt
-				return item1 > item2
-			})
 		}
 		ctx.JSON(http.StatusOK, items)
 	})

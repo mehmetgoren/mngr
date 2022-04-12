@@ -1,14 +1,13 @@
 package utils
 
 import (
-	"io/ioutil"
 	"mngr/models"
 	"os"
 	"path"
 	"strings"
 )
 
-func CreateDicIfNotExist(dir string) error {
+func createDirIfNotExist(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, 0777)
 		if err != nil {
@@ -18,45 +17,74 @@ func CreateDicIfNotExist(dir string) error {
 	return nil
 }
 
-func GetStreamFolderPath(config *models.Config) (string, error) {
-	dir := path.Join(config.General.RootFolderPath, "stream")
-	CreateDicIfNotExist(dir)
+func CreateRequiredDirectories(config *models.Config) {
+	// Create HLS stream folder
+	stream := GetStreamPath(config)
+	createDirIfNotExist(stream)
 
-	return dir, nil
+	// Create record folder
+	record := GetRecordPath(config)
+	createDirIfNotExist(record)
+
+	// Create object detection folder
+	od := GetOdPath(config)
+	createDirIfNotExist(od)
+
+	// Create facial recognition folder
+	fr := GetFrPath(config)
+	createDirIfNotExist(fr)
 }
 
-func GetRecordFolderPath(config *models.Config) (string, error) {
-	dir := path.Join(config.General.RootFolderPath, "record")
-	CreateDicIfNotExist(dir)
+func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
+	// Create HLS stream folder for the source
+	stream := GetStreamPath(config)
+	createDirIfNotExist(path.Join(stream, sourceId))
 
-	return dir, nil
+	// Create record folder for the source
+	record := GetRecordPath(config)
+	createDirIfNotExist(path.Join(record, sourceId))
+	//and also short video clips folder
+	createDirIfNotExist(path.Join(record, sourceId, "temp"))
+
+	// Create object detection folder for the source
+	od := GetOdPath(config)
+	createDirIfNotExist(path.Join(od, sourceId))
+	createDirIfNotExist(path.Join(od, sourceId, "data"))
+	createDirIfNotExist(path.Join(od, sourceId, "images"))
+	createDirIfNotExist(path.Join(od, sourceId, "videos"))
+
+	// Create facial recognition folder for the source
+	fr := GetFrPath(config)
+	createDirIfNotExist(path.Join(fr, sourceId))
+	createDirIfNotExist(path.Join(fr, sourceId, "data"))
+	createDirIfNotExist(path.Join(fr, sourceId, "images"))
+	createDirIfNotExist(path.Join(fr, sourceId, "videos"))
 }
 
-func GetOdFolder(config *models.Config) (string, error) {
-	dir := path.Join(config.General.RootFolderPath, GetDetectedFolderName())
-	CreateDicIfNotExist(dir)
+func GetStreamPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "stream")
+}
 
-	return dir, nil
+func GetRecordPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "record")
+}
+
+func GetOdPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "od")
+}
+
+func GetFrPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "fr")
 }
 
 func SetHlsPath(config *models.Config, s *models.StreamModel) {
 	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, path.Join(config.General.RootFolderPath, "stream"), "", -1)
 }
 
-func GetDetectedFolderName() string {
-	return "od"
+func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(GetOdPath(config), sourceId, "images")
 }
 
-func GetDetectedFolderPath() string {
-	return "./static/" + GetDetectedFolderName()
-}
-
-func CleanDetectedFolder() error {
-	rootPath := GetDetectedFolderPath()
-	files, _ := ioutil.ReadDir(rootPath)
-	for _, file := range files {
-		os.Remove(path.Join(rootPath, file.Name()))
-	}
-
-	return nil
+func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(GetOdPath(config), sourceId, "data")
 }
