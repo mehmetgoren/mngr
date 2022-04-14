@@ -33,6 +33,13 @@ func CreateRequiredDirectories(config *models.Config) {
 	// Create facial recognition folder
 	fr := GetFrPath(config)
 	createDirIfNotExist(fr)
+	ml := path.Join(fr, "ml")
+	createDirIfNotExist(ml)
+	train := path.Join(ml, "train")
+	createDirIfNotExist(train)
+	test := path.Join(ml, "test")
+	createDirIfNotExist(test)
+
 }
 
 func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
@@ -87,4 +94,16 @@ func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 
 func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "data")
+}
+
+func getFrPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "fr")
+}
+
+func GetFrImagesPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(getFrPath(config), sourceId, "images")
+}
+
+func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(getFrPath(config), sourceId, "data")
 }
