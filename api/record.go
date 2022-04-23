@@ -10,15 +10,34 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
 func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/records/:id", func(ctx *gin.Context) {
+	router.GET("/recordhours/:id/:datestr", func(ctx *gin.Context) {
 		id := ctx.Param("id")
+		dateStr := ctx.Param("datestr")
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath := utils.GetRecordPath(config)
-		files, _ := ioutil.ReadDir(path.Join(recordFolderPath, id))
+		recordFolderPath := utils.GetHourlyRecordPathBySourceId(config, id, dateStr)
+		files, _ := ioutil.ReadDir(recordFolderPath)
+		var list = make([]string, 0)
+		for _, file := range files {
+			if !file.IsDir() {
+				continue
+			}
+			list = append(list, file.Name())
+		}
+		ctx.JSON(http.StatusOK, list)
+	})
+	router.GET("/records/:id/:datestr/:hour", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		dateStr := ctx.Param("datestr")
+		hour := ctx.Param("hour")
+		config, _ := rb.ConfigRep.GetConfig()
+		recordFolderPath := path.Join(utils.GetHourlyRecordPathBySourceId(config, id, dateStr), hour)
+		files, _ := ioutil.ReadDir(recordFolderPath)
+		date := utils.StringToTime(dateStr)
 		var list = make([]*models.VideoFile, 0)
 		for _, file := range files {
 			if file.IsDir() {
@@ -27,7 +46,11 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			videoFile := models.VideoFile{}
 			videoFile.SourceId = id
 			videoFile.Name = file.Name()
-			videoFile.Path = path.Join("/playback", id, file.Name()) //utils.RelativePlaybackFolderPath + "/" + file.Name()
+			videoFile.Year = strconv.Itoa(date.Year())
+			videoFile.Month = strconv.Itoa(int(date.Month()))
+			videoFile.Day = strconv.Itoa(date.Day())
+			videoFile.Hour = hour
+			videoFile.SetPath()
 			videoFile.Size = utils.Round(float64(file.Size()) * 0.000001)
 			videoFile.CreatedAt = strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 			videoFile.ModifiedAt = utils.TimeToString(file.ModTime(), true)
@@ -36,19 +59,20 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, list)
 	})
 
-	router.DELETE("/records/:id", func(ctx *gin.Context) {
-		id := ctx.Param("id")
-		var fileNames []string
-		ctx.BindJSON(&fileNames)
+	router.DELETE("/records", func(ctx *gin.Context) {
+		var vf models.VideoFile
+		if err := ctx.ShouldBindJSON(&vf); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		config, _ := rb.ConfigRep.GetConfig()
 		recordFolderPath := utils.GetRecordPath(config)
-		for _, fileName := range fileNames {
-			err := os.Remove(path.Join(recordFolderPath, id, fileName))
-			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, err)
-				return
-			}
+		err := os.Remove(vf.GetAbsolutePath(recordFolderPath))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, err)
+		} else {
+			ctx.JSON(http.StatusOK, true)
 		}
-		ctx.JSON(http.StatusOK, nil)
 	})
 }

@@ -20,11 +20,6 @@ func RegisterStreamEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := rb.ConfigRep.GetConfig()
-		for _, stream := range modelList {
-			utils.SetHlsPath(config, stream)
-		}
-
 		c.JSON(http.StatusOK, modelList)
 	})
 	router.GET("/stream/:id", func(ctx *gin.Context) {
@@ -34,8 +29,6 @@ func RegisterStreamEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := rb.ConfigRep.GetConfig()
-		utils.SetHlsPath(config, stream)
 		ctx.JSON(http.StatusOK, stream)
 	})
 	router.POST("/ffmpegreader", func(context *gin.Context) {

@@ -37,8 +37,6 @@ type StartStreamResponseEvent struct {
 func (s *StartStreamResponseEvent) Handle(event *redis.Message) error {
 	utils.DeserializeJson(event.Payload, s)
 	//from full path to web server relative path
-	config, _ := s.Rb.ConfigRep.GetConfig()
-	utils.SetHlsPath(config, &s.StreamModel)
 	s.Pusher.Push(s)
 	return nil
 }

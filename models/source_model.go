@@ -8,7 +8,6 @@ type SourceModel struct {
 	// FFmpegModel section starts
 	Id            string `json:"id" redis:"id"`
 	Address       string `json:"address" redis:"address"`
-	RecordEnabled bool   `json:"record_enabled" redis:"record_enabled"`
 	RtspTransport int    `json:"rtsp_transport" redis:"rtsp_transport"`
 
 	AnalyzationDuration int    `json:"analyzation_duration" redis:"analyzation_duration"`
@@ -52,8 +51,6 @@ type SourceModel struct {
 	RecordAudioSampleRate int `json:"record_audio_sample_rate" redis:"record_audio_sample_rate"`
 	RecordAudioVolume     int `json:"record_audio_volume" redis:"record_audio_volume"`
 
-	VideoClipEnabled bool `json:"video_clip_enabled" redis:"video_clip_enabled"`
-
 	LogLevel int `json:"log_level" redis:"log_level"`
 	// FFmpegModel section ends
 
@@ -73,6 +70,9 @@ type SourceModel struct {
 	FfmpegReaderFrameRate int `json:"ffmpeg_reader_frame_rate" redis:"ffmpeg_reader_frame_rate"`
 	FfmpegReaderWidth     int `json:"ffmpeg_reader_width" redis:"ffmpeg_reader_width"`
 	FfmpegReaderHeight    int `json:"ffmpeg_reader_height" redis:"ffmpeg_reader_height"`
+
+	RecordEnabled bool `json:"record_enabled" redis:"record_enabled"`
+	AiClipEnabled bool `json:"ai_clip_enabled" redis:"ai_clip_enabled"`
 
 	CreatedAt string `json:"created_at" redis:"created_at"`
 	// SourceModel section ends

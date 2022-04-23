@@ -4,7 +4,7 @@ import (
 	"mngr/models"
 	"os"
 	"path"
-	"strings"
+	"strconv"
 )
 
 func createDirIfNotExist(dir string) error {
@@ -51,7 +51,7 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	record := GetRecordPath(config)
 	createDirIfNotExist(path.Join(record, sourceId))
 	//and also short video clips folder
-	createDirIfNotExist(path.Join(record, sourceId, "temp"))
+	createDirIfNotExist(path.Join(record, sourceId, "ai"))
 
 	// Create object detection folder for the source
 	od := GetOdPath(config)
@@ -84,10 +84,6 @@ func GetFrPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "fr")
 }
 
-func SetHlsPath(config *models.Config, s *models.StreamModel) {
-	s.HlsOutputPath = strings.Replace(s.HlsOutputPath, path.Join(config.General.RootFolderPath, "stream"), "", -1)
-}
-
 func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "images")
 }
@@ -106,4 +102,14 @@ func GetFrImagesPathBySourceId(config *models.Config, sourceId string) string {
 
 func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(getFrPath(config), sourceId, "data")
+}
+
+func GetRecordPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(GetRecordPath(config), sourceId)
+}
+
+func GetHourlyRecordPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+	date := StringToTime(dateStr)
+	return path.Join(GetRecordPathBySourceId(config, sourceId),
+		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
 }
