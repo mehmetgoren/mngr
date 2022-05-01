@@ -21,6 +21,9 @@ func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 	// od is not used here since od images are loaded from a temp file since the gallery performs better on non hierarchical filename instead of base64 strings
 	router.Static("/od", utils.GetOdPath(config))
 
-	//also add fr
+	// also add fr
 	router.Static("/fr", utils.GetFrPath(config))
+
+	// last ine is alpr
+	router.Static("/alpr", utils.GetAlprPath(config))
 }

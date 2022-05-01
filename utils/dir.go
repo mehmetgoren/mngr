@@ -40,6 +40,9 @@ func CreateRequiredDirectories(config *models.Config) {
 	test := path.Join(ml, "test")
 	createDirIfNotExist(test)
 
+	// Create automatic plate license recognizer
+	alpr := GetAlprPath(config)
+	createDirIfNotExist(alpr)
 }
 
 func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
@@ -66,6 +69,13 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	createDirIfNotExist(path.Join(fr, sourceId, "data"))
 	createDirIfNotExist(path.Join(fr, sourceId, "images"))
 	createDirIfNotExist(path.Join(fr, sourceId, "videos"))
+
+	// Create automatic plate license recognizer
+	alpr := GetAlprPath(config)
+	createDirIfNotExist(path.Join(alpr, sourceId))
+	createDirIfNotExist(path.Join(alpr, sourceId, "data"))
+	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
+	createDirIfNotExist(path.Join(alpr, sourceId, "videos"))
 }
 
 func GetStreamPath(config *models.Config) string {
@@ -113,3 +123,22 @@ func GetHourlyRecordPathBySourceId(config *models.Config, sourceId string, dateS
 	return path.Join(GetRecordPathBySourceId(config, sourceId),
 		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
 }
+
+func GetAlprPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "alpr")
+}
+
+// alpr starts
+func getAlprPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "alpr")
+}
+
+func GetAlprImagesPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(getAlprPath(config), sourceId, "images")
+}
+
+func GetAlprDataPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(getAlprPath(config), sourceId, "data")
+}
+
+// alpr ends

@@ -77,7 +77,7 @@ type ImageItem struct {
 	ImagePath string `json:"imagePath"`
 }
 
-type DetectedImagesParams struct {
+type ImagesParams struct {
 	RootPath string `json:"rootPath"`
 	SourceId string `json:"sourceId"`
 }
@@ -92,7 +92,7 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	})
 	// it has potential security risk
 	router.POST("odimages", func(ctx *gin.Context) {
-		var model DetectedImagesParams
+		var model ImagesParams
 		if err := ctx.ShouldBindJSON(&model); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
