@@ -12,6 +12,8 @@ type RepoBucket struct {
 	SourceRep *SourceRepository
 	StreamRep *StreamRepository
 	OdRep     *OdRepository
+	NdRep     *NetworkDiscoveryRepository
+	OvRep     *OnvifRepository
 }
 
 func (r *RepoBucket) Init() *RepoBucket {
@@ -22,6 +24,8 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.SourceRep = &SourceRepository{Connection: r.connMain}
 	r.StreamRep = &StreamRepository{Connection: r.connMain}
 	r.OdRep = &OdRepository{Connection: r.connMain}
+	r.NdRep = &NetworkDiscoveryRepository{Connection: r.connMain}
+	r.OvRep = &OnvifRepository{Connection: r.connMain}
 
 	return r
 }

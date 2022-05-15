@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// Publish Start
+// RegisterApiEndpoints Publish Start
 func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.POST("/startstream", func(ctx *gin.Context) {
 		var source models.SourceModel
@@ -51,11 +51,20 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
+	router.POST("/onvif", func(ctx *gin.Context) {
+		var e models.OnvifEvent
+		ctx.BindJSON(&e)
+		eventPub := eb.OnvifRequestEvent{Rb: rb, OnvifEvent: e}
+		err := eventPub.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+	})
 }
 
 // Publish End
 
-// Subscribe Start
+// RegisterWsEndpoints Subscribe Start
 func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")
 	hub := NewHub()
@@ -90,6 +99,13 @@ func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		editorEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "read_service"}
 		editorEvent := eb.FFmpegReaderResponseEvent{Pusher: clientEditor}
 		go editorEventBus.Subscribe(&editorEvent)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsonvif", func(ctx *gin.Context) {
+		clientOnvif := CreateClient(hub, ctx.Writer, ctx.Request)
+		onvifEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "onvif_response"}
+		onvifEvent := eb.OnvifResponseEvent{Pusher: clientOnvif}
+		go onvifEventBus.Subscribe(&onvifEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	// End Subscribe

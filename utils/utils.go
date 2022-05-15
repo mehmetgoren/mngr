@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -77,4 +78,10 @@ func GetFileNameWithoutExtension(fileName string) string {
 	extension := filepath.Ext(fileName)
 	fileName = fileName[0 : len(fileName)-len(extension)]
 	return fileName
+}
+
+var re = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
+
+func ParseIp(address string) string {
+	return re.FindString(address)
 }
