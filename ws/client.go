@@ -1,11 +1,11 @@
 package ws
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
 	"log"
 	"mngr/reps"
-	"mngr/utils"
 	"net/http"
 	"sync"
 )
@@ -34,16 +34,16 @@ func (c *Client) Push(s interface{}) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	json, err := utils.SerializeJson(s)
+	jb, err := json.Marshal(&s)
 	if err != nil {
 		return err
 	}
 	w, err := c.conn.NextWriter(websocket.TextMessage)
 	if err != nil {
-		log.Println("Error while getting next writer. Err: ", err)
+		//log.Println("Error while getting next writer. Err: ", err)
 		return err
 	}
-	_, err = w.Write([]byte(json))
+	_, err = w.Write(jb)
 	if err != nil {
 		log.Println("Error while writing to writer. Err: ", err)
 		return err
@@ -87,4 +87,12 @@ func CreateClient(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 	go readLoop(clientStream)
 
 	return clientStream
+}
+
+func (c *Client) Close() error {
+	err := c.conn.Close()
+	if err != nil {
+		log.Println("Error while closing websockets connection. Err: ", err)
+	}
+	return err
 }

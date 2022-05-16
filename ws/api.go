@@ -2,6 +2,7 @@ package ws
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"mngr/eb"
 	"mngr/models"
 	"mngr/reps"
@@ -64,6 +65,14 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 // Publish End
 
+type FFmpegReaderHolder struct {
+	EventBus *eb.EventBus
+	Client   *Client
+	Event    *eb.FFmpegReaderResponseEvent
+}
+
+var ffmpegReaderDic = make(map[string]*FFmpegReaderHolder)
+
 // RegisterWsEndpoints Subscribe Start
 func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")
@@ -94,11 +103,35 @@ func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		go editorEventBus.Subscribe(&editorEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
+	//todo: add key to user id when login is available.
 	router.GET("/wsffmpegreader", func(ctx *gin.Context) {
-		clientEditor := CreateClient(hub, ctx.Writer, ctx.Request)
-		editorEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "read_service"}
-		editorEvent := eb.FFmpegReaderResponseEvent{Pusher: clientEditor}
-		go editorEventBus.Subscribe(&editorEvent)
+		qs := ctx.Request.URL.Query()
+		if _, ok := qs["id"]; !ok {
+			log.Println("wsffmpegreader invalid qs")
+			return
+		}
+		id := qs["id"][0]
+		if len(id) == 0 {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			log.Println("wsffmpegreader invalid qs")
+			return
+		}
+		wsClient := CreateClient(hub, ctx.Writer, ctx.Request)
+
+		if prev, ok := ffmpegReaderDic[id]; ok {
+			err := prev.Client.Close()
+			if err != nil {
+				log.Println("Error while closing prev websockets connection for FFmPEG Reader. Err: ", err)
+			}
+			prev.Event.Pusher = wsClient
+			log.Println("wsffmpegreader item has been already added,changing Ws Client for " + id)
+			return
+		}
+
+		editorEventBus := &eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "ffrs" + id}
+		editorEvent := &eb.FFmpegReaderResponseEvent{Pusher: wsClient}
+		ffmpegReaderDic[id] = &FFmpegReaderHolder{EventBus: editorEventBus, Client: wsClient, Event: editorEvent}
+		go editorEventBus.Subscribe(editorEvent)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsonvif", func(ctx *gin.Context) {
