@@ -78,10 +78,7 @@ func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")
 	hub := NewHub()
 	go hub.Run()
-	router.GET("/wschat", func(ctx *gin.Context) {
-		HandlerChat(hub, ctx.Writer, ctx.Request)
-		ctx.Writer.WriteHeader(http.StatusOK)
-	})
+
 	router.GET("/wsstartstream", func(ctx *gin.Context) {
 		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
 		streamEventBusSub := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "start_stream_response"}
