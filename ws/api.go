@@ -61,6 +61,15 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
+	router.POST("/videomerge", func(ctx *gin.Context) {
+		var event eb.VideMergeRequestEvent
+		ctx.BindJSON(&event)
+		event.Rb = rb
+		err := event.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+	})
 }
 
 // Publish End
@@ -136,6 +145,13 @@ func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		onvifEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "onvif_response"}
 		onvifEvent := eb.OnvifResponseEvent{Pusher: clientOnvif}
 		go onvifEventBus.Subscribe(&onvifEvent)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsvideomerge", func(ctx *gin.Context) {
+		c := CreateClient(hub, ctx.Writer, ctx.Request)
+		eventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "vfm_response"}
+		event := eb.VideMergeResponseEvent{Pusher: c}
+		go eventBus.Subscribe(&event)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	// End Subscribe
