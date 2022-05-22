@@ -82,6 +82,7 @@ type FFmpegReaderHolder struct {
 
 var ffmpegReaderDic = make(map[string]*FFmpegReaderHolder)
 
+// RegisterWsEndpoints todo: make holder available for all ws endpoints
 // RegisterWsEndpoints Subscribe Start
 func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")

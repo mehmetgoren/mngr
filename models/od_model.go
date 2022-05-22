@@ -10,5 +10,8 @@ type OdModel struct {
 
 	ThresholdList string `json:"threshold_list" redis:"threshold_list"`
 	SelectedList  string `json:"selected_list" redis:"selected_list"`
-	ZoneList      string `json:"zone_list" redis:"zone_list"`
+	ZonesList     string `json:"zones_list" redis:"zones_list"`
+	MasksList     string `json:"masks_list" redis:"masks_list"`
+	StartTime     string `json:"start_time" redis:"start_time"`
+	EndTime       string `json:"end_time" redis:"end_time"`
 }
