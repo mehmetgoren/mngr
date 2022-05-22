@@ -75,6 +75,7 @@ func newTree(root string, onlyFolder bool) (result *FolderTreeItem, err error) {
 type ImageItem struct {
 	Id        string `json:"id"`
 	ImagePath string `json:"imagePath"`
+	CreatedAt string `json:"-"`
 }
 
 type ImagesParams struct {
@@ -83,10 +84,11 @@ type ImagesParams struct {
 }
 
 func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/odimagesfolders/:id", func(ctx *gin.Context) {
+	router.GET("/odimagesfolders/:id/:date", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
+		date := ctx.Param("date")
 		config, _ := rb.ConfigRep.GetConfig()
-		odPath := utils.GetOdImagesPathBySourceId(config, sourceId)
+		odPath := utils.GetHourlyOdImagesPathBySourceId(config, sourceId, date)
 		items, _ := newTree(odPath, true)
 		ctx.JSON(http.StatusOK, items)
 	})
@@ -103,9 +105,14 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		items := make([]*ImageItem, 0)
 		for _, jsonObject := range jsonObjects {
 			od := jsonObject.ObjectDetection
-			item := &ImageItem{Id: od.Id, ImagePath: od.ImageFileName}
+			item := &ImageItem{Id: od.Id, ImagePath: od.ImageFileName, CreatedAt: jsonObject.ObjectDetection.CreatedAt}
 			items = append(items, item)
 		}
+		sort.Slice(items, func(i, j int) bool {
+			t1 := utils.StringToTime(items[i].CreatedAt)
+			t2 := utils.StringToTime(items[j].CreatedAt)
+			return t1.After(t2)
+		})
 		ctx.JSON(http.StatusOK, items)
 	})
 }

@@ -98,6 +98,12 @@ func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "images")
 }
 
+func GetHourlyOdImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+	date := StringToTime(dateStr)
+	return path.Join(GetOdImagesPathBySourceId(config, sourceId),
+		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
+}
+
 func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "data")
 }
@@ -108,6 +114,11 @@ func getFrPath(config *models.Config) string {
 
 func GetFrImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(getFrPath(config), sourceId, "images")
+}
+func GetHourlyFrImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+	date := StringToTime(dateStr)
+	return path.Join(GetFrImagesPathBySourceId(config, sourceId),
+		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
 }
 
 func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
@@ -135,6 +146,11 @@ func getAlprPath(config *models.Config) string {
 
 func GetAlprImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(getAlprPath(config), sourceId, "images")
+}
+func GetHourlyAlprImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+	date := StringToTime(dateStr)
+	return path.Join(GetAlprImagesPathBySourceId(config, sourceId),
+		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
 }
 
 func GetAlprDataPathBySourceId(config *models.Config, sourceId string) string {
