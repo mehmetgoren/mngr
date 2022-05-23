@@ -33,9 +33,9 @@ func CreateRequiredDirectories(config *models.Config) {
 	// Create facial recognition folder
 	fr := GetFrPath(config)
 	createDirIfNotExist(fr)
-	ml := path.Join(fr, "ml")
+	ml := GetFrMlPath(config)
 	createDirIfNotExist(ml)
-	train := path.Join(ml, "train")
+	train := GetFrTrainPath(config)
 	createDirIfNotExist(train)
 	test := path.Join(ml, "test")
 	createDirIfNotExist(test)
@@ -94,6 +94,12 @@ func GetFrPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "fr")
 }
 
+func GetFrMlPath(config *models.Config) string {
+	fr := GetFrPath(config)
+	return path.Join(fr, "ml")
+}
+
+// od starts
 func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "images")
 }
@@ -108,6 +114,9 @@ func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "data")
 }
 
+// od ends
+
+// fr starts
 func getFrPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "fr")
 }
@@ -125,6 +134,13 @@ func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(getFrPath(config), sourceId, "data")
 }
 
+func GetFrTrainPath(config *models.Config) string {
+	return path.Join(GetFrMlPath(config), "train")
+}
+
+//fr ends
+
+// record starts
 func GetRecordPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetRecordPath(config), sourceId)
 }
@@ -135,11 +151,13 @@ func GetHourlyRecordPathBySourceId(config *models.Config, sourceId string, dateS
 		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
 }
 
+// record ends
+
+// alpr starts
 func GetAlprPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "alpr")
 }
 
-// alpr starts
 func getAlprPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "alpr")
 }

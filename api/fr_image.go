@@ -2,9 +2,12 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
+	"path"
 	"sort"
 )
 
@@ -39,5 +42,33 @@ func RegisterFrImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			return t1.After(t2)
 		})
 		ctx.JSON(http.StatusOK, items)
+	})
+
+	router.GET("/frtrainpersons", func(ctx *gin.Context) {
+		config, _ := rb.ConfigRep.GetConfig()
+		trainPath := utils.GetFrTrainPath(config)
+		directories, err := ioutil.ReadDir(trainPath)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		ret := make([]*models.FrTrainViewModel, 0)
+		for _, dir := range directories {
+			if !dir.IsDir() {
+				continue
+			}
+			item := &models.FrTrainViewModel{Name: dir.Name()}
+			subRoot := path.Join(trainPath, dir.Name())
+			subDirectories, err := ioutil.ReadDir(subRoot)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			}
+			item.ImagePaths = make([]string, 0)
+			for _, subDir := range subDirectories {
+				item.ImagePaths = append(item.ImagePaths, path.Join("fr", "ml", "train", item.Name, subDir.Name()))
+			}
+			ret = append(ret, item)
+		}
+		ctx.JSON(http.StatusOK, ret)
 	})
 }
