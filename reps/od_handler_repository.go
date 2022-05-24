@@ -10,7 +10,6 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -22,7 +21,7 @@ type OdHandlerRepository struct {
 func (o *OdHandlerRepository) GetJsonObjects(sourceId string, dateString string, sorted bool) []*models.ObjectDetectionJsonObject {
 	rootSourceDataPath := utils.GetOdDataPathBySourceId(o.Config, sourceId)
 	t := utils.StringToTime(dateString)
-	ti := TimeIndex{}
+	ti := utils.TimeIndex{}
 	ti.SetValuesFrom(&t)
 	indexedSourceDataPath := ti.GetIndexedPath(rootSourceDataPath)
 
@@ -66,38 +65,4 @@ func setupTimes(v *models.VideoClipJsonObject) {
 	fileName := utils.GetFileNameWithoutExtension(v.FileName)
 	v.CreatedAtTime = utils.StringToTime(strings.Split(fileName, ".")[0])
 	v.LastModifiedAtTime = v.CreatedAtTime.Add(time.Duration(v.Duration * int(time.Second)))
-}
-
-type TimeIndex struct {
-	Year  string
-	Month string
-	Day   string
-	Hour  string
-}
-
-func (i *TimeIndex) SetValuesFrom(t *time.Time) *TimeIndex {
-	i.Year = strconv.Itoa(t.Year())
-	i.Month = strconv.Itoa(int(t.Month()))
-	i.Day = strconv.Itoa(t.Day())
-	i.Hour = strconv.Itoa(t.Hour())
-	return i
-}
-
-func (i *TimeIndex) GetIndexedPath(rootPath string) string {
-	arr := make([]string, 0)
-	arr = append(arr, rootPath)
-	arr = append(arr, i.Year)
-	v, _ := strconv.Atoi(i.Month)
-	if v > 0 {
-		arr = append(arr, i.Month)
-	}
-	v, _ = strconv.Atoi(i.Day)
-	if v > 0 {
-		arr = append(arr, i.Day)
-	}
-	v, _ = strconv.Atoi(i.Hour)
-	if v > 0 {
-		arr = append(arr, i.Hour)
-	}
-	return path.Join(arr...)
 }

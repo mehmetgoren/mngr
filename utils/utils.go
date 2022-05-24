@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"mngr/models"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime/debug"
@@ -61,13 +63,13 @@ func StringToTime(dateString string) time.Time {
 func TimeToString(time time.Time, includeNanoSec bool) string {
 	arr := make([]string, 0)
 	arr = append(arr, strconv.Itoa(time.Year()))
-	arr = append(arr, strconv.Itoa(int(time.Month())))
-	arr = append(arr, strconv.Itoa(time.Day()))
-	arr = append(arr, strconv.Itoa(time.Hour()))
-	arr = append(arr, strconv.Itoa(time.Minute()))
-	arr = append(arr, strconv.Itoa(time.Second()))
+	arr = append(arr, FixZero(int(time.Month())))
+	arr = append(arr, FixZero(time.Day()))
+	arr = append(arr, FixZero(time.Hour()))
+	arr = append(arr, FixZero(time.Minute()))
+	arr = append(arr, FixZero(time.Second()))
 	if includeNanoSec {
-		arr = append(arr, strconv.Itoa(time.Nanosecond()))
+		arr = append(arr, FixZero(time.Nanosecond()))
 	}
 
 	return strings.Join(arr, sep)
@@ -84,4 +86,98 @@ var re = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2
 
 func ParseIp(address string) string {
 	return re.FindString(address)
+}
+
+func FixZero(val int) string {
+	if val < 9 {
+		return "0" + strconv.Itoa(val)
+	}
+	return strconv.Itoa(val)
+}
+
+type TimeIndex struct {
+	Year  string
+	Month string
+	Day   string
+	Hour  string
+}
+
+func (i *TimeIndex) FixZeros() {
+	if len(i.Month) == 1 {
+		i.Month = "0" + i.Month
+	}
+	if len(i.Day) == 1 {
+		i.Day = "0" + i.Day
+	}
+	if len(i.Hour) == 1 {
+		i.Hour = "0" + i.Hour
+	}
+}
+
+func (i *TimeIndex) SetValuesFrom(t *time.Time) *TimeIndex {
+	i.Year = strconv.Itoa(t.Year())
+	i.Month = FixZero(int(t.Month()))
+	i.Day = FixZero(t.Day())
+	i.Hour = FixZero(t.Hour())
+	return i
+}
+
+func (i *TimeIndex) GetIndexedPath(rootPath string) string {
+	arr := make([]string, 0)
+	arr = append(arr, rootPath)
+	arr = append(arr, i.Year)
+	v, _ := strconv.Atoi(i.Month)
+	if v > 0 {
+		arr = append(arr, i.Month)
+	}
+	v, _ = strconv.Atoi(i.Day)
+	if v > 0 {
+		arr = append(arr, i.Day)
+	}
+	v, _ = strconv.Atoi(i.Hour)
+	if v > 0 {
+		arr = append(arr, i.Hour)
+	}
+	return path.Join(arr...)
+}
+
+type DateIndex struct {
+	Year  string
+	Month string
+	Day   string
+}
+
+func (d *DateIndex) SetValuesFrom(dateStr string) *DateIndex {
+	t := StringToTime(dateStr)
+	d.Year = strconv.Itoa(t.Year())
+	d.Month = FixZero(int(t.Month()))
+	d.Day = FixZero(t.Day())
+	return d
+}
+
+func (d *DateIndex) GetIndexedPath(rootPath string) string {
+	arr := make([]string, 0)
+	arr = append(arr, rootPath)
+	arr = append(arr, d.Year)
+	v, _ := strconv.Atoi(d.Month)
+	if v > 0 {
+		arr = append(arr, d.Month)
+	}
+	v, _ = strconv.Atoi(d.Day)
+	if v > 0 {
+		arr = append(arr, d.Day)
+	}
+	return path.Join(arr...)
+}
+
+func SetVideoFilePath(v *models.VideoFile) {
+	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
+	ti.FixZeros()
+	v.Path = path.Join("/playback", v.SourceId, v.Year, ti.Month, ti.Day, ti.Hour, v.Name)
+}
+
+func GetVideoFileAbsolutePath(v *models.VideoFile, root string) string {
+	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
+	ti.FixZeros()
+	return path.Join(root, v.SourceId, v.Year, ti.Month, ti.Day, ti.Hour, v.Name)
 }

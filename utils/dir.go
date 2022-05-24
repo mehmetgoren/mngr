@@ -4,7 +4,6 @@ import (
 	"mngr/models"
 	"os"
 	"path"
-	"strconv"
 )
 
 func createDirIfNotExist(dir string) error {
@@ -105,9 +104,9 @@ func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 }
 
 func GetHourlyOdImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
-	date := StringToTime(dateStr)
-	return path.Join(GetOdImagesPathBySourceId(config, sourceId),
-		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
+	di := DateIndex{}
+	di.SetValuesFrom(dateStr)
+	return di.GetIndexedPath(GetOdImagesPathBySourceId(config, sourceId))
 }
 
 func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
@@ -125,9 +124,9 @@ func GetFrImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(getFrPath(config), sourceId, "images")
 }
 func GetHourlyFrImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
-	date := StringToTime(dateStr)
-	return path.Join(GetFrImagesPathBySourceId(config, sourceId),
-		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
+	di := DateIndex{}
+	di.SetValuesFrom(dateStr)
+	return di.GetIndexedPath(GetFrImagesPathBySourceId(config, sourceId))
 }
 
 func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
@@ -146,9 +145,9 @@ func GetRecordPathBySourceId(config *models.Config, sourceId string) string {
 }
 
 func GetHourlyRecordPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
-	date := StringToTime(dateStr)
-	return path.Join(GetRecordPathBySourceId(config, sourceId),
-		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
+	di := DateIndex{}
+	di.SetValuesFrom(dateStr)
+	return di.GetIndexedPath(GetRecordPathBySourceId(config, sourceId))
 }
 
 // record ends
@@ -166,9 +165,9 @@ func GetAlprImagesPathBySourceId(config *models.Config, sourceId string) string 
 	return path.Join(getAlprPath(config), sourceId, "images")
 }
 func GetHourlyAlprImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
-	date := StringToTime(dateStr)
-	return path.Join(GetAlprImagesPathBySourceId(config, sourceId),
-		strconv.Itoa(date.Year()), strconv.Itoa(int(date.Month())), strconv.Itoa(date.Day()))
+	di := DateIndex{}
+	di.SetValuesFrom(dateStr)
+	return di.GetIndexedPath(GetAlprImagesPathBySourceId(config, sourceId))
 }
 
 func GetAlprDataPathBySourceId(config *models.Config, sourceId string) string {

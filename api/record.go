@@ -47,10 +47,11 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			videoFile.SourceId = id
 			videoFile.Name = file.Name()
 			videoFile.Year = strconv.Itoa(date.Year())
-			videoFile.Month = strconv.Itoa(int(date.Month()))
-			videoFile.Day = strconv.Itoa(date.Day())
-			videoFile.Hour = hour
-			videoFile.SetPath()
+			videoFile.Month = utils.FixZero(int(date.Month()))
+			videoFile.Day = utils.FixZero(date.Day())
+			intHour, _ := strconv.Atoi(hour)
+			videoFile.Hour = utils.FixZero(intHour)
+			utils.SetVideoFilePath(&videoFile)
 			videoFile.Size = utils.Round(float64(file.Size()) * 0.000001)
 			videoFile.CreatedAt = strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 			videoFile.ModifiedAt = utils.TimeToString(file.ModTime(), true)
@@ -68,7 +69,7 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 		config, _ := rb.ConfigRep.GetConfig()
 		recordFolderPath := utils.GetRecordPath(config)
-		err := os.Remove(vf.GetAbsolutePath(recordFolderPath))
+		err := os.Remove(utils.GetVideoFileAbsolutePath(&vf, recordFolderPath))
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, err)
 		} else {

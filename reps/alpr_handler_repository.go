@@ -19,7 +19,7 @@ type AlprHandlerRepository struct {
 func (a *AlprHandlerRepository) GetJsonObjects(sourceId string, dateString string, sorted bool) []*models.AlprJsonObject {
 	rootSourceDataPath := utils.GetAlprDataPathBySourceId(a.Config, sourceId)
 	t := utils.StringToTime(dateString)
-	ti := TimeIndex{}
+	ti := utils.TimeIndex{}
 	ti.SetValuesFrom(&t)
 	indexedSourceDataPath := ti.GetIndexedPath(rootSourceDataPath)
 

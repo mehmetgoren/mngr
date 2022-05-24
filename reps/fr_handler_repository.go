@@ -19,7 +19,7 @@ type FrHandlerRepository struct {
 func (f *FrHandlerRepository) GetJsonObjects(sourceId string, dateString string, sorted bool) []*models.FaceRecognitionJsonObject {
 	rootSourceDataPath := utils.GetFrDataPathBySourceId(f.Config, sourceId)
 	t := utils.StringToTime(dateString)
-	ti := TimeIndex{}
+	ti := utils.TimeIndex{}
 	ti.SetValuesFrom(&t)
 	indexedSourceDataPath := ti.GetIndexedPath(rootSourceDataPath)
 
