@@ -135,9 +135,7 @@ func (i *TimeIndex) GetIndexedPath(rootPath string) string {
 		arr = append(arr, i.Day)
 	}
 	v, _ = strconv.Atoi(i.Hour)
-	if v > 0 {
-		arr = append(arr, i.Hour)
-	}
+	arr = append(arr, i.Hour)
 	return path.Join(arr...)
 }
 
