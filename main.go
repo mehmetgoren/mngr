@@ -49,6 +49,7 @@ func main() {
 	api.RegisterFrImagesEndpoints(router, &rb)
 	api.RegisterAlprImagesEndpoints(router, &rb)
 	api.RegisterOnvifEndpoints(router, &rb)
+	api.RegisterFrTrainingEndpoints(router, &rb)
 
 	ws.RegisterApiEndpoints(router, &rb)
 	ws.RegisterWsEndpoints(router, &rb)

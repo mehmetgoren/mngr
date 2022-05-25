@@ -137,6 +137,10 @@ func GetFrTrainPath(config *models.Config) string {
 	return path.Join(GetFrMlPath(config), "train")
 }
 
+func GetFrTrainPathByPerson(config *models.Config, person string) string {
+	return path.Join(GetFrTrainPath(config), person)
+}
+
 //fr ends
 
 // record starts
