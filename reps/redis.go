@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/lithammer/shortuuid/v3"
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -35,10 +33,6 @@ func createRedisConnection(db int) *redis.Client {
 		Password: "", // no password set
 		DB:       db, // use default DB
 	})
-}
-
-func NewId() string {
-	return strings.ToLower(shortuuid.New()[:11])
 }
 
 func Map(in interface{}) map[string]interface{} {

@@ -70,6 +70,16 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
+
+	router.POST("/frtrain", func(ctx *gin.Context) {
+		var event eb.FaceTrainRequestEvent
+		ctx.BindJSON(&event)
+		event.Rb = rb
+		err := event.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+	})
 }
 
 // Publish End
@@ -82,7 +92,7 @@ type FFmpegReaderHolder struct {
 
 var ffmpegReaderDic = make(map[string]*FFmpegReaderHolder)
 
-// RegisterWsEndpoints todo: make holder available for all ws endpoints
+// RegisterWsEndpoints todo: make holder available for all ws endpoints after login implementation.
 // RegisterWsEndpoints Subscribe Start
 func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/home", "./static/live/home.html")
@@ -152,6 +162,13 @@ func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		c := CreateClient(hub, ctx.Writer, ctx.Request)
 		eventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "vfm_response"}
 		event := eb.VideMergeResponseEvent{Pusher: c}
+		go eventBus.Subscribe(&event)
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsfrtrain", func(ctx *gin.Context) {
+		c := CreateClient(hub, ctx.Writer, ctx.Request)
+		eventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "fr_train_response"}
+		event := eb.FaceTrainResponseEvent{Pusher: c}
 		go eventBus.Subscribe(&event)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})

@@ -1,9 +1,11 @@
 package api
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"image/jpeg"
 	"io/ioutil"
 	"mngr/models"
 	"mngr/reps"
@@ -98,6 +100,112 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		fullPath := path.Join(config.General.RootFolderPath, p)
 		fmt.Println(u)
 		err = os.Remove(fullPath)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, true)
+	})
+
+	router.POST("frtrainpersonimage", func(ctx *gin.Context) {
+		viewModel := models.FrTrainScreenshotViewModel{}
+		err := ctx.BindJSON(&viewModel)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		config, err := rb.ConfigRep.GetConfig()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		b, err := base64.StdEncoding.DecodeString(viewModel.Base64Image)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		img, err := jpeg.Decode(bytes.NewReader(b))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		filename := path.Join(utils.GetFrTrainPathByPerson(config, viewModel.Name), utils.NewId()+".jpg")
+		f, err := os.Create(filename)
+		defer f.Close()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		if err = jpeg.Encode(f, img, nil); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, true)
+	})
+
+	router.POST("frtrainpersonrename", func(ctx *gin.Context) {
+		viewModel := models.FrTrainRename{}
+		err := ctx.BindJSON(&viewModel)
+		if err != nil || len(viewModel.NewName) == 0 || len(viewModel.OriginalName) == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		config, err := rb.ConfigRep.GetConfig()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		originalDirName := utils.GetFrTrainPathByPerson(config, viewModel.OriginalName)
+		if _, err := os.Stat(originalDirName); err != nil {
+			if os.IsNotExist(err) {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			}
+		}
+		check := utils.IsDirNameValid(viewModel.NewName)
+		if !check {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		newDirName := utils.GetFrTrainPathByPerson(config, viewModel.NewName)
+		err = os.Rename(originalDirName, newDirName)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, true)
+	})
+
+	router.POST("frtrainpersonnew", func(ctx *gin.Context) {
+		viewModel := models.FrTrainName{}
+		err := ctx.BindJSON(&viewModel)
+		if err != nil || len(viewModel.Name) == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+
+		check := utils.IsDirNameValid(viewModel.Name)
+		if !check {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		config, err := rb.ConfigRep.GetConfig()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		dirName := utils.GetFrTrainPathByPerson(config, viewModel.Name)
+		err = os.Mkdir(dirName, 0777)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, true)
+	})
+
+	router.DELETE("frtrainpersondelete", func(ctx *gin.Context) {
+		viewModel := models.FrTrainName{}
+		if err := ctx.ShouldBindJSON(&viewModel); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		check := utils.IsDirNameValid(viewModel.Name)
+		if !check {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid"})
+		}
+		config, err := rb.ConfigRep.GetConfig()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		dirName := utils.GetFrTrainPathByPerson(config, viewModel.Name)
+		err = os.RemoveAll(dirName)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}

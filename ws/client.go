@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"log"
-	"mngr/reps"
+	"mngr/utils"
 	"net/http"
 	"sync"
 )
@@ -82,7 +82,7 @@ func CreateClient(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 	//	log.Println("Client connection closed with code: ", code, " and text: ", text)
 	//	return nil
 	//})
-	clientStream := &Client{id: reps.NewId(), hub: hub, conn: conn, send: make(chan []byte, 256)}
+	clientStream := &Client{id: utils.NewId(), hub: hub, conn: conn, send: make(chan []byte, 256)}
 	clientStream.hub.register <- clientStream
 	go readLoop(clientStream)
 

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/lithammer/shortuuid/v3"
 	"mngr/models"
 	"path"
 	"path/filepath"
@@ -178,4 +179,17 @@ func GetVideoFileAbsolutePath(v *models.VideoFile, root string) string {
 	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
 	ti.FixZeros()
 	return path.Join(root, v.SourceId, v.Year, ti.Month, ti.Day, ti.Hour, v.Name)
+}
+
+func NewId() string {
+	return strings.ToLower(shortuuid.New()[:11])
+}
+
+func IsDirNameValid(fileName string) bool {
+	regExpString := "\\/?%*:|\"<>"
+	reg, err := regexp.Compile(regExpString)
+	if err != nil {
+		return false
+	}
+	return !reg.MatchString(fileName)
 }

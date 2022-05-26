@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"log"
 	"mngr/models"
+	"mngr/utils"
 )
 
 type SourceRepository struct {
@@ -16,7 +17,7 @@ var redisKeySources = "sources:"
 func (r *SourceRepository) Save(model *models.SourceModel) (*models.SourceModel, error) {
 	conn := r.Connection
 	if len(model.Id) == 0 {
-		model.Id = NewId()
+		model.Id = utils.NewId()
 	}
 	_, err := conn.HSet(context.Background(), redisKeySources+model.Id, Map(model)).Result()
 	if err != nil {
