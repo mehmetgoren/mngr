@@ -44,7 +44,7 @@ type DeviceInfo struct {
 	HardwareId      string `json:"hardware_id"`
 }
 
-type User struct {
+type OnvifUser struct {
 	Username  string `json:"username"`
 	UserLevel string `json:"user_level"`
 }
@@ -71,7 +71,7 @@ type TargetInfo struct {
 	//GetSystemLog
 	Logs string `json:"logs"`
 
-	Users []*User `json:"users"`
+	Users []*OnvifUser `json:"users"`
 
 	StreamUri string `json:"stream_uri"`
 }

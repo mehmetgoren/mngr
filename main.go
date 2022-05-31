@@ -4,6 +4,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"io"
+	"log"
 	"mngr/api"
 	"mngr/reps"
 	"mngr/utils"
@@ -20,11 +21,16 @@ func main() {
 
 	WhoAreYou(&rb)
 
+	users, err := rb.UserRep.GetUsers()
+	if users != nil {
+		log.Println("user count: ", len(users))
+	}
+
 	router := gin.Default()
 	f, _ := os.Create("access.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	router.Use(gin.Logger())
-	router.Use(loggingMiddleware)
+	router.Use(authMiddleware)
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"*"},
@@ -50,13 +56,18 @@ func main() {
 	api.RegisterAlprImagesEndpoints(router, &rb)
 	api.RegisterOnvifEndpoints(router, &rb)
 	api.RegisterFrTrainingEndpoints(router, &rb)
+	api.RegisterUserEndpoints(router, &rb)
 
 	ws.RegisterApiEndpoints(router, &rb)
 	ws.RegisterWsEndpoints(router, &rb)
 
-	router.Run(":2072")
+	err = router.Run(":2072")
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }
 
-func loggingMiddleware(ctx *gin.Context) {
+func authMiddleware(ctx *gin.Context) {
 
 }

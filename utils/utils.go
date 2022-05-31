@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"github.com/lithammer/shortuuid/v3"
 	"mngr/models"
@@ -169,6 +172,11 @@ func (d *DateIndex) GetIndexedPath(rootPath string) string {
 	return path.Join(arr...)
 }
 
+func DatetimeNow() string {
+	now := time.Now()
+	return TimeToString(now, true)
+}
+
 func SetVideoFilePath(v *models.VideoFile) {
 	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
 	ti.FixZeros()
@@ -185,6 +193,14 @@ func NewId() string {
 	return strings.ToLower(shortuuid.New()[:11])
 }
 
+func GenerateSecureToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
 func IsDirNameValid(fileName string) bool {
 	regExpString := "\\/?%*:|\"<>"
 	reg, err := regexp.Compile(regExpString)
@@ -192,4 +208,15 @@ func IsDirNameValid(fileName string) bool {
 		return false
 	}
 	return !reg.MatchString(fileName)
+}
+
+func EncodeBase64(b []byte) string {
+	return base64.StdEncoding.EncodeToString(b)
+}
+func DecodeBase64(s string) []byte {
+	data, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	return data
 }

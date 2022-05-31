@@ -2,6 +2,7 @@ package reps
 
 import (
 	"github.com/go-redis/redis/v8"
+	"mngr/models"
 )
 
 type RepoBucket struct {
@@ -14,6 +15,9 @@ type RepoBucket struct {
 	OdRep     *OdRepository
 	NdRep     *NetworkDiscoveryRepository
 	OvRep     *OnvifRepository
+	UserRep   *UserRepository
+
+	Users map[string]*models.User
 }
 
 func (r *RepoBucket) Init() *RepoBucket {
@@ -26,6 +30,9 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.OdRep = &OdRepository{Connection: r.connMain}
 	r.NdRep = &NetworkDiscoveryRepository{Connection: r.connMain}
 	r.OvRep = &OnvifRepository{Connection: r.connMain}
+	r.UserRep = &UserRepository{Connection: r.connMain}
+
+	r.Users = make(map[string]*models.User)
 
 	return r
 }
