@@ -69,5 +69,4 @@ func main() {
 }
 
 func authMiddleware(ctx *gin.Context) {
-
 }
