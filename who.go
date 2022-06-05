@@ -13,12 +13,6 @@ func createHeartbeatRepository(client *redis.Client, serviceName string, config 
 	return &heartbeatRepository
 }
 
-func createServiceRepository(client *redis.Client) *reps.ServiceRepository {
-	var pidRepository = reps.ServiceRepository{Client: client}
-
-	return &pidRepository
-}
-
 func WhoAreYou(rb *reps.RepoBucket) {
 	connMain := rb.GetMainConnection()
 	config, _ := rb.ConfigRep.GetConfig()
@@ -27,7 +21,7 @@ func WhoAreYou(rb *reps.RepoBucket) {
 	heartbeat := createHeartbeatRepository(connMain, serviceName, config)
 	go heartbeat.Start()
 
-	serviceRepository := createServiceRepository(connMain)
+	serviceRepository := rb.ServiceRep
 	go func() {
 		_, err := serviceRepository.Add(serviceName)
 		if err != nil {

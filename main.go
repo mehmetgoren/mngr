@@ -57,6 +57,7 @@ func main() {
 	api.RegisterOnvifEndpoints(router, &rb)
 	api.RegisterFrTrainingEndpoints(router, &rb)
 	api.RegisterUserEndpoints(router, &rb)
+	api.RegisterServiceEndpoints(router, &rb)
 
 	ws.RegisterApiEndpoints(router, &rb)
 	ws.RegisterWsEndpoints(router, &rb)

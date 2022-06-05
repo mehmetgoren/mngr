@@ -9,13 +9,14 @@ type RepoBucket struct {
 	connMain         *redis.Client
 	PubSubConnection *redis.Client
 
-	ConfigRep *ConfigRepository
-	SourceRep *SourceRepository
-	StreamRep *StreamRepository
-	OdRep     *OdRepository
-	NdRep     *NetworkDiscoveryRepository
-	OvRep     *OnvifRepository
-	UserRep   *UserRepository
+	ConfigRep  *ConfigRepository
+	SourceRep  *SourceRepository
+	StreamRep  *StreamRepository
+	OdRep      *OdRepository
+	NdRep      *NetworkDiscoveryRepository
+	OvRep      *OnvifRepository
+	UserRep    *UserRepository
+	ServiceRep *ServiceRepository
 
 	Users map[string]*models.User
 }
@@ -31,6 +32,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.NdRep = &NetworkDiscoveryRepository{Connection: r.connMain}
 	r.OvRep = &OnvifRepository{Connection: r.connMain}
 	r.UserRep = &UserRepository{Connection: r.connMain}
+	r.ServiceRep = &ServiceRepository{Connection: r.connMain}
 
 	r.Users = make(map[string]*models.User)
 

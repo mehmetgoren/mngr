@@ -89,3 +89,11 @@ func (u *UserRepository) GetUsers() ([]*models.User, error) {
 	}
 	return list, nil
 }
+
+func (u *UserRepository) RemoveById(userId string) (int64, error) {
+	result, err := u.Connection.Del(context.Background(), getUserKey(userId)).Result()
+	if err != nil {
+		log.Println("Error while deleting source: ", err)
+	}
+	return result, err
+}

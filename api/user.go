@@ -50,4 +50,23 @@ func RegisterUserEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 		ctx.JSON(http.StatusOK, true)
 	})
+
+	router.GET("/users", func(ctx *gin.Context) {
+		services, err := rb.UserRep.GetUsers()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, services)
+	})
+
+	router.DELETE("/users/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		result, err := rb.UserRep.RemoveById(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			delete(rb.Users, id)
+			ctx.JSON(http.StatusOK, result)
+		}
+	})
 }

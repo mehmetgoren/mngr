@@ -3,40 +3,26 @@ package reps
 import (
 	"context"
 	"github.com/go-redis/redis/v8"
+	"log"
+	"mngr/models"
 	"mngr/utils"
 	"os"
 	"runtime"
 	"time"
 )
 
-type ServiceModel struct {
-	Name            string `json:"name" redis:"name"`
-	Description     string `json:"description" redis:"description"`
-	Platform        string `json:"platform" redis:"platform"`
-	PlatformVersion string `json:"platform_version" redis:"platform_version"`
-	HostName        string `json:"hostname" redis:"hostname"`
-	IpAddress       string `json:"ip_address" redis:"ip_address"`
-	MacAddress      string `json:"mac_address" redis:"mac_address"`
-	Processor       string `json:"processor" redis:"processor"`
-	CpuCount        int    `json:"cpu_count" redis:"cpu_count"`
-	Ram             string `json:"ram" redis:"ram"`
-	Pid             int    `json:"pid" redis:"pid"`
-	CreatedAt       string `json:"created_at" redis:"created_at"`
-	Heartbeat       string `json:"heartbeat" redis:"heartbeat"`
-}
-
 type ServiceRepository struct {
-	Client *redis.Client
+	Connection *redis.Client
 }
 
-func getKey(serviceName string) string {
+func getServicesKey(serviceName string) string {
 	return "services:" + serviceName
 }
 
 func (r *ServiceRepository) Add(serviceName string) (int64, error) {
 	now := time.Now()
 	host, _ := os.Hostname()
-	sm := ServiceModel{
+	sm := &models.ServiceModel{
 		Name:            serviceName,
 		Description:     "The Web Server Manager Service®",
 		Platform:        runtime.GOOS,
@@ -52,5 +38,31 @@ func (r *ServiceRepository) Add(serviceName string) (int64, error) {
 		Heartbeat:       "",
 	}
 
-	return r.Client.HSet(context.Background(), getKey(serviceName), Map(sm)).Result()
+	return r.Connection.HSet(context.Background(), getServicesKey(serviceName), Map(sm)).Result()
+}
+
+func (r *ServiceRepository) GetServices() ([]*models.ServiceModel, error) {
+	conn := r.Connection
+	list := make([]*models.ServiceModel, 0, 5)
+	keys, err := conn.Keys(context.Background(), getServicesKey("*")).Result()
+	if err != nil {
+		if err.Error() == "redis: nil" {
+			conn.Set(context.Background(), redisKeyStream, list, 0)
+			return list, nil
+		} else {
+			log.Println("Error getting all stream from redis: ", err)
+			return nil, err
+		}
+	}
+
+	for _, key := range keys {
+		var p models.ServiceModel
+		err := conn.HGetAll(context.Background(), key).Scan(&p)
+		if err != nil {
+			log.Println("Error getting stream from redis: ", err)
+			return nil, err
+		}
+		list = append(list, &p)
+	}
+	return list, nil
 }
