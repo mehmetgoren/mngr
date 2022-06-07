@@ -40,3 +40,7 @@ func (s *StartStreamResponseEvent) Handle(event *redis.Message) error {
 	s.Pusher.Push(s)
 	return nil
 }
+
+func (s *StartStreamResponseEvent) SetPusher(pusher utils.WsPusher) {
+	s.Pusher = pusher
+}

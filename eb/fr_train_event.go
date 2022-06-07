@@ -39,3 +39,7 @@ func (f *FaceTrainResponseEvent) Handle(event *redis.Message) error {
 	f.Pusher.Push(f)
 	return nil
 }
+
+func (f *FaceTrainResponseEvent) SetPusher(pusher utils.WsPusher) {
+	f.Pusher = pusher
+}

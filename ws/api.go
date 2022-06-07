@@ -6,6 +6,7 @@ import (
 	"mngr/eb"
 	"mngr/models"
 	"mngr/reps"
+	"mngr/utils"
 	"net/http"
 )
 
@@ -84,92 +85,44 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 // Publish End
 
-type FFmpegReaderHolder struct {
-	EventBus *eb.EventBus
-	Client   *Client
-	Event    *eb.FFmpegReaderResponseEvent
-}
-
-var ffmpegReaderDic = make(map[string]*FFmpegReaderHolder)
-
-// RegisterWsEndpoints todo: make holder available for all ws endpoints after login implementation.
 // RegisterWsEndpoints Subscribe Start
-func RegisterWsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.StaticFile("/home", "./static/live/home.html")
+func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 	hub := NewHub()
 	go hub.Run()
 
 	router.GET("/wsstartstream", func(ctx *gin.Context) {
-		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamEventBusSub := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "start_stream_response"}
-		streamEventSub := eb.StartStreamResponseEvent{Rb: rb, Pusher: clientStream}
-		go streamEventBusSub.Subscribe(&streamEventSub)
+		holders.RegisterEndPoint(hub, ctx, StartStreamEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsstopstream", func(ctx *gin.Context) {
-		clientStream := CreateClient(hub, ctx.Writer, ctx.Request)
-		streamEventBusSub := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "stop_stream_response"}
-		streamEventSub := eb.StopStreamResponseEvent{Pusher: clientStream}
-		go streamEventBusSub.Subscribe(&streamEventSub)
+		holders.RegisterEndPoint(hub, ctx, StopStreamEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wseditor", func(ctx *gin.Context) {
-		clientEditor := CreateClient(hub, ctx.Writer, ctx.Request)
-		editorEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "editor_response"}
-		editorEvent := eb.EditorResponseEvent{Pusher: clientEditor}
-		go editorEventBus.Subscribe(&editorEvent)
+		requester := utils.GetQsValue(ctx, "requester")
+		holders.RegisterEndPoint(hub, ctx, EditorEvent, requester)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	//todo: add key to user id when login is available.
 	router.GET("/wsffmpegreader", func(ctx *gin.Context) {
-		qs := ctx.Request.URL.Query()
-		if _, ok := qs["id"]; !ok {
-			log.Println("wsffmpegreader invalid qs")
-			return
-		}
-		id := qs["id"][0]
+		id := utils.GetQsValue(ctx, "id")
 		if len(id) == 0 {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
-			log.Println("wsffmpegreader invalid qs")
+			log.Println("wsffmpegreader invalid source Id value")
 			return
 		}
-		wsClient := CreateClient(hub, ctx.Writer, ctx.Request)
-
-		if prev, ok := ffmpegReaderDic[id]; ok {
-			err := prev.Client.Close()
-			if err != nil {
-				log.Println("Error while closing prev websockets connection for FFmPEG Reader. Err: ", err)
-			}
-			prev.Event.Pusher = wsClient
-			log.Println("wsffmpegreader item has been already added,changing Ws Client for " + id)
-			return
-		}
-
-		editorEventBus := &eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "ffrs" + id}
-		editorEvent := &eb.FFmpegReaderResponseEvent{Pusher: wsClient}
-		ffmpegReaderDic[id] = &FFmpegReaderHolder{EventBus: editorEventBus, Client: wsClient, Event: editorEvent}
-		go editorEventBus.Subscribe(editorEvent)
+		holders.RegisterEndPoint(hub, ctx, FFmpegReaderEvent, id)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsonvif", func(ctx *gin.Context) {
-		clientOnvif := CreateClient(hub, ctx.Writer, ctx.Request)
-		onvifEventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "onvif_response"}
-		onvifEvent := eb.OnvifResponseEvent{Pusher: clientOnvif}
-		go onvifEventBus.Subscribe(&onvifEvent)
+		holders.RegisterEndPoint(hub, ctx, OnvifEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsvideomerge", func(ctx *gin.Context) {
-		c := CreateClient(hub, ctx.Writer, ctx.Request)
-		eventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "vfm_response"}
-		event := eb.VideMergeResponseEvent{Pusher: c}
-		go eventBus.Subscribe(&event)
+		holders.RegisterEndPoint(hub, ctx, VideoMergeEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsfrtrain", func(ctx *gin.Context) {
-		c := CreateClient(hub, ctx.Writer, ctx.Request)
-		eventBus := eb.EventBus{PubSubConnection: rb.PubSubConnection, Channel: "fr_train_response"}
-		event := eb.FaceTrainResponseEvent{Pusher: c}
-		go eventBus.Subscribe(&event)
+		holders.RegisterEndPoint(hub, ctx, FrTrainEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	// End Subscribe

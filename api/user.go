@@ -3,11 +3,12 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"mngr/models"
-	"mngr/reps"
+	"mngr/ws"
 	"net/http"
 )
 
-func RegisterUserEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
+	rb := holders.Rb
 	router.POST("/login", func(ctx *gin.Context) {
 		var lu models.LoginUserViewModel
 		if err := ctx.BindJSON(&lu); err != nil {
@@ -46,7 +47,8 @@ func RegisterUserEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			return
 		}
 		if u != nil {
-			rb.Users[u.Token] = u
+			rb.LoadUser()
+			holders.Init()
 		}
 		ctx.JSON(http.StatusOK, true)
 	})
@@ -65,7 +67,8 @@ func RegisterUserEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
-			delete(rb.Users, id)
+			rb.LoadUser()
+			holders.Init()
 			ctx.JSON(http.StatusOK, result)
 		}
 	})

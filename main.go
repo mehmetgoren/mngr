@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -11,15 +12,28 @@ import (
 	"mngr/ws"
 	"net/http"
 	"os"
+	"strings"
 )
+
+var rb = &reps.RepoBucket{}
+var whiteList = make([]string, 0)
+
+func initWhiteList() {
+	whiteList = append(whiteList, "/livestream/")
+	whiteList = append(whiteList, "/playback/")
+	whiteList = append(whiteList, "/od/")
+	whiteList = append(whiteList, "/fr/")
+	whiteList = append(whiteList, "/alpr/")
+}
 
 func main() {
 	defer utils.HandlePanic()
 
-	rb := reps.RepoBucket{}
+	initWhiteList()
 	rb.Init()
-
-	WhoAreYou(&rb)
+	holders := &ws.Holders{Rb: rb}
+	holders.Init()
+	WhoAreYou(rb)
 
 	users, err := rb.UserRep.GetUsers()
 	if users != nil {
@@ -44,23 +58,23 @@ func main() {
 		})
 	})
 
-	api.RegisterStaticResources(router, &rb)
-	api.RegisterSourceEndpoints(router, &rb)
-	api.RegisterStreamEndpoints(router, &rb)
-	api.RegisterConfigEndpoints(router, &rb)
-	api.RegisterRecordEndpoints(router, &rb)
-	api.RegisterOdEndpoints(router, &rb)
-	api.RegisterOdImagesEndpoints(router, &rb)
-	api.RegisterOdVideoClipEndpoints(router, &rb)
-	api.RegisterFrImagesEndpoints(router, &rb)
-	api.RegisterAlprImagesEndpoints(router, &rb)
-	api.RegisterOnvifEndpoints(router, &rb)
-	api.RegisterFrTrainingEndpoints(router, &rb)
-	api.RegisterUserEndpoints(router, &rb)
-	api.RegisterServiceEndpoints(router, &rb)
+	api.RegisterStaticResources(router, rb)
+	api.RegisterSourceEndpoints(router, rb)
+	api.RegisterStreamEndpoints(router, rb)
+	api.RegisterConfigEndpoints(router, rb)
+	api.RegisterRecordEndpoints(router, rb)
+	api.RegisterOdEndpoints(router, rb)
+	api.RegisterOdImagesEndpoints(router, rb)
+	api.RegisterOdVideoClipEndpoints(router, rb)
+	api.RegisterFrImagesEndpoints(router, rb)
+	api.RegisterAlprImagesEndpoints(router, rb)
+	api.RegisterOnvifEndpoints(router, rb)
+	api.RegisterFrTrainingEndpoints(router, rb)
+	api.RegisterUserEndpoints(router, holders)
+	api.RegisterServiceEndpoints(router, rb)
 
-	ws.RegisterApiEndpoints(router, &rb)
-	ws.RegisterWsEndpoints(router, &rb)
+	ws.RegisterApiEndpoints(router, rb)
+	ws.RegisterWsEndpoints(router, holders)
 
 	err = router.Run(":2072")
 	if err != nil {
@@ -70,4 +84,47 @@ func main() {
 }
 
 func authMiddleware(ctx *gin.Context) {
+	req := ctx.Request
+	uri := req.RequestURI
+	if req.Method == "OPTIONS" || uri == "/login" || uri == "/registeruser" {
+		return
+	}
+	if strings.HasPrefix(uri, "/ws") { // if it is a websocker request
+		qs := ctx.Request.URL.Query()
+		if _, ok := qs["token"]; !ok {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			ctx.Abort()
+			log.Println("websocket invalid query string parameters")
+			return
+		}
+		token := qs["token"][0]
+		if len(token) == 0 {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			ctx.Abort()
+			log.Println("websocket invalid query string parameters")
+			return
+		}
+
+		if _, ok := rb.Users[token]; !ok {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			ctx.Abort()
+			log.Println("websocket token was not found")
+		}
+	} else {
+		token := ctx.Request.Header.Get("user")
+		if _, ok := rb.Users[token]; !ok {
+			isWhitelisted := false
+			for _, wl := range whiteList {
+				if strings.HasPrefix(uri, wl) {
+					isWhitelisted = true
+					break
+				}
+			}
+			if !isWhitelisted {
+				ctx.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("unauthorized")})
+				ctx.Abort()
+				log.Println("an unauthorized request has been detected: ", req)
+			}
+		}
+	}
 }

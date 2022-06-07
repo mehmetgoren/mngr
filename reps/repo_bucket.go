@@ -2,6 +2,7 @@ package reps
 
 import (
 	"github.com/go-redis/redis/v8"
+	"log"
 	"mngr/models"
 )
 
@@ -34,9 +35,21 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.UserRep = &UserRepository{Connection: r.connMain}
 	r.ServiceRep = &ServiceRepository{Connection: r.connMain}
 
-	r.Users = make(map[string]*models.User)
+	r.LoadUser()
 
 	return r
+}
+
+func (r *RepoBucket) LoadUser() {
+	r.Users = make(map[string]*models.User)
+	users, err := r.UserRep.GetUsers()
+	if err != nil {
+		log.Println(err.Error())
+	} else {
+		for _, user := range users {
+			r.Users[user.Token] = user
+		}
+	}
 }
 
 func (r *RepoBucket) GetMainConnection() *redis.Client {

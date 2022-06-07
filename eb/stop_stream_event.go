@@ -37,3 +37,7 @@ func (s *StopStreamResponseEvent) Handle(event *redis.Message) error {
 	s.Pusher.Push(s)
 	return nil
 }
+
+func (s *StopStreamResponseEvent) SetPusher(pusher utils.WsPusher) {
+	s.Pusher = pusher
+}

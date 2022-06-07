@@ -5,8 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/lithammer/shortuuid/v3"
+	"log"
 	"mngr/models"
+	"net/http"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -219,4 +222,19 @@ func DecodeBase64(s string) []byte {
 		panic(err)
 	}
 	return data
+}
+
+func GetQsValue(ctx *gin.Context, key string) string {
+	qs := ctx.Request.URL.Query()
+	if _, ok := qs[key]; !ok {
+		log.Println("invalid qs")
+		return ""
+	}
+	value := qs[key][0]
+	if len(value) == 0 {
+		ctx.Writer.WriteHeader(http.StatusBadRequest)
+		log.Println("invalid qs")
+		return ""
+	}
+	return value
 }

@@ -40,3 +40,7 @@ func (v *VideMergeResponseEvent) Handle(event *redis.Message) error {
 	v.Pusher.Push(v)
 	return nil
 }
+
+func (v *VideMergeResponseEvent) SetPusher(pusher utils.WsPusher) {
+	v.Pusher = pusher
+}

@@ -78,10 +78,10 @@ func CreateClient(hub *Hub, w http.ResponseWriter, r *http.Request) *Client {
 		log.Println("Failed to upgrade to websocket connection: ", err)
 		return nil
 	}
-	//conn.SetCloseHandler(func(code int, text string) error {
-	//	log.Println("Client connection closed with code: ", code, " and text: ", text)
-	//	return nil
-	//})
+	conn.SetCloseHandler(func(code int, text string) error {
+		log.Println("Client connection closed with code: ", code, " and text: ", text)
+		return nil
+	})
 	clientStream := &Client{id: utils.NewId(), hub: hub, conn: conn, send: make(chan []byte, 256)}
 	clientStream.hub.register <- clientStream
 	go readLoop(clientStream)

@@ -16,3 +16,7 @@ func (e *FFmpegReaderResponseEvent) Handle(event *redis.Message) error {
 	e.Pusher.Push(e)
 	return nil
 }
+
+func (e *FFmpegReaderResponseEvent) SetPusher(pusher utils.WsPusher) {
+	e.Pusher = pusher
+}

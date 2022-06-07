@@ -46,3 +46,7 @@ func (o *OnvifResponseEvent) Handle(event *redis.Message) error {
 	o.Pusher.Push(o)
 	return nil
 }
+
+func (o *OnvifResponseEvent) SetPusher(pusher utils.WsPusher) {
+	o.Pusher = pusher
+}

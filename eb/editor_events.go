@@ -62,3 +62,7 @@ func (e *EditorResponseEvent) Handle(event *redis.Message) error {
 	}
 	return nil
 }
+
+func (e *EditorResponseEvent) SetPusher(pusher utils.WsPusher) {
+	e.Pusher = pusher
+}
