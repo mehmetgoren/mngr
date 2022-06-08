@@ -96,7 +96,7 @@ func ParseIp(address string) string {
 }
 
 func FixZero(val int) string {
-	if val < 9 {
+	if val < 10 {
 		return "0" + strconv.Itoa(val)
 	}
 	return strconv.Itoa(val)
