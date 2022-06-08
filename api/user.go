@@ -72,4 +72,18 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusOK, result)
 		}
 	})
+
+	router.POST("/logoutuser", func(ctx *gin.Context) {
+		var user models.User
+		if err := ctx.BindJSON(&user); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if len(user.Token) == 0 {
+			ctx.JSON(http.StatusNotFound, false)
+		}
+		delete(rb.Users, user.Token)
+		holders.Init()
+		ctx.JSON(http.StatusOK, true)
+	})
 }
