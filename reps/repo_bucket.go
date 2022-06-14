@@ -10,14 +10,17 @@ type RepoBucket struct {
 	connMain         *redis.Client
 	PubSubConnection *redis.Client
 
-	ConfigRep  *ConfigRepository
-	SourceRep  *SourceRepository
-	StreamRep  *StreamRepository
-	OdRep      *OdRepository
-	NdRep      *NetworkDiscoveryRepository
-	OvRep      *OnvifRepository
-	UserRep    *UserRepository
-	ServiceRep *ServiceRepository
+	ConfigRep       *ConfigRepository
+	SourceRep       *SourceRepository
+	StreamRep       *StreamRepository
+	OdRep           *OdRepository
+	NdRep           *NetworkDiscoveryRepository
+	OvRep           *OnvifRepository
+	UserRep         *UserRepository
+	ServiceRep      *ServiceRepository
+	RtspTemplateRep *RtspTemplateRepository
+	FailedStreamRep *FailedStreamRepository
+	RecStuckRep     *RecStuckRepository
 
 	Users map[string]*models.User
 }
@@ -34,6 +37,9 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.OvRep = &OnvifRepository{Connection: r.connMain}
 	r.UserRep = &UserRepository{Connection: r.connMain}
 	r.ServiceRep = &ServiceRepository{Connection: r.connMain}
+	r.RtspTemplateRep = &RtspTemplateRepository{Connection: r.connMain}
+	r.FailedStreamRep = &FailedStreamRepository{Connection: r.connMain}
+	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
 
 	r.LoadUser()
 
