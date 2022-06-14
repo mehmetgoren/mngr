@@ -1,15 +1,9 @@
 package utils
 
 import (
-	"fmt"
-	"strconv"
+	"math"
 )
 
-func Round(x float64) float64 {
-	str := fmt.Sprintf("%.2f", x)
-	if f, err := strconv.ParseFloat(str, 64); err == nil {
-		return f
-	}
-
-	return 0.0
+func Round(val float64) float64 {
+	return math.Round(val*100) / 100
 }

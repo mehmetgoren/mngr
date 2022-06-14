@@ -72,6 +72,7 @@ func main() {
 	api.RegisterFrTrainingEndpoints(router, rb)
 	api.RegisterUserEndpoints(router, holders)
 	api.RegisterServiceEndpoints(router, rb)
+	api.RegisterServerStatsEndpoints(router, rb)
 
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
