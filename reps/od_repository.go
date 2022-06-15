@@ -26,6 +26,32 @@ func (o *OdRepository) Get(id string) (*models.OdModel, error) {
 	return &p, err
 }
 
+func (o *OdRepository) GetAll() ([]*models.OdModel, error) {
+	ret := make([]*models.OdModel, 0)
+	conn := o.Connection
+	allKey := redisKeyOds + "*"
+	keys, err := conn.Keys(context.Background(), allKey).Result()
+	if err != nil {
+		if err.Error() == "redis: nil" {
+			return ret, nil
+		} else {
+			log.Println("Error getting all stream from redis: ", err)
+			return nil, err
+		}
+	}
+	for _, key := range keys {
+		var p models.OdModel
+		err := conn.HGetAll(context.Background(), key).Scan(&p)
+		if err != nil {
+			log.Println("Error getting object detection model from redis: ", err)
+			return nil, err
+		}
+		ret = append(ret, &p)
+	}
+
+	return ret, err
+}
+
 func (o *OdRepository) Save(model *models.OdModel) (*models.OdModel, error) {
 	conn := o.Connection
 	if len(model.Id) == 0 {

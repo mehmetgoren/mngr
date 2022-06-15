@@ -24,6 +24,13 @@ func RegisterOdEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 		ctx.JSON(http.StatusOK, od)
 	})
+	router.GET("/ods", func(ctx *gin.Context) {
+		ods, err := rb.OdRep.GetAll()
+		if err != nil {
+			ods = make([]*models.OdModel, 0)
+		}
+		ctx.JSON(http.StatusOK, ods)
+	})
 	router.POST("/ods", func(ctx *gin.Context) {
 		var model models.OdModel
 		if err := ctx.ShouldBindJSON(&model); err != nil {
