@@ -21,6 +21,7 @@ type RepoBucket struct {
 	RtspTemplateRep *RtspTemplateRepository
 	FailedStreamRep *FailedStreamRepository
 	RecStuckRep     *RecStuckRepository
+	VariousRep      *VariousInfosRepository
 
 	Users map[string]*models.User
 }
@@ -40,6 +41,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.RtspTemplateRep = &RtspTemplateRepository{Connection: r.connMain}
 	r.FailedStreamRep = &FailedStreamRepository{Connection: r.connMain}
 	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
+	r.VariousRep = &VariousInfosRepository{Connection: r.connMain}
 
 	r.LoadUser()
 

@@ -22,7 +22,7 @@ type FailedStreamModel struct {
 	RtmpContainerFailedCount int    `json:"rtmp_container_failed_count" redis:"rtmp_container_failed_count"`
 	RtmpFeederFailedCount    int    `json:"rtmp_feeder_failed_count" redis:"rtmp_feeder_failed_count"`
 	HlsFailedCount           int    `json:"hls_failed_count" redis:"hls_failed_count"`
-	FfmpegReaderFailedCount  int    `json:"ffmpeg_reader_failed_count" redis:"ffmpeg_reader_failed_count"`
+	FFmpegReaderFailedCount  int    `json:"ffmpeg_reader_failed_count" redis:"ffmpeg_reader_failed_count"`
 	RecordFailedCount        int    `json:"record_failed_count" redis:"record_failed_count"`
 	SnapshotFailedCount      int    `json:"snapshot_failed_count" redis:"snapshot_failed_count"`
 	RecordStuckProcessCount  int    `json:"record_stuck_process_count" redis:"record_stuck_process_count"`
@@ -43,4 +43,10 @@ type RecStuckModel struct {
 	FailedCount           int    `json:"failed_count" redis:"failed_count"`
 	FailedModifiedFile    string `json:"failed_modified_file" redis:"failed_modified_file"`
 	LastCheckAt           string `json:"last_check_at" redis:"last_check_at"`
+}
+
+type VariousInfos struct {
+	RtmpPortCounter      int      `json:"rtmp_port_counter"`
+	RtmpContainerZombies []string `json:"rtmp_container_zombies"`
+	FFmpegProcessZombies []int    `json:"ffmpeg_process_zombies"`
 }

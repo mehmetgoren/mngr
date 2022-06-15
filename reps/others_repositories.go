@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"log"
 	"mngr/models"
+	"strconv"
 )
 
 type RtspTemplateRepository struct {
@@ -79,5 +80,46 @@ func (r *RecStuckRepository) GetAll() ([]*models.RecStuckModel, error) {
 		}
 		ret = append(ret, &p)
 	}
+	return ret, nil
+}
+
+type VariousInfosRepository struct {
+	Connection *redis.Client
+}
+
+func (v *VariousInfosRepository) Get() (*models.VariousInfos, error) {
+	conn := v.Connection
+	ctx := context.Background()
+	result, err := conn.HGet(ctx, "rtmpports", "ports_count").Result()
+	if err != nil {
+		return nil, err
+	}
+	ret := &models.VariousInfos{}
+	ret.RtmpPortCounter, _ = strconv.Atoi(result)
+
+	//result2, err := conn.LRange(ctx, "zombies:docker", 0, -1).Result()
+	result2, err := conn.SMembers(ctx, "zombies:docker").Result()
+	if err != nil {
+		return nil, err
+	}
+	if result2 != nil {
+		ret.RtmpContainerZombies = make([]string, 0)
+		for _, v := range result2 {
+			ret.RtmpContainerZombies = append(ret.RtmpContainerZombies, v)
+		}
+	}
+
+	result3, err := conn.SMembers(ctx, "zombies:ffmpeg").Result()
+	if err != nil {
+		return nil, err
+	}
+	if result3 != nil {
+		ret.FFmpegProcessZombies = make([]int, 0)
+		for _, v := range result3 {
+			iv, _ := strconv.Atoi(v)
+			ret.FFmpegProcessZombies = append(ret.FFmpegProcessZombies, iv)
+		}
+	}
+
 	return ret, nil
 }

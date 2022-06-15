@@ -30,4 +30,12 @@ func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 		ctx.JSON(http.StatusOK, ret)
 	})
+
+	router.GET("/various", func(ctx *gin.Context) {
+		ret, err := rb.VariousRep.Get()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		ctx.JSON(http.StatusOK, ret)
+	})
 }
