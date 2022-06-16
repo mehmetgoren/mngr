@@ -91,7 +91,7 @@ func authMiddleware(ctx *gin.Context) {
 	if req.Method == "OPTIONS" || uri == "/login" || uri == "/registeruser" {
 		return
 	}
-	if strings.HasPrefix(uri, "/ws") { // if it is a websocker request
+	if strings.HasPrefix(uri, "/ws") { // if it is a websocket request
 		qs := ctx.Request.URL.Query()
 		if _, ok := qs["token"]; !ok {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
@@ -107,14 +107,14 @@ func authMiddleware(ctx *gin.Context) {
 			return
 		}
 
-		if _, ok := rb.Users[token]; !ok {
+		if _, ok := rb.IsUserAuthenticated(token); !ok {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
 			ctx.Abort()
 			log.Println("websocket token was not found")
 		}
 	} else {
 		token := ctx.Request.Header.Get("user")
-		if _, ok := rb.Users[token]; !ok {
+		if _, ok := rb.IsUserAuthenticated(token); !ok {
 			isWhitelisted := false
 			for _, wl := range whiteList {
 				if strings.HasPrefix(uri, wl) {

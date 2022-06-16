@@ -64,6 +64,17 @@ func (u *UserRepository) Register(uv *models.RegisterUserViewModel) (*models.Use
 	return user, err
 }
 
+func (u *UserRepository) GetUser(userId string) (*models.User, error) {
+	conn := u.Connection
+	var us models.User
+	err := conn.HGetAll(context.Background(), getUserKey(userId)).Scan(&us)
+	if err != nil {
+		log.Println("Error getting stream from redis: ", err)
+		return nil, err
+	}
+	return &us, nil
+}
+
 func (u *UserRepository) GetUsers() ([]*models.User, error) {
 	conn := u.Connection
 	keys, err := conn.Keys(context.Background(), getUserKey("*")).Result()

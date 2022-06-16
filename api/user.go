@@ -5,10 +5,17 @@ import (
 	"mngr/models"
 	"mngr/ws"
 	"net/http"
+	"time"
 )
 
 func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 	rb := holders.Rb
+
+	logoutUser := func(user *models.User, triggerLogout bool) {
+		rb.RemoveUser(user.Token)
+		holders.UserLogout(user.Token, triggerLogout)
+	}
+
 	router.POST("/login", func(ctx *gin.Context) {
 		var lu models.LoginUserViewModel
 		if err := ctx.BindJSON(&lu); err != nil {
@@ -20,8 +27,10 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
+		logoutUser(u, true)
+		time.Sleep(3 * time.Second)
 		if u != nil {
-			rb.Users[u.Token] = u
+			rb.AddUser(u)
 		}
 		ctx.JSON(http.StatusOK, u)
 	})
@@ -46,10 +55,6 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusBadRequest, false)
 			return
 		}
-		if u != nil {
-			rb.LoadUser()
-			holders.Init()
-		}
 		ctx.JSON(http.StatusOK, true)
 	})
 
@@ -57,18 +62,27 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 		services, err := rb.UserRep.GetUsers()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		ctx.JSON(http.StatusOK, services)
 	})
 
 	router.DELETE("/users/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
+		user, err := rb.UserRep.GetUser(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if user == nil {
+			ctx.JSON(http.StatusOK, 0)
+			return
+		}
 		result, err := rb.UserRep.RemoveById(id)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
-			rb.LoadUser()
-			holders.Init()
+			logoutUser(user, true)
 			ctx.JSON(http.StatusOK, result)
 		}
 	})
@@ -81,9 +95,9 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 		}
 		if len(user.Token) == 0 {
 			ctx.JSON(http.StatusNotFound, false)
+			return
 		}
-		delete(rb.Users, user.Token)
-		holders.Init()
+		logoutUser(&user, false)
 		ctx.JSON(http.StatusOK, true)
 	})
 }

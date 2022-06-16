@@ -23,7 +23,7 @@ type RepoBucket struct {
 	RecStuckRep     *RecStuckRepository
 	VariousRep      *VariousInfosRepository
 
-	Users map[string]*models.User
+	users map[string]*models.User
 }
 
 func (r *RepoBucket) Init() *RepoBucket {
@@ -43,21 +43,34 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
 	r.VariousRep = &VariousInfosRepository{Connection: r.connMain}
 
-	r.LoadUser()
+	r.initUsers()
 
 	return r
 }
 
-func (r *RepoBucket) LoadUser() {
-	r.Users = make(map[string]*models.User)
+func (r *RepoBucket) initUsers() {
+	r.users = make(map[string]*models.User)
 	users, err := r.UserRep.GetUsers()
 	if err != nil {
 		log.Println(err.Error())
 	} else {
 		for _, user := range users {
-			r.Users[user.Token] = user
+			r.users[user.Token] = user
 		}
 	}
+}
+
+func (r *RepoBucket) AddUser(user *models.User) {
+	r.users[user.Token] = user
+}
+
+func (r *RepoBucket) RemoveUser(token string) {
+	delete(r.users, token)
+}
+
+func (r *RepoBucket) IsUserAuthenticated(token string) (*models.User, bool) {
+	user, found := r.users[token]
+	return user, found
 }
 
 func (r *RepoBucket) GetMainConnection() *redis.Client {

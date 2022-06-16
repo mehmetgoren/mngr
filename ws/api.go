@@ -125,5 +125,18 @@ func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 		holders.RegisterEndPoint(hub, ctx, FrTrainEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
+	router.GET("/wsuserlogout", func(ctx *gin.Context) {
+		qs := ctx.Request.URL.Query()
+		if val, ok := qs["token"]; ok {
+			if len(val) > 0 {
+				userToken := val[0]
+				client := CreateClient(hub, ctx.Writer, ctx.Request)
+				holders.UserLogin(userToken, client)
+				ctx.Writer.WriteHeader(http.StatusOK)
+				return
+			}
+		}
+		ctx.Writer.WriteHeader(http.StatusNotFound)
+	})
 	// End Subscribe
 }

@@ -27,6 +27,8 @@ type Holder struct {
 type Holders struct {
 	Rb *reps.RepoBucket
 
+	userLogoutConnections map[string]*Client
+
 	WsStartStream  map[string]*Holder
 	WsStopStream   map[string]*Holder
 	WsEditor       map[string]*Holder
@@ -37,34 +39,49 @@ type Holders struct {
 }
 
 func (h *Holders) Init() {
-	closeWsConnection(h.WsStartStream)
+	h.userLogoutConnections = make(map[string]*Client)
 	h.WsStartStream = make(map[string]*Holder)
-
-	closeWsConnection(h.WsStopStream)
 	h.WsStopStream = make(map[string]*Holder)
-
-	closeWsConnection(h.WsEditor)
 	h.WsEditor = make(map[string]*Holder)
-
-	closeWsConnection(h.WsFFmpegReader)
 	h.WsFFmpegReader = make(map[string]*Holder)
-
-	closeWsConnection(h.WsOnvif)
 	h.WsOnvif = make(map[string]*Holder)
-
-	closeWsConnection(h.WsVideoMerge)
 	h.WsVideoMerge = make(map[string]*Holder)
-
-	closeWsConnection(h.WsFrTrain)
 	h.WsFrTrain = make(map[string]*Holder)
 }
 
-func closeWsConnection(h map[string]*Holder) {
+func (h *Holders) UserLogin(token string, client *Client) {
+	h.userLogoutConnections[token] = client
+}
+
+func (h *Holders) UserLogout(token string, triggerLogout bool) {
+	closeWsConnection(h.WsStartStream, token)
+	closeWsConnection(h.WsStopStream, token)
+	closeWsConnection(h.WsEditor, token)
+	closeWsConnection(h.WsFFmpegReader, token)
+	closeWsConnection(h.WsOnvif, token)
+	closeWsConnection(h.WsVideoMerge, token)
+	closeWsConnection(h.WsFrTrain, token)
+	if val, ok := h.userLogoutConnections[token]; ok {
+		if triggerLogout {
+			err := val.Push(token)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+		err := val.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+		delete(h.userLogoutConnections, token)
+	}
+}
+
+func closeWsConnection(h map[string]*Holder, token string) {
 	if h == nil {
 		return
 	}
-	for _, v := range h {
-		err := v.Client.Close()
+	if val, ok := h[token]; ok {
+		err := val.Client.Close()
 		if err != nil {
 			log.Println(err.Error())
 		}
