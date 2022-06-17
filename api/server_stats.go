@@ -19,7 +19,7 @@ func RegisterServerStatsEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		config, err := rb.ConfigRep.RestoreConfig()
+		config, err := rb.ConfigRep.GetConfig()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
