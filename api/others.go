@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"mngr/reps"
+	"mngr/utils"
 	"net/http"
 )
 
@@ -37,5 +38,15 @@ func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		ctx.JSON(http.StatusOK, ret)
+	})
+
+	router.GET("nvidiasmi", func(ctx *gin.Context) {
+		viewModel := utils.NvidiaGpuModel{}
+		err := viewModel.Fetch()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, &viewModel)
 	})
 }
