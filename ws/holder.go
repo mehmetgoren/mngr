@@ -16,6 +16,7 @@ const (
 	OnvifEvent        = 4
 	VideoMergeEvent   = 5
 	FrTrainEvent      = 6
+	ProbeEvent        = 7
 )
 
 type Holder struct {
@@ -36,6 +37,7 @@ type Holders struct {
 	WsOnvif        map[string]*Holder
 	WsVideoMerge   map[string]*Holder
 	WsFrTrain      map[string]*Holder
+	Probe          map[string]*Holder
 }
 
 func (h *Holders) Init() {
@@ -47,6 +49,7 @@ func (h *Holders) Init() {
 	h.WsOnvif = make(map[string]*Holder)
 	h.WsVideoMerge = make(map[string]*Holder)
 	h.WsFrTrain = make(map[string]*Holder)
+	h.Probe = make(map[string]*Holder)
 }
 
 func (h *Holders) UserLogin(token string, client *Client) {
@@ -61,6 +64,7 @@ func (h *Holders) UserLogout(token string, triggerLogout bool) {
 	closeWsConnection(h.WsOnvif, token)
 	closeWsConnection(h.WsVideoMerge, token)
 	closeWsConnection(h.WsFrTrain, token)
+	closeWsConnection(h.Probe, token)
 	if val, ok := h.userLogoutConnections[token]; ok {
 		if triggerLogout {
 			err := val.Push(token)
@@ -104,6 +108,8 @@ func (h *Holders) getDic(opType int) map[string]*Holder {
 		return h.WsVideoMerge
 	case FrTrainEvent:
 		return h.WsFrTrain
+	case ProbeEvent:
+		return h.Probe
 	default:
 		panic("not supported")
 	}
@@ -149,6 +155,10 @@ func (h *Holders) RegisterEndPoint(hub *Hub, ctx *gin.Context, opType int, keyEx
 			break
 		case FrTrainEvent:
 			dic[token] = h.createFrTrainEvent(client)
+			break
+		case ProbeEvent:
+			dic[token] = h.createProbeEvent(client)
+			break
 		default:
 			panic("not supported")
 		}
@@ -226,6 +236,17 @@ func (h *Holders) createVideoMergeEvent(c *Client) *Holder {
 func (h *Holders) createFrTrainEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "fr_train_response"}
 	eh := &eb.FaceTrainResponseEvent{Pusher: c}
+	go e.Subscribe(eh)
+	return &Holder{
+		EventBus:     e,
+		Client:       c,
+		EventHandler: eh,
+	}
+}
+
+func (h *Holders) createProbeEvent(c *Client) *Holder {
+	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "probe_response"}
+	eh := &eb.ProbeResponseEvent{Pusher: c}
 	go e.Subscribe(eh)
 	return &Holder{
 		EventBus:     e,

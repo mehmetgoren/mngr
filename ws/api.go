@@ -81,6 +81,16 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
+
+	router.POST("/probe", func(ctx *gin.Context) {
+		var event eb.ProbeRequestEvent
+		ctx.BindJSON(&event)
+		event.Rb = rb
+		err := event.Publish()
+		if err == nil {
+			ctx.Writer.WriteHeader(http.StatusOK)
+		}
+	})
 }
 
 // Publish End
@@ -123,6 +133,10 @@ func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 	})
 	router.GET("/wsfrtrain", func(ctx *gin.Context) {
 		holders.RegisterEndPoint(hub, ctx, FrTrainEvent, "")
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
+	router.GET("/wsprobe", func(ctx *gin.Context) {
+		holders.RegisterEndPoint(hub, ctx, ProbeEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsuserlogout", func(ctx *gin.Context) {
