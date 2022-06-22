@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"mngr/api"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"mngr/ws"
@@ -14,6 +15,29 @@ import (
 	"os"
 	"strings"
 )
+
+func checkDefaultUser(rb *reps.RepoBucket) {
+	users, err := rb.UserRep.GetUsers()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	if users != nil && len(users) > 0 {
+		log.Println("user count: ", len(users))
+	} else {
+		_, err = rb.UserRep.Register(&models.RegisterUserViewModel{
+			Username:   "admin",
+			Password:   "admin",
+			RePassword: "admin",
+			Email:      "admin@feniks.com",
+		})
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		checkDefaultUser(rb)
+	}
+}
 
 var rb = &reps.RepoBucket{}
 var whiteList = make([]string, 0)
@@ -35,10 +59,7 @@ func main() {
 	holders.Init()
 	WhoAreYou(rb)
 
-	users, err := rb.UserRep.GetUsers()
-	if users != nil {
-		log.Println("user count: ", len(users))
-	}
+	checkDefaultUser(rb)
 
 	router := gin.Default()
 	f, _ := os.Create("access.log")
@@ -78,7 +99,7 @@ func main() {
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
-	err = router.Run(":2072")
+	err := router.Run(":2072")
 	if err != nil {
 		log.Println(err.Error())
 		return
