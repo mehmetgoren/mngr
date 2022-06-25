@@ -44,7 +44,7 @@ func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		viewModel := utils.NvidiaGpuModel{}
 		err := viewModel.Fetch()
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ctx.JSON(http.StatusOK, nil)
 			return
 		}
 		ctx.JSON(http.StatusOK, &viewModel)
