@@ -17,6 +17,7 @@ const (
 	VideoMergeEvent   = 5
 	FrTrainEvent      = 6
 	ProbeEvent        = 7
+	NotifierEvent     = 8
 )
 
 type Holder struct {
@@ -38,6 +39,7 @@ type Holders struct {
 	WsVideoMerge   map[string]*Holder
 	WsFrTrain      map[string]*Holder
 	Probe          map[string]*Holder
+	Notifier       map[string]*Holder
 }
 
 func (h *Holders) Init() {
@@ -50,6 +52,7 @@ func (h *Holders) Init() {
 	h.WsVideoMerge = make(map[string]*Holder)
 	h.WsFrTrain = make(map[string]*Holder)
 	h.Probe = make(map[string]*Holder)
+	h.Notifier = make(map[string]*Holder)
 }
 
 func (h *Holders) UserLogin(token string, client *Client) {
@@ -65,6 +68,7 @@ func (h *Holders) UserLogout(token string, triggerLogout bool) {
 	closeWsConnection(h.WsVideoMerge, token)
 	closeWsConnection(h.WsFrTrain, token)
 	closeWsConnection(h.Probe, token)
+	closeWsConnection(h.Notifier, token)
 	if val, ok := h.userLogoutConnections[token]; ok {
 		if triggerLogout {
 			err := val.Push(token)
@@ -110,6 +114,8 @@ func (h *Holders) getDic(opType int) map[string]*Holder {
 		return h.WsFrTrain
 	case ProbeEvent:
 		return h.Probe
+	case NotifierEvent:
+		return h.Notifier
 	default:
 		panic("not supported")
 	}
@@ -159,6 +165,9 @@ func (h *Holders) RegisterEndPoint(hub *Hub, ctx *gin.Context, opType int, keyEx
 		case ProbeEvent:
 			dic[token] = h.createProbeEvent(client)
 			break
+		case NotifierEvent:
+			dic[token] = h.createNotifierEvent(client)
+			break
 		default:
 			panic("not supported")
 		}
@@ -170,7 +179,12 @@ func (h *Holders) RegisterEndPoint(hub *Hub, ctx *gin.Context, opType int, keyEx
 func (h *Holders) createStartStreamEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "start_stream_response"}
 	eh := &eb.StartStreamResponseEvent{Rb: h.Rb, Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -181,7 +195,12 @@ func (h *Holders) createStartStreamEvent(c *Client) *Holder {
 func (h *Holders) createStopStreamEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "stop_stream_response"}
 	eh := &eb.StopStreamResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -192,7 +211,12 @@ func (h *Holders) createStopStreamEvent(c *Client) *Holder {
 func (h *Holders) createEditorEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "editor_response"}
 	eh := &eb.EditorResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -203,7 +227,12 @@ func (h *Holders) createEditorEvent(c *Client) *Holder {
 func (h *Holders) createFFmpegReaderEvent(c *Client, sourceId string) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "ffrs" + sourceId}
 	eh := &eb.FFmpegReaderResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -214,7 +243,12 @@ func (h *Holders) createFFmpegReaderEvent(c *Client, sourceId string) *Holder {
 func (h *Holders) createOnvifEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "onvif_response"}
 	eh := &eb.OnvifResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -225,7 +259,12 @@ func (h *Holders) createOnvifEvent(c *Client) *Holder {
 func (h *Holders) createVideoMergeEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "vfm_response"}
 	eh := &eb.VideMergeResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -236,7 +275,12 @@ func (h *Holders) createVideoMergeEvent(c *Client) *Holder {
 func (h *Holders) createFrTrainEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "fr_train_response"}
 	eh := &eb.FaceTrainResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,
@@ -247,7 +291,28 @@ func (h *Holders) createFrTrainEvent(c *Client) *Holder {
 func (h *Holders) createProbeEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "probe_response"}
 	eh := &eb.ProbeResponseEvent{Pusher: c}
-	go e.Subscribe(eh)
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
+	return &Holder{
+		EventBus:     e,
+		Client:       c,
+		EventHandler: eh,
+	}
+}
+
+func (h *Holders) createNotifierEvent(c *Client) *Holder {
+	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "notifier"}
+	eh := &eb.NotifierResponseEvent{Pusher: c}
+	go func() {
+		err := e.Subscribe(eh)
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}()
 	return &Holder{
 		EventBus:     e,
 		Client:       c,

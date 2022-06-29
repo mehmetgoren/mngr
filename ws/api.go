@@ -139,6 +139,10 @@ func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 		holders.RegisterEndPoint(hub, ctx, ProbeEvent, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
+	router.GET("/wsnotifier", func(ctx *gin.Context) {
+		holders.RegisterEndPoint(hub, ctx, NotifierEvent, "")
+		ctx.Writer.WriteHeader(http.StatusOK)
+	})
 	router.GET("/wsuserlogout", func(ctx *gin.Context) {
 		qs := ctx.Request.URL.Query()
 		if val, ok := qs["token"]; ok {

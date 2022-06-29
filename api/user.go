@@ -28,7 +28,7 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			return
 		}
 		logoutUser(u, true)
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 		if u != nil {
 			rb.AddUser(u)
 		}
