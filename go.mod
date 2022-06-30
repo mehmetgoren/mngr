@@ -12,6 +12,7 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.7
 	github.com/mackerelio/go-osstat v0.2.2
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	gopkg.in/tucnak/telebot.v2 v2.5.0
 )
 
 require (
@@ -28,6 +29,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect

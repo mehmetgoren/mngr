@@ -95,6 +95,7 @@ func main() {
 	api.RegisterServiceEndpoints(router, rb)
 	api.RegisterServerStatsEndpoints(router, rb)
 	api.RegisterOthersEndpoints(router, rb)
+	api.RegisterCloudEndpoints(router, rb)
 
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)

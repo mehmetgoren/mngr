@@ -22,6 +22,7 @@ type RepoBucket struct {
 	FailedStreamRep *FailedStreamRepository
 	RecStuckRep     *RecStuckRepository
 	VariousRep      *VariousInfosRepository
+	CloudRep        *CloudRepository
 
 	users map[string]*models.User
 }
@@ -42,6 +43,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.FailedStreamRep = &FailedStreamRepository{Connection: r.connMain}
 	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
 	r.VariousRep = &VariousInfosRepository{Connection: r.connMain}
+	r.CloudRep = &CloudRepository{Connection: r.connMain}
 
 	r.initUsers()
 
