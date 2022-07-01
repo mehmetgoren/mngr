@@ -23,7 +23,6 @@ func RegisterCloudEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 		ctx.JSON(http.StatusOK, viewModel)
 	})
-
 	router.POST("/telegram", func(ctx *gin.Context) {
 		var model models.TelegramViewModel
 		if err := ctx.ShouldBindJSON(&model); err != nil {
@@ -44,7 +43,6 @@ func RegisterCloudEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 		ctx.JSON(http.StatusOK, true)
 	})
-
 	router.DELETE("/telegramuser/:id", func(ctx *gin.Context) {
 		id := ctx.Param("id")
 		idInt, err := strconv.Atoi(id)
@@ -58,5 +56,30 @@ func RegisterCloudEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			return
 		}
 		ctx.JSON(http.StatusOK, true)
+	})
+
+	router.GET("/gdrive", func(ctx *gin.Context) {
+		cloudRep := rb.CloudRep
+		viewModel := &models.GdriveViewModel{}
+		viewModel.AuthCode, _ = cloudRep.GetGdriveAuthCode()
+		viewModel.CredentialsJson, _ = cloudRep.GetGdriveCredentials()
+		viewModel.Enabled = cloudRep.IsGdriveIntegrationEnabled()
+		viewModel.TokenJson, _ = cloudRep.GetGdriveToken()
+		viewModel.URL, _ = cloudRep.GetGdriveUrl()
+
+		ctx.JSON(http.StatusOK, viewModel)
+	})
+	router.POST("/gdrive", func(ctx *gin.Context) {
+		var model models.GdriveViewModel
+		if err := ctx.ShouldBindJSON(&model); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		cloudRep := rb.CloudRep
+		cloudRep.SaveGdriveAuthCode(model.AuthCode)
+		cloudRep.SaveGdriveCredentials(model.CredentialsJson)
+		cloudRep.SaveGdriveIntegrationEnabled(model.Enabled)
+		cloudRep.SaveGdriveToken(model.TokenJson)
+		cloudRep.SaveGdriveUrl(model.URL)
 	})
 }
