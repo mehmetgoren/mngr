@@ -74,7 +74,7 @@ func (s *ServerStats) InitDiskInfos(config *models.Config) error {
 		return err
 	}
 	for _, p := range parts {
-		if strings.EqualFold(config.General.RootFolderPath, p.Mountpoint) {
+		if strings.HasPrefix(config.General.RootFolderPath, p.Mountpoint) {
 			device := p.Mountpoint
 			u, err := disk.Usage(device)
 			if err != nil {
