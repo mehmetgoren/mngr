@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"mngr/api"
+	"mngr/data/cmn"
 	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
@@ -50,6 +51,13 @@ func initWhiteList() {
 	whiteList = append(whiteList, "/alpr/")
 }
 
+func createFactory() *cmn.Factory {
+	config, _ := rb.ConfigRep.GetConfig()
+	factory := &cmn.Factory{Config: config}
+	factory.Init()
+	return factory
+}
+
 func main() {
 	defer utils.HandlePanic()
 
@@ -58,6 +66,9 @@ func main() {
 	holders := &ws.Holders{Rb: rb}
 	holders.Init()
 	WhoAreYou(rb)
+
+	factory := createFactory()
+	defer factory.Close()
 
 	checkDefaultUser(rb)
 
@@ -85,10 +96,10 @@ func main() {
 	api.RegisterConfigEndpoints(router, rb)
 	api.RegisterRecordEndpoints(router, rb)
 	api.RegisterOdEndpoints(router, rb)
-	api.RegisterOdImagesEndpoints(router, rb)
-	api.RegisterOdVideoClipEndpoints(router, rb)
-	api.RegisterFrImagesEndpoints(router, rb)
-	api.RegisterAlprImagesEndpoints(router, rb)
+	api.RegisterOdImagesEndpoints(router, rb, factory)
+	api.RegisterOdVideoClipEndpoints(router, rb, factory)
+	api.RegisterFrImagesEndpoints(router, rb, factory)
+	api.RegisterAlprImagesEndpoints(router, rb, factory)
 	api.RegisterOnvifEndpoints(router, rb)
 	api.RegisterFrTrainingEndpoints(router, rb)
 	api.RegisterUserEndpoints(router, holders)

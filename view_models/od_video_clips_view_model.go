@@ -1,7 +1,7 @@
 package view_models
 
 import (
-	"mngr/models"
+	"mngr/data"
 	"path"
 	"strings"
 )
@@ -12,11 +12,16 @@ type PreviewViewModel struct {
 	Id            string `json:"id"`
 }
 
+type DetectedObjectViewModel struct {
+	PredScore   float32 `json:"pred_score"`
+	PredClsIdx  int     `json:"pred_cls_idx"`
+	PredClsName string  `json:"pred_cls_name"`
+}
+
 type OdVideoClipsViewModel struct {
-	DetectedObjects []*models.DetectedObject `json:"detected_objects"`
-	ImageFileNames  []string                 `json:"image_file_names"`
-	DataFileNames   []string                 `json:"data_file_names"`
-	Ids             []string                 `json:"ids"`
+	DetectedObjects []*DetectedObjectViewModel `json:"detected_objects"`
+	ImageFileNames  []string                   `json:"image_file_names"`
+	Ids             []string                   `json:"ids"`
 
 	Preview             *PreviewViewModel `json:"preview"`
 	VideoCreatedAt      string            `json:"video_created_at"`
@@ -26,34 +31,39 @@ type OdVideoClipsViewModel struct {
 	Duration            int               `json:"duration"`
 }
 
-func Map(list []*models.ObjectDetectionJsonObject) []*OdVideoClipsViewModel {
+func Map(list []*data.OdDto) []*OdVideoClipsViewModel {
 	ret := make([]*OdVideoClipsViewModel, 0)
 	dic := make(map[string]*OdVideoClipsViewModel)
 	for _, item := range list {
-		key := item.Video.FileName
+		if item.AiClip == nil {
+			continue
+		}
+		key := item.AiClip.FileName
 		if len(key) == 0 {
 			continue
 		}
 		val, ok := dic[key]
 		if !ok {
 			val = &OdVideoClipsViewModel{}
-			val.DetectedObjects = make([]*models.DetectedObject, 0)
+			val.DetectedObjects = make([]*DetectedObjectViewModel, 0)
 			val.ImageFileNames = make([]string, 0)
-			val.DataFileNames = make([]string, 0)
 			val.Ids = make([]string, 0)
 
-			val.VideoCreatedAt = item.Video.CreatedAt
-			val.VideoLastModifiedAt = item.Video.LastModifiedAt
-			val.VideoFileName = item.Video.FileName
-			val.VideoBaseFileName = path.Base(item.Video.FileName)
-			val.Duration = item.Video.Duration
+			val.VideoCreatedAt = item.AiClip.CreatedAt
+			val.VideoLastModifiedAt = item.AiClip.LastModifiedAt
+			val.VideoFileName = item.AiClip.FileName
+			val.VideoBaseFileName = path.Base(item.AiClip.FileName)
+			val.Duration = item.AiClip.Duration
 			dic[key] = val
 			ret = append(ret, val)
 		}
-		val.ImageFileNames = append(val.ImageFileNames, item.ObjectDetection.ImageFileName)
-		val.DataFileNames = append(val.DataFileNames, item.ObjectDetection.DataFileName)
-		val.DetectedObjects = append(val.DetectedObjects, item.ObjectDetection.DetectedObjects...)
-		val.Ids = append(val.Ids, item.ObjectDetection.Id)
+		val.ImageFileNames = append(val.ImageFileNames, item.ImageFileName)
+		do := &DetectedObjectViewModel{}
+		do.PredClsIdx = item.DetectedObject.PredClsIdx
+		do.PredClsName = item.DetectedObject.PredClsName
+		do.PredScore = item.DetectedObject.PredScore
+		val.DetectedObjects = append(val.DetectedObjects, do)
+		val.Ids = append(val.Ids, item.Id)
 	}
 
 	for _, v := range ret {

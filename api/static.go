@@ -26,4 +26,11 @@ func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 
 	// last ine is alpr
 	router.Static("/alpr", utils.GetAlprPath(config))
+
+	streams, err := rb.StreamRep.GetAll()
+	if err == nil && streams != nil {
+		for _, s := range streams {
+			utils.CreateSourceDefaultDirectories(config, s.Id)
+		}
+	}
 }

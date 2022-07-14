@@ -58,21 +58,18 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	// Create object detection folder for the source
 	od := GetOdPath(config)
 	createDirIfNotExist(path.Join(od, sourceId))
-	createDirIfNotExist(path.Join(od, sourceId, "data"))
 	createDirIfNotExist(path.Join(od, sourceId, "images"))
 	createDirIfNotExist(path.Join(od, sourceId, "videos"))
 
 	// Create facial recognition folder for the source
 	fr := GetFrPath(config)
 	createDirIfNotExist(path.Join(fr, sourceId))
-	createDirIfNotExist(path.Join(fr, sourceId, "data"))
 	createDirIfNotExist(path.Join(fr, sourceId, "images"))
 	createDirIfNotExist(path.Join(fr, sourceId, "videos"))
 
 	// Create automatic plate license recognizer
 	alpr := GetAlprPath(config)
 	createDirIfNotExist(path.Join(alpr, sourceId))
-	createDirIfNotExist(path.Join(alpr, sourceId, "data"))
 	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
 	createDirIfNotExist(path.Join(alpr, sourceId, "videos"))
 }
@@ -109,10 +106,6 @@ func GetHourlyOdImagesPathBySourceId(config *models.Config, sourceId string, dat
 	return di.GetIndexedPath(GetOdImagesPathBySourceId(config, sourceId))
 }
 
-func GetOdDataPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(GetOdPath(config), sourceId, "data")
-}
-
 // od ends
 
 // fr starts
@@ -127,10 +120,6 @@ func GetHourlyFrImagesPathBySourceId(config *models.Config, sourceId string, dat
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
 	return di.GetIndexedPath(GetFrImagesPathBySourceId(config, sourceId))
-}
-
-func GetFrDataPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(getFrPath(config), sourceId, "data")
 }
 
 func GetFrTrainPath(config *models.Config) string {
@@ -172,10 +161,6 @@ func GetHourlyAlprImagesPathBySourceId(config *models.Config, sourceId string, d
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
 	return di.GetIndexedPath(GetAlprImagesPathBySourceId(config, sourceId))
-}
-
-func GetAlprDataPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(getAlprPath(config), sourceId, "data")
 }
 
 // alpr ends

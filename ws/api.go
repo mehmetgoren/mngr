@@ -15,6 +15,8 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.POST("/startstream", func(ctx *gin.Context) {
 		var source models.SourceModel
 		ctx.BindJSON(&source)
+		config, _ := rb.ConfigRep.GetConfig()
+		utils.CreateSourceDefaultDirectories(config, source.Id)
 		eventPub := eb.StartStreamRequestEvent{Rb: rb, SourceModel: source}
 		err := eventPub.Publish()
 		if err == nil {

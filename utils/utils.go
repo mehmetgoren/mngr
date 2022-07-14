@@ -11,7 +11,6 @@ import (
 	"mngr/models"
 	"net/http"
 	"path"
-	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"strconv"
@@ -82,13 +81,6 @@ func TimeToString(time time.Time, includeNanoSec bool) string {
 	return strings.Join(arr, sep)
 }
 
-func GetFileNameWithoutExtension(fileName string) string {
-	fileName = filepath.Base(fileName)
-	extension := filepath.Ext(fileName)
-	fileName = fileName[0 : len(fileName)-len(extension)]
-	return fileName
-}
-
 var re = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
 
 func ParseIp(address string) string {
@@ -107,6 +99,15 @@ type TimeIndex struct {
 	Month string
 	Day   string
 	Hour  string
+}
+
+func (i *TimeIndex) GetValuesAsInt() (int, int, int, int) {
+	y, _ := strconv.Atoi(i.Year)
+	m, _ := strconv.Atoi(i.Month)
+	d, _ := strconv.Atoi(i.Day)
+	h, _ := strconv.Atoi(i.Hour)
+
+	return y, m, d, h
 }
 
 func (i *TimeIndex) FixZeros() {

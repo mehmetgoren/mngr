@@ -2,24 +2,31 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data/cmn"
 	"mngr/reps"
+	"mngr/utils"
 	"mngr/view_models"
 	"net/http"
 	"os"
 	"path"
 )
 
-func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory *cmn.Factory) {
 	router.GET("/odvideoclips/:sourceid/:date", func(ctx *gin.Context) {
-		config, _ := rb.ConfigRep.GetConfig()
-
 		sourceId := ctx.Param("sourceid")
 		date := ctx.Param("date")
 
-		odhRep := reps.OdHandlerRepository{Config: config}
-		jsonObjects := odhRep.GetJsonObjects(sourceId, date, true)
-		list := view_models.Map(jsonObjects)
+		t := utils.StringToTime(date)
+		ti := utils.TimeIndex{}
+		ti.SetValuesFrom(&t)
 
+		entities, err := factory.CreateRepository().GetOds(sourceId, &ti, true)
+		if err != nil {
+			ctx.JSON(http.StatusOK, make([]*view_models.OdVideoClipsViewModel, 0))
+			return
+		}
+
+		list := view_models.Map(entities)
 		ctx.JSON(http.StatusOK, list)
 	})
 
@@ -31,19 +38,20 @@ func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			return
 		}
 
-		if len(vm.DataFileNames) == 0 {
+		if len(vm.Ids) == 0 {
 			ctx.JSON(http.StatusBadRequest, false)
+			return
 		}
 
 		config, _ := rb.ConfigRep.GetConfig()
 		rootPath := config.General.RootFolderPath
-
 		os.Remove(path.Join(rootPath, vm.VideoFileName))
 		for _, ifn := range vm.ImageFileNames {
 			os.Remove(path.Join(rootPath, ifn))
 		}
-		for _, dfi := range vm.DataFileNames {
-			os.Remove(path.Join(rootPath, dfi))
+		rep := factory.CreateRepository()
+		for _, id := range vm.Ids {
+			rep.RemoveOd(id)
 		}
 
 		ctx.JSON(http.StatusOK, true)

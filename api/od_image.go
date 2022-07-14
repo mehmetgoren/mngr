@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data/cmn"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
@@ -83,7 +84,7 @@ type ImagesParams struct {
 	SourceId string `json:"sourceId"`
 }
 
-func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory *cmn.Factory) {
 	router.GET("/odimagesfolders/:id/:date", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
 		date := ctx.Param("date")
@@ -99,20 +100,22 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := rb.ConfigRep.GetConfig()
-		odhRep := reps.OdHandlerRepository{Config: config}
-		jsonObjects := odhRep.GetJsonObjects(model.SourceId, model.RootPath, true)
+		t := utils.StringToTime(model.RootPath)
+		ti := utils.TimeIndex{}
+		ti.SetValuesFrom(&t)
+
 		items := make([]*ImageItem, 0)
-		for _, jsonObject := range jsonObjects {
-			od := jsonObject.ObjectDetection
-			item := &ImageItem{Id: od.Id, ImagePath: od.ImageFileName, CreatedAt: jsonObject.ObjectDetection.CreatedAt}
+
+		dtos, err := factory.CreateRepository().GetOds(model.SourceId, &ti, true)
+		if err != nil || dtos == nil {
+			ctx.JSON(http.StatusOK, items)
+			return
+		}
+
+		for _, dto := range dtos {
+			item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
 			items = append(items, item)
 		}
-		sort.Slice(items, func(i, j int) bool {
-			t1 := utils.StringToTime(items[i].CreatedAt)
-			t2 := utils.StringToTime(items[j].CreatedAt)
-			return t1.After(t2)
-		})
 		ctx.JSON(http.StatusOK, items)
 	})
 }

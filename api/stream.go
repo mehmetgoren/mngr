@@ -51,6 +51,7 @@ func RegisterStreamEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			panic("Bad jpeg")
 		}
 
+		//todo: remove it
 		f, err := os.OpenFile("/mnt/sdc1/pics/"+utils.TimeToString(time.Now(), true)+".jpg", os.O_WRONLY|os.O_CREATE, 0777)
 		if err != nil {
 			panic("Cannot open file")

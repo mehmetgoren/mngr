@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data/cmn"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
-	"sort"
 )
 
-func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory *cmn.Factory) {
 	router.GET("/alprimagesfolders/:id/:date", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
 		date := ctx.Param("date")
@@ -24,20 +24,22 @@ func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		config, _ := rb.ConfigRep.GetConfig()
-		arhRep := reps.AlprHandlerRepository{Config: config}
-		jsonObjects := arhRep.GetJsonObjects(model.SourceId, model.RootPath, true)
+
+		t := utils.StringToTime(model.RootPath)
+		ti := utils.TimeIndex{}
+		ti.SetValuesFrom(&t)
 		items := make([]*ImageItem, 0)
-		for _, jsonObject := range jsonObjects {
-			ar := jsonObject.AlprResults
-			item := &ImageItem{Id: ar.Id, ImagePath: ar.ImageFileName, CreatedAt: jsonObject.AlprResults.CreatedAt}
+		dtos, err := factory.CreateRepository().GetAlprs(model.SourceId, &ti, true)
+		if err != nil {
+			ctx.JSON(http.StatusOK, items)
+			return
+		}
+
+		for _, dto := range dtos {
+			item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
 			items = append(items, item)
 		}
-		sort.Slice(items, func(i, j int) bool {
-			t1 := utils.StringToTime(items[i].CreatedAt)
-			t2 := utils.StringToTime(items[j].CreatedAt)
-			return t1.After(t2)
-		})
+
 		ctx.JSON(http.StatusOK, items)
 	})
 }
