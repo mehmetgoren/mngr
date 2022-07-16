@@ -2,6 +2,7 @@ package mng
 
 import (
 	"mngr/data"
+	"mngr/utils"
 )
 
 type OdMapper struct {
@@ -19,6 +20,10 @@ func (o *OdMapper) Map(source *OdEntity) *data.OdDto {
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFileName = source.VideoFileName
+	if source.VideoFileCreatedDate != nil {
+		ret.VideoFileCreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
+	}
+	ret.VideoFileDuration = source.VideoFileDuration
 	ret.AiClip = source.AiClip
 
 	return ret

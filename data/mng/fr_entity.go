@@ -3,6 +3,7 @@ package mng
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mngr/data"
+	"time"
 )
 
 type DetectedFace struct {
@@ -16,23 +17,17 @@ type DetectedFace struct {
 }
 
 type FrEntity struct {
-	Id            primitive.ObjectID `json:"_id" bson:"_id"`
-	GroupId       string             `json:"group_id" bson:"group_id"`   //Index
-	SourceId      string             `json:"source_id" bson:"source_id"` //Index
-	CreatedAt     string             `json:"created_at" bson:"created_at"`
-	DetectedFace  *DetectedFace      `json:"detected_face" bson:"detected_face"`
-	ImageFileName string             `json:"image_file_name" bson:"image_file_name"`
-	VideoFileName string             `json:"video_file_name" bson:"video_file_name"` //Index
+	Id                   primitive.ObjectID `json:"_id" bson:"_id"`
+	GroupId              string             `json:"group_id" bson:"group_id"`   //Index
+	SourceId             string             `json:"source_id" bson:"source_id"` //Index
+	CreatedAt            string             `json:"created_at" bson:"created_at"`
+	DetectedFace         *DetectedFace      `json:"detected_face" bson:"detected_face"`
+	ImageFileName        string             `json:"image_file_name" bson:"image_file_name"`
+	VideoFileName        string             `json:"video_file_name" bson:"video_file_name"` //Index
+	VideoFileCreatedDate *time.Time         `json:"video_file_created_date" bson:"video_file_created_date"`
+	VideoFileDuration    int                `json:"video_file_duration" bson:"video_file_duration"`
 
 	AiClip *data.AiClip `json:"ai_clip" bson:"ai_clip"`
-
-	//extended
-	Year   int `json:"year" bson:"year"`   //Index
-	Month  int `json:"month" bson:"month"` //Index
-	Day    int `json:"day" bson:"day"`     //Index
-	Hour   int `json:"hour" bson:"hour"`   //Index
-	Minute int `json:"minute" bson:"minute"`
-	Second int `json:"second" bson:"second"`
 
 	CreatedDate primitive.DateTime `json:"created_date" bson:"created_date"`
 }

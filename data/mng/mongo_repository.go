@@ -4,24 +4,26 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mngr/data"
-	"mngr/utils"
 )
 
 type MongoRepository struct {
 	Db *DbContext
 }
 
-func (m *MongoRepository) GetOds(sourceId string, ti *utils.TimeIndex, sort bool) ([]*data.OdDto, error) {
-	if ti == nil {
+func createQuery(params *data.GetParams) bson.M {
+	return bson.M{"source_id": params.SourceId, "created_date": bson.M{"$gte": params.T1, "$lt": params.T2}}
+}
+
+func (m *MongoRepository) GetOds(params *data.GetParams) ([]*data.OdDto, error) {
+	if params == nil {
 		return nil, nil
 	}
 
 	var sorts bson.D
-	if sort {
+	if params.Sort {
 		sorts = bson.D{{"created_date", -1}}
 	}
-	year, month, day, hour := ti.GetValuesAsInt()
-	entities, err := m.Db.Ods.GetByQuery(bson.M{"source_id": sourceId, "year": year, "month": month, "day": day, "hour": hour}, sorts)
+	entities, err := m.Db.Ods.GetByQuery(createQuery(params), sorts)
 	if err != nil {
 		return nil, err
 	}
@@ -38,17 +40,16 @@ func (m *MongoRepository) GetOds(sourceId string, ti *utils.TimeIndex, sort bool
 	return ret, nil
 }
 
-func (m *MongoRepository) GetFrs(sourceId string, ti *utils.TimeIndex, sort bool) ([]*data.FrDto, error) {
-	if ti == nil {
+func (m *MongoRepository) GetFrs(params *data.GetParams) ([]*data.FrDto, error) {
+	if params == nil {
 		return nil, nil
 	}
 
 	var sorts bson.D
-	if sort {
+	if params.Sort {
 		sorts = bson.D{{"created_date", -1}}
 	}
-	year, month, day, hour := ti.GetValuesAsInt()
-	entities, err := m.Db.Frs.GetByQuery(bson.M{"source_id": sourceId, "year": year, "month": month, "day": day, "hour": hour}, sorts)
+	entities, err := m.Db.Frs.GetByQuery(createQuery(params), sorts)
 	if err != nil {
 		return nil, err
 	}
@@ -62,17 +63,16 @@ func (m *MongoRepository) GetFrs(sourceId string, ti *utils.TimeIndex, sort bool
 	return ret, nil
 }
 
-func (m *MongoRepository) GetAlprs(sourceId string, ti *utils.TimeIndex, sort bool) ([]*data.AlprDto, error) {
-	if ti == nil {
+func (m *MongoRepository) GetAlprs(params *data.GetParams) ([]*data.AlprDto, error) {
+	if params == nil {
 		return nil, nil
 	}
 
 	var sorts bson.D
-	if sort {
+	if params.Sort {
 		sorts = bson.D{{"created_date", -1}}
 	}
-	year, month, day, hour := ti.GetValuesAsInt()
-	entities, err := m.Db.Alprs.GetByQuery(bson.M{"source_id": sourceId, "year": year, "month": month, "day": day, "hour": hour}, sorts)
+	entities, err := m.Db.Alprs.GetByQuery(createQuery(params), sorts)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,9 @@
 package mng
 
-import "mngr/data"
+import (
+	"mngr/data"
+	"mngr/utils"
+)
 
 type AlprMapper struct {
 }
@@ -16,6 +19,10 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFileName = source.VideoFileName
+	if source.VideoFileCreatedDate != nil {
+		ret.VideoFileCreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
+	}
+	ret.VideoFileDuration = source.VideoFileDuration
 	ret.AiClip = source.AiClip
 
 	return ret

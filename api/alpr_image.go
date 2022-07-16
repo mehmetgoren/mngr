@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data"
 	"mngr/data/cmn"
 	"mngr/reps"
 	"mngr/utils"
@@ -25,11 +26,8 @@ func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factor
 			return
 		}
 
-		t := utils.StringToTime(model.RootPath)
-		ti := utils.TimeIndex{}
-		ti.SetValuesFrom(&t)
 		items := make([]*ImageItem, 0)
-		dtos, err := factory.CreateRepository().GetAlprs(model.SourceId, &ti, true)
+		dtos, err := factory.CreateRepository().GetAlprs(data.GetParamsByHour(model.SourceId, model.RootPath))
 		if err != nil {
 			ctx.JSON(http.StatusOK, items)
 			return

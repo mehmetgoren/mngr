@@ -94,57 +94,11 @@ func FixZero(val int) string {
 	return strconv.Itoa(val)
 }
 
-type TimeIndex struct {
-	Year  string
-	Month string
-	Day   string
-	Hour  string
-}
-
-func (i *TimeIndex) GetValuesAsInt() (int, int, int, int) {
-	y, _ := strconv.Atoi(i.Year)
-	m, _ := strconv.Atoi(i.Month)
-	d, _ := strconv.Atoi(i.Day)
-	h, _ := strconv.Atoi(i.Hour)
-
-	return y, m, d, h
-}
-
-func (i *TimeIndex) FixZeros() {
-	if len(i.Month) == 1 {
-		i.Month = "0" + i.Month
+func FixZeroStr(val string) string {
+	if len(val) == 1 {
+		val = "0" + val
 	}
-	if len(i.Day) == 1 {
-		i.Day = "0" + i.Day
-	}
-	if len(i.Hour) == 1 {
-		i.Hour = "0" + i.Hour
-	}
-}
-
-func (i *TimeIndex) SetValuesFrom(t *time.Time) *TimeIndex {
-	i.Year = strconv.Itoa(t.Year())
-	i.Month = FixZero(int(t.Month()))
-	i.Day = FixZero(t.Day())
-	i.Hour = FixZero(t.Hour())
-	return i
-}
-
-func (i *TimeIndex) GetIndexedPath(rootPath string) string {
-	arr := make([]string, 0)
-	arr = append(arr, rootPath)
-	arr = append(arr, i.Year)
-	v, _ := strconv.Atoi(i.Month)
-	if v > 0 {
-		arr = append(arr, i.Month)
-	}
-	v, _ = strconv.Atoi(i.Day)
-	if v > 0 {
-		arr = append(arr, i.Day)
-	}
-	v, _ = strconv.Atoi(i.Hour)
-	arr = append(arr, i.Hour)
-	return path.Join(arr...)
+	return val
 }
 
 type DateIndex struct {
@@ -182,15 +136,11 @@ func DatetimeNow() string {
 }
 
 func SetVideoFilePath(v *models.VideoFile) {
-	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
-	ti.FixZeros()
-	v.Path = path.Join("/playback", v.SourceId, v.Year, ti.Month, ti.Day, ti.Hour, v.Name)
+	v.Path = path.Join("/playback", v.SourceId, v.Year, FixZeroStr(v.Month), FixZeroStr(v.Day), FixZeroStr(v.Hour), v.Name)
 }
 
 func GetVideoFileAbsolutePath(v *models.VideoFile, root string) string {
-	ti := TimeIndex{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour}
-	ti.FixZeros()
-	return path.Join(root, v.SourceId, v.Year, ti.Month, ti.Day, ti.Hour, v.Name)
+	return path.Join(root, v.SourceId, v.Year, FixZeroStr(v.Month), FixZeroStr(v.Day), FixZeroStr(v.Hour), v.Name)
 }
 
 func NewId() string {

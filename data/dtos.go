@@ -15,14 +15,16 @@ type DetectedObjectDto struct {
 }
 
 type OdDto struct {
-	Id             string             `json:"id"`
-	GroupId        string             `json:"group_id"`
-	SourceId       string             `json:"source_id"`
-	CreatedAt      string             `json:"created_at"`
-	DetectedObject *DetectedObjectDto `json:"detected_object"`
-	ImageFileName  string             `json:"image_file_name"`
-	VideoFileName  string             `json:"video_file_name"`
-	AiClip         *AiClip            `json:"ai_clip"`
+	Id                 string             `json:"id"`
+	GroupId            string             `json:"group_id"`
+	SourceId           string             `json:"source_id"`
+	CreatedAt          string             `json:"created_at"`
+	DetectedObject     *DetectedObjectDto `json:"detected_object"`
+	ImageFileName      string             `json:"image_file_name"`
+	VideoFileName      string             `json:"video_file_name"`
+	VideoFileCreatedAt string             `json:"video_file_created_at"`
+	VideoFileDuration  int                `json:"video_file_duration"`
+	AiClip             *AiClip            `json:"ai_clip"`
 }
 
 type DetectedFaceDto struct {
@@ -36,14 +38,16 @@ type DetectedFaceDto struct {
 }
 
 type FrDto struct {
-	Id            string           `json:"id"`
-	GroupId       string           `json:"group_id"`
-	SourceId      string           `json:"source_id"`
-	CreatedAt     string           `json:"created_at"`
-	DetectedFace  *DetectedFaceDto `json:"detected_face"`
-	ImageFileName string           `json:"image_file_name"`
-	VideoFileName string           `json:"video_file_name"`
-	AiClip        *AiClip          `json:"ai_clip"`
+	Id                 string           `json:"id"`
+	GroupId            string           `json:"group_id"`
+	SourceId           string           `json:"source_id"`
+	CreatedAt          string           `json:"created_at"`
+	DetectedFace       *DetectedFaceDto `json:"detected_face"`
+	ImageFileName      string           `json:"image_file_name"`
+	VideoFileName      string           `json:"video_file_name"`
+	VideoFileCreatedAt string           `json:"video_file_created_at"`
+	VideoFileDuration  int              `json:"video_file_duration"`
+	AiClip             *AiClip          `json:"ai_clip"`
 }
 
 type DetectedPlateDto struct {
@@ -53,12 +57,14 @@ type DetectedPlateDto struct {
 }
 
 type AlprDto struct {
-	Id            string            `json:"id"`
-	GroupId       string            `json:"group_id"`
-	SourceId      string            `json:"source_id"`
-	CreatedAt     string            `json:"created_at"`
-	DetectedPlate *DetectedPlateDto `json:"detected_plate"`
-	ImageFileName string            `json:"image_file_name"`
-	VideoFileName string            `json:"video_file_name"`
-	AiClip        *AiClip           `json:"ai_clip"`
+	Id                 string            `json:"id"`
+	GroupId            string            `json:"group_id"`
+	SourceId           string            `json:"source_id"`
+	CreatedAt          string            `json:"created_at"`
+	DetectedPlate      *DetectedPlateDto `json:"detected_plate"`
+	ImageFileName      string            `json:"image_file_name"`
+	VideoFileName      string            `json:"video_file_name"`
+	VideoFileCreatedAt string            `json:"video_file_created_at"`
+	VideoFileDuration  int               `json:"video_file_duration"`
+	AiClip             *AiClip           `json:"ai_clip"`
 }

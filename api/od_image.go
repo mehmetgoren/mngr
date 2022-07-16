@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data"
 	"mngr/data/cmn"
 	"mngr/reps"
 	"mngr/utils"
@@ -100,13 +101,10 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory 
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		t := utils.StringToTime(model.RootPath)
-		ti := utils.TimeIndex{}
-		ti.SetValuesFrom(&t)
 
 		items := make([]*ImageItem, 0)
 
-		dtos, err := factory.CreateRepository().GetOds(model.SourceId, &ti, true)
+		dtos, err := factory.CreateRepository().GetOds(data.GetParamsByHour(model.SourceId, model.RootPath))
 		if err != nil || dtos == nil {
 			ctx.JSON(http.StatusOK, items)
 			return

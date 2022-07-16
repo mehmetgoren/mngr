@@ -1,6 +1,9 @@
 package mng
 
-import "mngr/data"
+import (
+	"mngr/data"
+	"mngr/utils"
+)
 
 type FrMapper struct {
 }
@@ -17,6 +20,10 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFileName = source.VideoFileName
+	if source.VideoFileCreatedDate != nil {
+		ret.VideoFileCreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
+	}
+	ret.VideoFileDuration = source.VideoFileDuration
 	ret.AiClip = source.AiClip
 
 	return ret

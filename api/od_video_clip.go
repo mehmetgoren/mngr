@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/data"
 	"mngr/data/cmn"
 	"mngr/reps"
-	"mngr/utils"
 	"mngr/view_models"
 	"net/http"
 	"os"
@@ -16,11 +16,7 @@ func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket, facto
 		sourceId := ctx.Param("sourceid")
 		date := ctx.Param("date")
 
-		t := utils.StringToTime(date)
-		ti := utils.TimeIndex{}
-		ti.SetValuesFrom(&t)
-
-		entities, err := factory.CreateRepository().GetOds(sourceId, &ti, true)
+		entities, err := factory.CreateRepository().GetOds(data.GetParamsByHour(sourceId, date))
 		if err != nil {
 			ctx.JSON(http.StatusOK, make([]*view_models.OdVideoClipsViewModel, 0))
 			return
