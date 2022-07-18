@@ -8,17 +8,17 @@ import (
 	"mngr/utils"
 )
 
-type VideMergeRequestEvent struct {
-	Id      string           `json:"id"`
-	DateStr string           `json:"date_str"`
-	Rb      *reps.RepoBucket `json:"-"`
+type VfmRequestEvent struct {
+	SourceId string           `json:"source_id"`
+	DateStr  string           `json:"date_str"`
+	Rb       *reps.RepoBucket `json:"-"`
 }
 
-func (v VideMergeRequestEvent) MarshalBinary() ([]byte, error) {
+func (v VfmRequestEvent) MarshalBinary() ([]byte, error) {
 	return json.Marshal(v)
 }
 
-func (v *VideMergeRequestEvent) Publish() error {
+func (v *VfmRequestEvent) Publish() error {
 	eventBusPub := EventBus{PubSubConnection: v.Rb.PubSubConnection, Channel: "vfm_request"}
 	err := eventBusPub.Publish(v)
 	if err != nil {
@@ -29,18 +29,19 @@ func (v *VideMergeRequestEvent) Publish() error {
 	return nil
 }
 
-type VideMergeResponseEvent struct {
-	Id     string         `json:"id"`
-	Result bool           `json:"result"`
-	Pusher utils.WsPusher `json:"-"`
+type VfmResponseEvent struct {
+	SourceId             string         `json:"source_id"`
+	OutputFileName       string         `json:"output_file_name"`
+	MergedVideoFilenames []string       `json:"merged_video_filenames"`
+	Pusher               utils.WsPusher `json:"-"`
 }
 
-func (v *VideMergeResponseEvent) Handle(event *redis.Message) error {
+func (v *VfmResponseEvent) Handle(event *redis.Message) error {
 	utils.DeserializeJson(event.Payload, v)
 	v.Pusher.Push(v)
 	return nil
 }
 
-func (v *VideMergeResponseEvent) SetPusher(pusher utils.WsPusher) {
+func (v *VfmResponseEvent) SetPusher(pusher utils.WsPusher) {
 	v.Pusher = pusher
 }

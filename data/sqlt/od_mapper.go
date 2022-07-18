@@ -2,7 +2,6 @@ package sqlt
 
 import (
 	"mngr/data"
-	"mngr/utils"
 	"strconv"
 )
 
@@ -20,11 +19,14 @@ func (o *OdMapper) Map(source *OdEntity) *data.OdDto {
 		PredClsName: source.PredClsName,
 	}
 	ret.ImageFileName = source.ImageFileName
-	ret.VideoFileName = source.VideoFileName
-	if source.VideoFileCreatedDate != nil {
-		ret.VideoFileCreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
-	}
-	ret.VideoFileDuration = source.VideoFileDuration
+
+	ret.VideoFile = &data.VideoFileDto{}
+	ret.VideoFile.Name = source.VideoFileName
+	ret.VideoFile.CreatedDate = *source.VideoFileCreatedDate
+	ret.VideoFile.Duration = source.VideoFileDuration
+	ret.VideoFile.Merged = source.VideoFileMerged
+	ret.VideoFile.ObjectAppearsAt = source.ObjectAppearsAt
+
 	ret.AiClip = &data.AiClip{
 		Enabled:        source.AiClipEnabled,
 		FileName:       source.AiClipFileName,

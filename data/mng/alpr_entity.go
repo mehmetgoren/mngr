@@ -3,7 +3,6 @@ package mng
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mngr/data"
-	"time"
 )
 
 type Candidate struct {
@@ -38,10 +37,9 @@ type AlprEntity struct {
 	TotalProcessingTimeMs float64        `json:"total_processing_time_ms" bson:"total_processing_time_ms"`
 	DetectedPlate         *DetectedPlate `json:"detected_plate" bson:"detected_plate"`
 
-	ImageFileName        string     `json:"image_file_name" bson:"image_file_name"`
-	VideoFileName        string     `json:"video_file_name" bson:"video_file_name"` //Index
-	VideoFileCreatedDate *time.Time `json:"video_file_created_date" bson:"video_file_created_date"`
-	VideoFileDuration    int        `json:"video_file_duration" bson:"video_file_duration"`
+	ImageFileName string `json:"image_file_name" bson:"image_file_name"`
+
+	VideoFile *VideoFile `json:"video_file" bson:"video_file"`
 
 	AiClip *data.AiClip `json:"ai_clip" bson:"ai_clip"`
 

@@ -258,7 +258,7 @@ func (h *Holders) createOnvifEvent(c *Client) *Holder {
 
 func (h *Holders) createVideoMergeEvent(c *Client) *Holder {
 	e := &eb.EventBus{PubSubConnection: h.Rb.PubSubConnection, Channel: "vfm_response"}
-	eh := &eb.VideMergeResponseEvent{Pusher: c}
+	eh := &eb.VfmResponseEvent{Pusher: c}
 	go func() {
 		err := e.Subscribe(eh)
 		if err != nil {

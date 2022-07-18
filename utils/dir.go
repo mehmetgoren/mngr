@@ -4,6 +4,7 @@ import (
 	"mngr/models"
 	"os"
 	"path"
+	"strings"
 )
 
 func createDirIfNotExist(dir string) error {
@@ -164,3 +165,11 @@ func GetHourlyAlprImagesPathBySourceId(config *models.Config, sourceId string, d
 }
 
 // alpr ends
+
+func SetRelativeImagePath(config *models.Config, fullImagePath string) string {
+	return strings.Replace(fullImagePath, config.General.RootFolderPath+"/", "", -1)
+}
+
+func SetOdAiVideoClipPath(config *models.Config, fullVideoPath string) string {
+	return strings.Replace(fullVideoPath, config.General.RootFolderPath+"/", "", -1)
+}

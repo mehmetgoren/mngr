@@ -65,7 +65,7 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 	})
 	router.POST("/videomerge", func(ctx *gin.Context) {
-		var event eb.VideMergeRequestEvent
+		var event eb.VfmRequestEvent
 		ctx.BindJSON(&event)
 		event.Rb = rb
 		err := event.Publish()

@@ -13,6 +13,8 @@ type BaseEntity struct {
 	VideoFileName        string     `json:"video_file_name" gorm:"index"` //Index
 	VideoFileCreatedDate *time.Time `json:"video_file_created_date"`
 	VideoFileDuration    int        `json:"video_file_duration"`
+	VideoFileMerged      bool       `json:"video_file_merged"`
+	ObjectAppearsAt      int        `json:"object_appears_at"`
 
 	AiClipEnabled           bool   `json:"ai_clip_enabled"`
 	AiClipFileName          string `json:"ai_clip_file_name" gorm:"index"` //Index
