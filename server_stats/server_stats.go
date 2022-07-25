@@ -33,13 +33,13 @@ func (s *ServerStats) InitCpuInfos() error {
 	}
 	total := float64(after.Total - before.Total)
 	c.Count = before.CPUCount
-	c.UserUsage = utils.Round(float64(after.User-before.User) / total * 100)
+	c.UserUsage = utils.RoundFloat64(float64(after.User-before.User) / total * 100)
 	c.UserUsageHuman = human.CommafWithDigits(c.UserUsage, 2) + " %"
-	c.SystemUsage = utils.Round(float64(after.System-before.System) / total * 100)
+	c.SystemUsage = utils.RoundFloat64(float64(after.System-before.System) / total * 100)
 	c.SystemUsageHuman = human.CommafWithDigits(c.SystemUsage, 2) + " %"
-	c.Idle = utils.Round(float64(after.Idle-before.Idle) / total * 100)
+	c.Idle = utils.RoundFloat64(float64(after.Idle-before.Idle) / total * 100)
 	c.IdleHuman = human.CommafWithDigits(c.Idle, 2) + " %"
-	c.UsagePercent = utils.Round(100.0 - c.Idle)
+	c.UsagePercent = utils.RoundFloat64(100.0 - c.Idle)
 	c.UsagePercentHuman = human.CommafWithDigits(c.UsagePercent, 2) + " %"
 
 	s.Cpu = c
@@ -61,7 +61,7 @@ func (s *ServerStats) InitMemInfos() error {
 	m.CachedHuman = human.IBytes(mem.Cached)
 	m.Free = mem.Free / 1024 / 1024
 	m.FreeHuman = human.IBytes(mem.Free)
-	m.UsagePercent = utils.Round(float64(m.Used) / float64(m.Total) * 100.0)
+	m.UsagePercent = utils.RoundFloat64(float64(m.Used) / float64(m.Total) * 100.0)
 	m.UsagePercentHuman = human.CommafWithDigits(m.UsagePercent, 2) + " %"
 
 	s.Memory = m
@@ -96,7 +96,7 @@ func (s *ServerStats) InitDiskInfos(config *models.Config) error {
 			d.UsedHuman = human.Bytes(u.Used)
 			d.Free = u.Free / 1024 / 1024
 			d.FreeHuman = human.Bytes(u.Free)
-			d.UsagePercent = utils.Round(u.UsedPercent)
+			d.UsagePercent = utils.RoundFloat64(u.UsedPercent)
 			d.UsagePercentHuman = human.CommafWithDigits(d.UsagePercent, 2) + " %"
 			s.Disk = d
 

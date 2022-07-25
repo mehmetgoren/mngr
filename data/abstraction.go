@@ -6,10 +6,12 @@ import (
 )
 
 type GetParams struct {
-	SourceId string
-	T1       time.Time
-	T2       time.Time
-	Sort     bool
+	SourceId             string
+	ClassName            string
+	NoPreparingVideoFile bool
+	T1                   time.Time
+	T2                   time.Time
+	Sort                 bool
 }
 
 func GetParamsByHour(sourceId string, dateStr string) *GetParams {

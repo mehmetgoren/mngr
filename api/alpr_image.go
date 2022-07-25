@@ -33,9 +33,8 @@ func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factor
 			return
 		}
 
-		config, _ := rb.ConfigRep.GetConfig()
 		for _, dto := range dtos {
-			item := &ImageItem{Id: dto.Id, ImagePath: utils.SetRelativeImagePath(config, dto.ImageFileName), CreatedAt: dto.CreatedAt}
+			item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
 			items = append(items, item)
 		}
 

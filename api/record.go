@@ -52,7 +52,7 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			intHour, _ := strconv.Atoi(hour)
 			videoFile.Hour = utils.FixZero(intHour)
 			utils.SetVideoFilePath(&videoFile)
-			videoFile.Size = utils.Round(float64(file.Size()) * 0.000001)
+			videoFile.Size = utils.RoundFloat64(float64(file.Size()) * 0.000001)
 			videoFile.CreatedAt = strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 			videoFile.ModifiedAt = utils.TimeToString(file.ModTime(), true)
 			list = append(list, &videoFile)

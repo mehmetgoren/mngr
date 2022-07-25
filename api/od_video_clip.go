@@ -22,8 +22,7 @@ func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket, facto
 			return
 		}
 
-		config, _ := rb.ConfigRep.GetConfig()
-		list := view_models.Map(config, entities)
+		list := view_models.Map(entities)
 		ctx.JSON(http.StatusOK, list)
 	})
 

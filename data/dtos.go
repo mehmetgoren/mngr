@@ -1,9 +1,5 @@
 package data
 
-import (
-	"time"
-)
-
 type AiClip struct {
 	Enabled        bool   `json:"enabled" bson:"enabled"`
 	FileName       string `json:"file_name" bson:"file_name"`
@@ -13,11 +9,11 @@ type AiClip struct {
 }
 
 type VideoFileDto struct {
-	Name            string    `json:"name"`
-	CreatedDate     time.Time `json:"created_date"`
-	Duration        int       `json:"duration"`
-	Merged          bool      `json:"merged"`
-	ObjectAppearsAt int       `json:"object_appears_at"`
+	Name            string `json:"name"`
+	CreatedAt       string `json:"created_at"`
+	Duration        int    `json:"duration"`
+	Merged          bool   `json:"merged"`
+	ObjectAppearsAt int    `json:"object_appears_at"`
 }
 
 type DetectedObjectDto struct {
@@ -33,7 +29,7 @@ type OdDto struct {
 	CreatedAt      string             `json:"created_at"`
 	DetectedObject *DetectedObjectDto `json:"detected_object"`
 	ImageFileName  string             `json:"image_file_name"`
-	VideoFile      *VideoFileDto      `json:"video_file_name"`
+	VideoFile      *VideoFileDto      `json:"video_file"`
 	AiClip         *AiClip            `json:"ai_clip"`
 }
 
@@ -54,7 +50,7 @@ type FrDto struct {
 	CreatedAt     string           `json:"created_at"`
 	DetectedFace  *DetectedFaceDto `json:"detected_face"`
 	ImageFileName string           `json:"image_file_name"`
-	VideoFile     *VideoFileDto    `json:"video_file_name"`
+	VideoFile     *VideoFileDto    `json:"video_file"`
 	AiClip        *AiClip          `json:"ai_clip"`
 }
 
@@ -71,6 +67,57 @@ type AlprDto struct {
 	CreatedAt     string            `json:"created_at"`
 	DetectedPlate *DetectedPlateDto `json:"detected_plate"`
 	ImageFileName string            `json:"image_file_name"`
-	VideoFile     *VideoFileDto     `json:"video_file_name"`
+	VideoFile     *VideoFileDto     `json:"video_file"`
 	AiClip        *AiClip           `json:"ai_clip"`
+}
+
+type AiDataDto struct {
+	Id            string        `json:"id"`
+	GroupId       string        `json:"group_id"`
+	SourceId      string        `json:"source_id"`
+	CreatedAt     string        `json:"created_at"`
+	PredClsName   string        `json:"pred_cls_name"`
+	PredScore     float32       `json:"pred_score"`
+	ImageFileName string        `json:"image_file_name"`
+	VideoFile     *VideoFileDto `json:"video_file"`
+	AiClip        *AiClip       `json:"ai_clip"`
+}
+
+func (a *AiDataDto) MapFromOd(ods *OdDto) *AiDataDto {
+	a.Id = ods.Id
+	a.GroupId = ods.GroupId
+	a.SourceId = ods.SourceId
+	a.CreatedAt = ods.CreatedAt
+	a.PredClsName = ods.DetectedObject.PredClsName
+	a.PredScore = ods.DetectedObject.PredScore
+	a.ImageFileName = ods.ImageFileName
+	a.VideoFile = ods.VideoFile
+	a.AiClip = ods.AiClip
+	return a
+}
+
+func (a *AiDataDto) MapFromFr(frs *FrDto) *AiDataDto {
+	a.Id = frs.Id
+	a.GroupId = frs.GroupId
+	a.SourceId = frs.SourceId
+	a.CreatedAt = frs.CreatedAt
+	a.PredClsName = frs.DetectedFace.PredClsName
+	a.PredScore = frs.DetectedFace.PredScore
+	a.ImageFileName = frs.ImageFileName
+	a.VideoFile = frs.VideoFile
+	a.AiClip = frs.AiClip
+	return a
+}
+
+func (a *AiDataDto) MapFromAlpr(alprs *AlprDto) *AiDataDto {
+	a.Id = alprs.Id
+	a.GroupId = alprs.GroupId
+	a.SourceId = alprs.SourceId
+	a.CreatedAt = alprs.CreatedAt
+	a.PredClsName = alprs.DetectedPlate.Plate
+	a.PredScore = float32(alprs.DetectedPlate.Confidence)
+	a.ImageFileName = alprs.ImageFileName
+	a.VideoFile = alprs.VideoFile
+	a.AiClip = alprs.AiClip
+	return a
 }

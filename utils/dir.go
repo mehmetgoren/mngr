@@ -170,6 +170,10 @@ func SetRelativeImagePath(config *models.Config, fullImagePath string) string {
 	return strings.Replace(fullImagePath, config.General.RootFolderPath+"/", "", -1)
 }
 
-func SetOdAiVideoClipPath(config *models.Config, fullVideoPath string) string {
+func SetRelativeOdAiVideoClipPath(config *models.Config, fullVideoPath string) string {
 	return strings.Replace(fullVideoPath, config.General.RootFolderPath+"/", "", -1)
+}
+
+func SetRelativeRecordPath(config *models.Config, fullRecordPath string) string {
+	return strings.Replace(fullRecordPath, config.General.RootFolderPath+"/record", "playback", -1)
 }

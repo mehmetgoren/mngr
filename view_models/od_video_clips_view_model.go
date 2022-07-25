@@ -2,8 +2,6 @@ package view_models
 
 import (
 	"mngr/data"
-	"mngr/models"
-	"mngr/utils"
 	"path"
 	"strings"
 )
@@ -33,7 +31,7 @@ type OdVideoClipsViewModel struct {
 	Duration            int               `json:"duration"`
 }
 
-func Map(config *models.Config, list []*data.OdDto) []*OdVideoClipsViewModel {
+func Map(list []*data.OdDto) []*OdVideoClipsViewModel {
 	ret := make([]*OdVideoClipsViewModel, 0)
 	dic := make(map[string]*OdVideoClipsViewModel)
 	for _, item := range list {
@@ -53,13 +51,13 @@ func Map(config *models.Config, list []*data.OdDto) []*OdVideoClipsViewModel {
 
 			val.VideoCreatedAt = item.AiClip.CreatedAt
 			val.VideoLastModifiedAt = item.AiClip.LastModifiedAt
-			val.VideoFileName = utils.SetOdAiVideoClipPath(config, item.AiClip.FileName)
+			val.VideoFileName = item.AiClip.FileName
 			val.VideoBaseFileName = path.Base(item.AiClip.FileName)
 			val.Duration = item.AiClip.Duration
 			dic[key] = val
 			ret = append(ret, val)
 		}
-		val.ImageFileNames = append(val.ImageFileNames, utils.SetRelativeImagePath(config, item.ImageFileName))
+		val.ImageFileNames = append(val.ImageFileNames, item.ImageFileName)
 		do := &DetectedObjectViewModel{}
 		do.PredClsIdx = item.DetectedObject.PredClsIdx
 		do.PredClsName = item.DetectedObject.PredClsName

@@ -10,8 +10,21 @@ type MongoRepository struct {
 	Db *DbContext
 }
 
-func createQuery(params *data.GetParams) bson.M {
-	return bson.M{"source_id": params.SourceId, "created_date": bson.M{"$gte": params.T1, "$lt": params.T2}}
+func createQuery(className string, params *data.GetParams) (bson.M, bson.D) {
+	q := bson.M{}
+	q["source_id"] = params.SourceId
+	q["created_date"] = bson.M{"$gte": params.T1, "$lte": params.T2}
+	if len(params.ClassName) > 0 {
+		q[className] = primitive.Regex{Pattern: params.ClassName, Options: "i"} //bson.M{"$regex": "/.*" + params.ClassName + ".*/", "$options": "i"}
+	}
+	if params.NoPreparingVideoFile {
+		q["video_file.name"] = bson.M{"$exists": true, "$ne": ""}
+	}
+	var sorts bson.D
+	if params.Sort {
+		sorts = bson.D{{"created_date", -1}}
+	}
+	return q, sorts
 }
 
 func (m *MongoRepository) GetOds(params *data.GetParams) ([]*data.OdDto, error) {
@@ -19,11 +32,8 @@ func (m *MongoRepository) GetOds(params *data.GetParams) ([]*data.OdDto, error) 
 		return nil, nil
 	}
 
-	var sorts bson.D
-	if params.Sort {
-		sorts = bson.D{{"created_date", -1}}
-	}
-	entities, err := m.Db.Ods.GetByQuery(createQuery(params), sorts)
+	q, s := createQuery("detected_object.pred_cls_name", params)
+	entities, err := m.Db.Ods.GetByQuery(q, s)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +41,7 @@ func (m *MongoRepository) GetOds(params *data.GetParams) ([]*data.OdDto, error) 
 		return nil, nil
 	}
 
-	mapper := &OdMapper{}
+	mapper := &OdMapper{Config: m.Db.Config}
 	ret := make([]*data.OdDto, 0)
 	for _, entity := range entities {
 		ret = append(ret, mapper.Map(entity))
@@ -45,16 +55,13 @@ func (m *MongoRepository) GetFrs(params *data.GetParams) ([]*data.FrDto, error) 
 		return nil, nil
 	}
 
-	var sorts bson.D
-	if params.Sort {
-		sorts = bson.D{{"created_date", -1}}
-	}
-	entities, err := m.Db.Frs.GetByQuery(createQuery(params), sorts)
+	q, s := createQuery("detected_face.pred_cls_name", params)
+	entities, err := m.Db.Frs.GetByQuery(q, s)
 	if err != nil {
 		return nil, err
 	}
 
-	mapper := &FrMapper{}
+	mapper := &FrMapper{Config: m.Db.Config}
 	ret := make([]*data.FrDto, 0)
 	for _, entity := range entities {
 		ret = append(ret, mapper.Map(entity))
@@ -68,16 +75,13 @@ func (m *MongoRepository) GetAlprs(params *data.GetParams) ([]*data.AlprDto, err
 		return nil, nil
 	}
 
-	var sorts bson.D
-	if params.Sort {
-		sorts = bson.D{{"created_date", -1}}
-	}
-	entities, err := m.Db.Alprs.GetByQuery(createQuery(params), sorts)
+	q, s := createQuery("detected_plate.plate", params)
+	entities, err := m.Db.Alprs.GetByQuery(q, s)
 	if err != nil {
 		return nil, err
 	}
 
-	mapper := &AlprMapper{}
+	mapper := &AlprMapper{Config: m.Db.Config}
 	ret := make([]*data.AlprDto, 0)
 	for _, entity := range entities {
 		ret = append(ret, mapper.Map(entity))
