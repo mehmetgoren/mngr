@@ -15,6 +15,7 @@ func (o *OdMapper) Map(source *OdEntity) *data.OdDto {
 	ret := &data.OdDto{}
 	ret.Id = strconv.FormatUint(uint64(source.ID), 10)
 	ret.GroupId = source.GroupId
+	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAtStr
 	ret.DetectedObject = &data.DetectedObjectDto{
 		PredScore:   utils.RoundFloat32(source.PredScore),

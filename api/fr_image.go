@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/data"
 	"mngr/data/cmn"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
@@ -27,7 +28,8 @@ func RegisterFrImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory 
 		}
 
 		items := make([]*ImageItem, 0)
-		dtos, err := factory.CreateRepository().GetFrs(data.GetParamsByHour(model.SourceId, model.RootPath))
+		si := models.CreateDateSort(factory.GetCreatedDateFieldName())
+		dtos, err := factory.CreateRepository().QueryFrs(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
 		if err != nil {
 			ctx.JSON(http.StatusOK, items)
 			return

@@ -46,3 +46,7 @@ func (f *Factory) Close() error {
 
 	return nil
 }
+
+func (f *Factory) GetCreatedDateFieldName() string {
+	return "created_date"
+}

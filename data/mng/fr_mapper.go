@@ -14,6 +14,7 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 	ret := &data.FrDto{}
 	ret.Id = source.Id.String()
 	ret.GroupId = source.GroupId
+	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAt
 	ret.DetectedFace = &data.DetectedFaceDto{
 		PredScore:   utils.RoundFloat32(source.DetectedFace.PredScore),

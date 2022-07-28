@@ -37,9 +37,13 @@ func (d *DbSet[T]) Close() error {
 	return d.conn.Disconnect(context.TODO())
 }
 
-func (d *DbSet[T]) GetByQuery(query bson.M, sorts bson.D) ([]*T, error) {
+func (d *DbSet[T]) GetByQuery(query bson.M, paging *PagingOptions, sorts bson.D) ([]*T, error) {
 	ctx := context.TODO()
 	opts := options.Find()
+	if paging != nil {
+		opts.SetSkip(int64(paging.Skip))
+		opts.SetLimit(int64(paging.Limit))
+	}
 	if sorts != nil {
 		opts.SetSort(sorts)
 	}

@@ -14,6 +14,7 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 	ret := &data.AlprDto{}
 	ret.Id = source.Id.String()
 	ret.GroupId = source.GroupId
+	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAt
 	ret.DetectedPlate = &data.DetectedPlateDto{
 		Plate:      source.DetectedPlate.Plate,

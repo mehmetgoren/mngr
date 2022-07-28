@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/data"
 	"mngr/data/cmn"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
@@ -27,7 +28,8 @@ func RegisterAlprImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factor
 		}
 
 		items := make([]*ImageItem, 0)
-		dtos, err := factory.CreateRepository().GetAlprs(data.GetParamsByHour(model.SourceId, model.RootPath))
+		si := models.CreateDateSort(factory.GetCreatedDateFieldName())
+		dtos, err := factory.CreateRepository().QueryAlprs(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
 		if err != nil {
 			ctx.JSON(http.StatusOK, items)
 			return

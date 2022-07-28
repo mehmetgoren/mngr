@@ -1,36 +1,48 @@
 package data
 
 import (
+	"mngr/models"
 	"mngr/utils"
 	"time"
 )
 
-type GetParams struct {
+type QueryParams struct {
 	SourceId             string
 	ClassName            string
 	NoPreparingVideoFile bool
 	T1                   time.Time
 	T2                   time.Time
-	Sort                 bool
+	Sort                 models.SortInfo
+	Paging               models.PagingInfo
 }
 
-func GetParamsByHour(sourceId string, dateStr string) *GetParams {
-	params := &GetParams{}
+func GetParamsByHour(sourceId string, dateStr string, sort models.SortInfo) *QueryParams {
+	params := &QueryParams{}
 	params.SourceId = sourceId
-	params.Sort = true
-	params.SetupTimes(dateStr)
+	params.Sort = sort
+	params.SetupHourlyTimes(dateStr)
 	return params
 }
 
-func (g *GetParams) SetupTimes(dataStr string) {
-	g.T1 = utils.StringToTime(dataStr)
-	g.T2 = g.T1.Add(time.Hour)
+func (q *QueryParams) SetupHourlyTimes(dataStr string) {
+	q.T1 = utils.StringToTime(dataStr)
+	q.T2 = q.T1.Add(time.Hour)
+}
+
+func (q *QueryParams) SetupTimes(startDateStr string, endDateStr string) {
+	q.T1 = utils.StringToTime(startDateStr)
+	q.T2 = utils.StringToTime(endDateStr)
 }
 
 type Repository interface {
-	GetOds(params *GetParams) ([]*OdDto, error)
-	GetFrs(params *GetParams) ([]*FrDto, error)
-	GetAlprs(params *GetParams) ([]*AlprDto, error)
+	QueryOds(params QueryParams) ([]*OdDto, error)
+	CountOds(params QueryParams) (int64, error)
+
+	QueryFrs(params QueryParams) ([]*FrDto, error)
+	CountFrs(params QueryParams) (int64, error)
+
+	QueryAlprs(params QueryParams) ([]*AlprDto, error)
+	CountAlprs(params QueryParams) (int64, error)
 
 	RemoveOd(id string) error
 }

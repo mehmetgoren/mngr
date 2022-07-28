@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/data"
 	"mngr/data/cmn"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
@@ -103,8 +104,8 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory 
 		}
 
 		items := make([]*ImageItem, 0)
-
-		dtos, err := factory.CreateRepository().GetOds(data.GetParamsByHour(model.SourceId, model.RootPath))
+		si := models.CreateDateSort(factory.GetCreatedDateFieldName())
+		dtos, err := factory.CreateRepository().QueryOds(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
 		if err != nil || dtos == nil {
 			ctx.JSON(http.StatusOK, items)
 			return

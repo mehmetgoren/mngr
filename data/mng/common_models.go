@@ -9,3 +9,8 @@ type VideoFile struct {
 	Merged          bool               `json:"merged" bson:"merged"`
 	ObjectAppearsAt int                `json:"object_appears_at" bson:"object_appears_at"`
 }
+
+type PagingOptions struct {
+	Skip  int
+	Limit int
+}
