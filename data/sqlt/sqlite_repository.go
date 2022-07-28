@@ -4,6 +4,8 @@ import (
 	"gorm.io/gorm"
 	"mngr/data"
 	"mngr/models"
+	"os"
+	"strconv"
 	"strings"
 )
 
@@ -145,4 +147,77 @@ func (s *SqliteRepository) RemoveOd(id string) error {
 	}
 
 	return nil
+}
+
+func deleteRec[T any](db *gorm.DB, options *data.DeleteOptions, cast func(t *T) *BaseEntity) error {
+	if options.Id == "" {
+		return nil
+	}
+
+	id_, err := strconv.ParseUint(options.Id, 10, 32)
+	if err != nil {
+		return err
+	}
+	id := uint(id_)
+	entity := new(T)
+	result := db.First(entity, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	result = db.Delete(entity, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if options.DeleteImage {
+		be := cast(entity)
+		if be.GroupId != "" {
+			result = db.Where("group_id = ?", be.GroupId).Delete(entity)
+			if result.Error != nil {
+				return result.Error
+			}
+			err = os.Remove(be.ImageFileName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if options.DeleteVideo {
+		be := cast(entity)
+		if be.VideoFileName != "" {
+			result = db.Where("video_file_name = ?", be.VideoFileName).Delete(entity)
+			if result.Error != nil {
+				return result.Error
+			}
+			err = os.Remove(be.VideoFileName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *SqliteRepository) DeleteOds(options *data.DeleteOptions) error {
+	cast := func(t *OdEntity) *BaseEntity {
+		return &t.BaseEntity
+	}
+	return deleteRec[OdEntity](s.Db.Ods.GetGormDb(), options, cast)
+}
+
+func (s *SqliteRepository) DeleteFrs(options *data.DeleteOptions) error {
+	cast := func(t *FrEntity) *BaseEntity {
+		return &t.BaseEntity
+	}
+	return deleteRec[FrEntity](s.Db.Frs.GetGormDb(), options, cast)
+}
+
+func (s *SqliteRepository) DeleteAlprs(options *data.DeleteOptions) error {
+	cast := func(t *AlprEntity) *BaseEntity {
+		return &t.BaseEntity
+	}
+	return deleteRec[AlprEntity](s.Db.Alprs.GetGormDb(), options, cast)
 }

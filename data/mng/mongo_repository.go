@@ -5,7 +5,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"mngr/data"
+	"os"
 )
 
 type MongoRepository struct {
@@ -152,4 +154,88 @@ func (m *MongoRepository) RemoveOd(id string) error {
 	_, err = m.Db.Ods.DeleteOneById(objectId)
 
 	return err
+}
+
+func deleteRec[T any](coll *mongo.Collection, options *data.DeleteOptions,
+	getGroupId func(t *T) string, getImageFileName func(t *T) string, getVideoFileName func(t *T) string) error {
+	objectId, err := primitive.ObjectIDFromHex(options.Id)
+	if err != nil {
+		log.Println("Invalid id")
+	}
+
+	ctx := context.TODO()
+	result := coll.FindOne(ctx, bson.M{"_id": objectId})
+	entity := new(T)
+	err = result.Decode(entity)
+	if err != nil {
+		return err
+	}
+	_, err = coll.DeleteOne(ctx, bson.M{"_id": objectId})
+	if err != nil {
+		return err
+	}
+
+	if options.DeleteImage {
+		_, err = coll.DeleteMany(ctx, bson.M{"group_id": getGroupId(entity)})
+		if err != nil {
+			return err
+		}
+		imageFileName := getImageFileName(entity)
+		err = os.Remove(imageFileName)
+		if err != nil {
+			return err
+		}
+	}
+
+	if options.DeleteVideo {
+		videoFileName := getVideoFileName(entity)
+		_, err = coll.DeleteMany(ctx, bson.M{"video_file.name": videoFileName})
+		if err != nil {
+			return err
+		}
+		err = os.Remove(videoFileName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *MongoRepository) DeleteOds(options *data.DeleteOptions) error {
+	getGroupId := func(t *OdEntity) string {
+		return t.GroupId
+	}
+	getImageFileName := func(t *OdEntity) string {
+		return t.ImageFileName
+	}
+	getVideoFileName := func(t *OdEntity) string {
+		return t.VideoFile.Name
+	}
+	return deleteRec[OdEntity](m.Db.Ods.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
+}
+
+func (m *MongoRepository) DeleteFrs(options *data.DeleteOptions) error {
+	getGroupId := func(t *FrEntity) string {
+		return t.GroupId
+	}
+	getImageFileName := func(t *FrEntity) string {
+		return t.ImageFileName
+	}
+	getVideoFileName := func(t *FrEntity) string {
+		return t.VideoFile.Name
+	}
+	return deleteRec[FrEntity](m.Db.Frs.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
+}
+
+func (m *MongoRepository) DeleteAlprs(options *data.DeleteOptions) error {
+	getGroupId := func(t *AlprEntity) string {
+		return t.GroupId
+	}
+	getImageFileName := func(t *AlprEntity) string {
+		return t.ImageFileName
+	}
+	getVideoFileName := func(t *AlprEntity) string {
+		return t.VideoFile.Name
+	}
+	return deleteRec[AlprEntity](m.Db.Alprs.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
 }

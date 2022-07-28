@@ -12,7 +12,7 @@ type FrMapper struct {
 
 func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 	ret := &data.FrDto{}
-	ret.Id = source.Id.String()
+	ret.Id = source.Id.Hex()
 	ret.GroupId = source.GroupId
 	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAt

@@ -34,6 +34,12 @@ func (q *QueryParams) SetupTimes(startDateStr string, endDateStr string) {
 	q.T2 = utils.StringToTime(endDateStr)
 }
 
+type DeleteOptions struct {
+	Id          string
+	DeleteImage bool
+	DeleteVideo bool
+}
+
 type Repository interface {
 	QueryOds(params QueryParams) ([]*OdDto, error)
 	CountOds(params QueryParams) (int64, error)
@@ -45,4 +51,8 @@ type Repository interface {
 	CountAlprs(params QueryParams) (int64, error)
 
 	RemoveOd(id string) error
+
+	DeleteOds(options *DeleteOptions) error
+	DeleteFrs(options *DeleteOptions) error
+	DeleteAlprs(options *DeleteOptions) error
 }

@@ -59,3 +59,7 @@ func (d *DbSet[T]) GetByQuery(query bson.M, paging *PagingOptions, sorts bson.D)
 func (d *DbSet[T]) DeleteOneById(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	return d.coll.DeleteOne(context.TODO(), bson.M{"_id": id})
 }
+
+func (d *DbSet[T]) GetCollection() *mongo.Collection {
+	return d.coll
+}

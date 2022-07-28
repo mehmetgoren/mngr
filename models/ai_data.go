@@ -49,3 +49,10 @@ type QueryAiDataAdvancedParams struct {
 	Sort                 SortInfo   `json:"sort"`
 	Paging               PagingInfo `json:"paging"`
 }
+
+type AiDataDeleteOptions struct {
+	AiType      int    `json:"ai_type"`
+	Id          string `json:"id"`
+	DeleteImage bool   `json:"delete_image"`
+	DeleteVideo bool   `json:"delete_video"`
+}

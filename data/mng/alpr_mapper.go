@@ -12,7 +12,7 @@ type AlprMapper struct {
 
 func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 	ret := &data.AlprDto{}
-	ret.Id = source.Id.String()
+	ret.Id = source.Id.Hex()
 	ret.GroupId = source.GroupId
 	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAt

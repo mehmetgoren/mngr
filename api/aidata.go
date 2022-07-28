@@ -106,4 +106,41 @@ func RegisterAiDataEndpoints(router *gin.Engine, factory *cmn.Factory) {
 			ctx.JSON(http.StatusOK, 0)
 		}
 	})
+
+	router.DELETE("deleteaidata", func(ctx *gin.Context) {
+		var p models.AiDataDeleteOptions
+		if err := ctx.ShouldBindJSON(&p); err != nil {
+			ctx.JSON(http.StatusOK, false)
+			return
+		}
+		options := &data.DeleteOptions{}
+		options.Id = p.Id
+		options.DeleteVideo = p.DeleteVideo
+		options.DeleteImage = p.DeleteImage
+
+		switch p.AiType {
+		case models.Od:
+			err := factory.CreateRepository().DeleteOds(options)
+			if err != nil {
+				ctx.JSON(http.StatusOK, false)
+				return
+			}
+			break
+		case models.Fr:
+			err := factory.CreateRepository().DeleteFrs(options)
+			if err != nil {
+				ctx.JSON(http.StatusOK, false)
+				return
+			}
+			break
+		case models.Alpr:
+			err := factory.CreateRepository().DeleteAlprs(options)
+			if err != nil {
+				ctx.JSON(http.StatusOK, false)
+				return
+			}
+			break
+		}
+		ctx.JSON(http.StatusOK, true)
+	})
 }

@@ -12,6 +12,8 @@ func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 	utils.CreateRequiredDirectories(config)
 
 	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
+	router.StaticFile("/blank.mp4", "./static/playback/blank.mp4")
+
 	streamFolderPath := utils.GetStreamPath(config)
 	router.Static("/livestream", streamFolderPath)
 

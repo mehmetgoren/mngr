@@ -49,6 +49,7 @@ func initWhiteList() {
 	whiteList = append(whiteList, "/od/")
 	whiteList = append(whiteList, "/fr/")
 	whiteList = append(whiteList, "/alpr/")
+	whiteList = append(whiteList, "/blank.mp4")
 }
 
 func createFactory() *cmn.Factory {
