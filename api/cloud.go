@@ -82,4 +82,11 @@ func RegisterCloudEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		cloudRep.SaveGdriveToken(model.TokenJson)
 		cloudRep.SaveGdriveUrl(model.URL)
 	})
+
+	router.POST("/resetgdrivetokenandurl", func(ctx *gin.Context) {
+		cloudRep := rb.CloudRep
+		cloudRep.SaveGdriveToken("")
+		cloudRep.SaveGdriveUrl("")
+		ctx.JSON(http.StatusOK, true)
+	})
 }
