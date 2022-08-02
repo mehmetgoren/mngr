@@ -97,7 +97,6 @@ func (v *VariousInfosRepository) Get() (*models.VariousInfos, error) {
 	ret := &models.VariousInfos{}
 	ret.RtmpPortCounter, _ = strconv.Atoi(result)
 
-	//result2, err := conn.LRange(ctx, "zombies:docker", 0, -1).Result()
 	result2, err := conn.SMembers(ctx, "zombies:docker").Result()
 	if err != nil {
 		return nil, err

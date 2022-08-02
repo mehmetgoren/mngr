@@ -132,10 +132,11 @@ func (h *Holders) RegisterEndPoint(hub *Hub, ctx *gin.Context, opType int, keyEx
 	client := CreateClient(hub, ctx.Writer, ctx.Request)
 	dic := h.getDic(opType)
 	if prev, ok := dic[token]; ok {
-		err := prev.Client.Close()
-		if err != nil {
-			log.Println("Error while closing prev websockets connection for FFmpeg Reader. Err: ", err)
-		}
+		//todo: refactor whole webscokets implementation
+		//err := prev.Client.Close()
+		//if err != nil {
+		//	log.Println("Error while closing prev websockets connection. Err: ", err)
+		//}
 		prev.Client = client
 		prev.EventHandler.SetPusher(client)
 		log.Println("holder's item has been already added,changing Ws Client for " + token)
