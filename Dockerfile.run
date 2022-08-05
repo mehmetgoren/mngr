@@ -1,2 +1,2 @@
 docker build -t mngr:v1.0.0 .
-docker run -it --restart unless-stopped --name mngr-instance --net host -v /mnt/sde1:/mnt/sde1 mngr:v1.0.0
+docker run -it --restart unless-stopped --name mngr-instance --net host -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock mngr:v1.0.0
