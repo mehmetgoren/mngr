@@ -34,6 +34,32 @@ func (r *ServiceRepository) Add(serviceName string) (int64, error) {
 		CpuCount:        runtime.NumCPU(),
 		Ram:             "unknown",
 		Pid:             os.Getpid(),
+		InstanceType:    models.Container,
+		InstanceName:    "mngr-instance",
+		CreatedAt:       utils.TimeToString(now, true),
+		Heartbeat:       "",
+	}
+
+	return r.Connection.HSet(context.Background(), getServicesKey(serviceName), Map(sm)).Result()
+}
+
+func (r *ServiceRepository) AddWebApp(serviceName string) (int64, error) {
+	now := time.Now()
+	host, _ := os.Hostname()
+	sm := &models.ServiceModel{
+		Name:            serviceName,
+		Description:     "The Web Application Service®",
+		Platform:        runtime.GOOS,
+		PlatformVersion: runtime.GOARCH,
+		HostName:        host,
+		IpAddress:       "127.0.0.1",
+		MacAddress:      "00:00:00:00:00:00",
+		Processor:       "unknown",
+		CpuCount:        runtime.NumCPU(),
+		Ram:             "unknown",
+		Pid:             os.Getpid(),
+		InstanceType:    models.Container,
+		InstanceName:    "webapp-instance",
 		CreatedAt:       utils.TimeToString(now, true),
 		Heartbeat:       "",
 	}

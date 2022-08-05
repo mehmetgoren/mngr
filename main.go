@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/docker/docker/client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -70,6 +71,16 @@ func main() {
 
 	factory := createFactory()
 	defer factory.Close()
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		log.Println(err.Error())
+	}
+	defer func() {
+		if dockerClient != nil {
+			err = dockerClient.Close()
+			log.Println(err.Error())
+		}
+	}()
 
 	checkDefaultUser(rb)
 
@@ -104,7 +115,7 @@ func main() {
 	api.RegisterOnvifEndpoints(router, rb)
 	api.RegisterFrTrainingEndpoints(router, rb)
 	api.RegisterUserEndpoints(router, holders)
-	api.RegisterServiceEndpoints(router, rb)
+	api.RegisterServiceEndpoints(router, rb, dockerClient)
 	api.RegisterServerStatsEndpoints(router, rb)
 	api.RegisterOthersEndpoints(router, rb)
 	api.RegisterCloudEndpoints(router, rb)
@@ -113,7 +124,7 @@ func main() {
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
-	err := router.Run(":2072")
+	err = router.Run(":2072")
 	if err != nil {
 		log.Println(err.Error())
 		return
