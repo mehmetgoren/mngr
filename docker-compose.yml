@@ -1,0 +1,165 @@
+version: "3"
+services:
+  onvf:
+    image: gokalpgoren/onvf:v1.0.0-amd64
+    container_name: "onvf-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    network_mode: "host" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  alpr:
+    image: gokalpgoren/alpr:v1.0.0-amd64
+    container_name: "alpr-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    network_mode: "host" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/alpr:/tmp/alpr
+  smcp:
+    image: gokalpgoren/smcp:v1.0.0-amd64
+    container_name: "smcp-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    network_mode: "host"
+    volumes:
+      - /mnt/sda1:/mnt/sda1
+  mngr:
+    image: gokalpgoren/mngr:v1.0.0-amd64
+    container_name: "mngr-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/sda1:/mnt/sda1
+  webapp:
+    image: gokalpgoren/webapp:v1.0.0-amd64
+    container_name: "webapp-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    ports:
+      - "8080:80"
+  ffmpeg_service:
+    image: gokalpgoren/ffmpeg_service:v1.0.0-amd64
+    container_name: "ffmpeg_service-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/sda1:/mnt/sda1
+  detect_service_pytorch:
+    image: gokalpgoren/detect_service_pytorch:v1.0.0-amd64
+    container_name: "detect_service_pytorch-instance"  
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    network_mode: "host"  
+  detect_service_tf:
+    image: gokalpgoren/detect_service_tf:v1.0.0-amd64
+    container_name: "detect_service_tf-instance"  
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    network_mode: "host"  
+  detect_service_jetson:
+    image: gokalpgoren/detect_service_jetson:v1.0.0-arm64
+    container_name: detect_service_jetson-instance
+    runtime: nvidia
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "DISPLAY=$DISPLAY"
+    restart: "unless-stopped"
+    network_mode: "host" 
+    volumes:
+      - /tmp/.X11-unix/:/tmp/.X11-unix
+      - /tmp/argus_socket:/tmp/argus_socket
+      - /etc/enctune.conf:/etc/enctune.conf 
+      - /home/gokalp/Documents/jetson-inference/data:/jetson-inference/data
+      - /home/gokalp/Documents/jetson-inference/python/training/classification/data:/jetson-inference/python/training/classification/data 
+      - /home/gokalp/Documents/jetson-inference/python/training/classification/models:/jetson-inference/python/training/classification/models
+      - /home/gokalp/Documents/jetson-inference/python/training/detection/ssd/data:/jetson-inference/python/training/detection/ssd/data
+      - /home/gokalp/Documents/jetson-inference/python/training/detection/ssd/models:/jetson-inference/python/training/detection/ssd/models gokalpgoren/detect_service_jetson:v1.0.0-arm64
+  face_recognition_pytorch:
+    image: gokalpgoren/face_recognition_pytorch:v1.0.0-amd64
+    container_name: "face_recognition_pytorch-instance"  
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "unless-stopped"
+    network_mode: "host"   
+  cv2_read_service:
+    image: gokalpgoren/cv2_read_service:v1.0.0-amd64
+    container_name: "cv2_read_service-instance"
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    network_mode: "host"    
