@@ -1,13 +1,13 @@
 docker build -t mngr:v1.0.0-amd64 .
-docker run -it --restart unless-stopped --name mngr-instance --net host -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock mngr:v1.0.0-amd64
+docker run -it --restart unless-stopped --name mngr-instance --net host -e TZ=Europe/Istanbul -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock mngr:v1.0.0-amd64
 
 gokalpgoren
     amd64:
         docker build -t gokalpgoren/mngr:v1.0.0-amd64 .
-        docker run -it --restart unless-stopped --name mngr-instance --net host -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-amd64
+        docker run -it --restart unless-stopped --name mngr-instance --net host -e TZ=Europe/Istanbul -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-amd64
 
         with nvidia container toolkit (cuda enabled)
-        docker run -it --restart unless-stopped --name mngr-instance --gpus all --net host -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-amd64
+        docker run -it --restart unless-stopped --name mngr-instance --gpus all --net host -e TZ=Europe/Istanbul -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-amd64
     raspi4:
         docker build -t gokalpgoren/mngr:v1.0.0-raspi4 .
-        docker run -it --restart unless-stopped --name mngr-instance --net host -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-raspi4
+        docker run -it --restart unless-stopped --name mngr-instance --net host -e TZ=Europe/Istanbul -v /mnt/sde1:/mnt/sde1 -v /var/run/docker.sock:/var/run/docker.sock gokalpgoren/mngr:v1.0.0-raspi4
