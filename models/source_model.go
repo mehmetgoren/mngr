@@ -59,6 +59,9 @@ type SourceModel struct {
 	Name        string `json:"name" redis:"name"`
 	Description string `json:"description" redis:"description"`
 
+	MacAddress string `json:"mac_address" redis:"mac_address"`
+	IpAddress  string `json:"ip_address" redis:"ip_address"`
+
 	Enabled        bool `json:"enabled" redis:"enabled"`
 	RtmpServerType int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
 
