@@ -28,21 +28,21 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 	})
 
 	router.POST("/restartservice", func(ctx *gin.Context) {
-		var service models.ServiceModel
-		if err := ctx.ShouldBindJSON(&service); err != nil {
-			log.Println(err.Error())
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+		containerAction(dockerClient, ctx, func(service *models.ServiceModel, dm *dckr.DockerManager) bool {
+			return dm.RestartContainer(service.InstanceName)
+		})
+	})
 
-		if service.InstanceType == models.Systemd {
-			ctx.JSON(http.StatusOK, false)
-			return
-		}
+	router.POST("/startservice", func(ctx *gin.Context) {
+		containerAction(dockerClient, ctx, func(service *models.ServiceModel, dm *dckr.DockerManager) bool {
+			return dm.StartContainer(service.InstanceName)
+		})
+	})
 
-		dm := dckr.DockerManager{Client: dockerClient}
-		result := dm.RestartContainer(service.InstanceName)
-		ctx.JSON(http.StatusOK, result)
+	router.POST("/stopservice", func(ctx *gin.Context) {
+		containerAction(dockerClient, ctx, func(service *models.ServiceModel, dm *dckr.DockerManager) bool {
+			return dm.StopContainer(service.InstanceName)
+		})
 	})
 
 	router.POST("/restartaftercloudchanges", func(ctx *gin.Context) {
@@ -61,4 +61,22 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 		result := dm.RestartAll(services)
 		ctx.JSON(http.StatusOK, result)
 	})
+}
+
+func containerAction(dockerClient *client.Client, ctx *gin.Context, fn func(sm *models.ServiceModel, dm *dckr.DockerManager) bool) {
+	var service models.ServiceModel
+	if err := ctx.ShouldBindJSON(&service); err != nil {
+		log.Println(err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if service.InstanceType == models.Systemd {
+		ctx.JSON(http.StatusOK, false)
+		return
+	}
+
+	dm := dckr.DockerManager{Client: dockerClient}
+	result := fn(&service, &dm) // dm.RestartContainer(service.InstanceName)
+	ctx.JSON(http.StatusOK, result)
 }

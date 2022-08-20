@@ -48,6 +48,43 @@ func (d *DockerManager) RestartContainer(instanceName string) bool {
 	return true
 }
 
+func (d *DockerManager) StartContainer(instanceName string) bool {
+	if d.Client == nil || len(instanceName) == 0 {
+		return false
+	}
+
+	cntr, _ := d.getContainer(instanceName)
+	if cntr == nil || cntr.State != "running" {
+		return false
+	}
+	err := d.Client.ContainerStart(context.Background(), cntr.ID, types.ContainerStartOptions{})
+	if err != nil {
+		log.Println(err.Error())
+		return false
+	}
+	return true
+}
+
+func (d *DockerManager) StopContainer(instanceName string) bool {
+	if d.Client == nil || len(instanceName) == 0 {
+		return false
+	}
+
+	cntr, _ := d.getContainer(instanceName)
+	if cntr == nil {
+		return false
+	}
+	if cntr.State == "running" {
+		err := d.Client.ContainerStop(context.Background(), cntr.ID, nil)
+		if err != nil {
+			log.Println(err.Error())
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 func (d *DockerManager) RestartAfterCloudChanges() bool {
 	if d.Client == nil {
 		return false
