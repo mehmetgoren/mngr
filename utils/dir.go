@@ -73,6 +73,10 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	createDirIfNotExist(path.Join(alpr, sourceId))
 	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
 	createDirIfNotExist(path.Join(alpr, sourceId, "videos"))
+
+	//create DeepStack backup directory
+	ds := getDeepStackBackupPath(config)
+	createDirIfNotExist(ds)
 }
 
 func GetStreamPath(config *models.Config) string {
@@ -176,4 +180,8 @@ func SetRelativeOdAiVideoClipPath(config *models.Config, fullVideoPath string) s
 
 func SetRelativeRecordPath(config *models.Config, fullRecordPath string) string {
 	return strings.Replace(fullRecordPath, config.General.RootFolderPath+"/record", "playback", -1)
+}
+
+func getDeepStackBackupPath(config *models.Config) string {
+	return path.Join(config.General.RootFolderPath, "deepstack")
 }

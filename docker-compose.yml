@@ -221,3 +221,21 @@ services:
       - "REDIS_PORT=6379"
     restart: "unless-stopped"
     network_mode: "host"
+
+  deepstack_service:
+    image: gokalpgoren/deepstack_service:v1.0.0-amd64
+    container_name: "deepstack_service-instance"
+    depends_on:
+      - redis
+      - ffmpeg_service
+      - smcp
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+    restart: "unless-stopped"
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/sda1:/mnt/sda1
+
