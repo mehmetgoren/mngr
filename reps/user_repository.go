@@ -18,6 +18,10 @@ func getUserKey(id string) string {
 	return "users:" + id
 }
 
+func (u *UserRepository) addToRedis(user *models.User) (int64, error) {
+	return u.Connection.HSet(context.Background(), getUserKey(user.Id), Map(user)).Result()
+}
+
 func (u *UserRepository) Login(lu *models.LoginUserViewModel) (*models.User, error) {
 	validate := validator.New()
 	err := validate.Struct(lu)
@@ -32,6 +36,8 @@ func (u *UserRepository) Login(lu *models.LoginUserViewModel) (*models.User, err
 	}
 	for _, user := range users {
 		if user.Username == lu.Username && user.Password == lu.Password {
+			user.LastLoginAt = utils.DatetimeNow()
+			u.addToRedis(user)
 			return user, nil
 		}
 	}
@@ -56,7 +62,7 @@ func (u *UserRepository) Register(uv *models.RegisterUserViewModel) (*models.Use
 	user.Token = utils.GenerateSecureToken(4)
 	user.LastLoginAt = utils.DatetimeNow()
 
-	_, err = u.Connection.HSet(context.Background(), getUserKey(user.Id), Map(user)).Result()
+	_, err = u.addToRedis(user)
 	if err != nil {
 		return nil, err
 	}

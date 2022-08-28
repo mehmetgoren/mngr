@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	Id          string `json:"id" redis:"id"`
 	Username    string `json:"username" redis:"username"`
@@ -19,4 +21,9 @@ type RegisterUserViewModel struct {
 type LoginUserViewModel struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
+}
+
+type UserSession struct {
+	*User
+	LastVisitAt time.Time
 }

@@ -4,12 +4,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lithammer/shortuuid/v3"
 	"log"
 	"mngr/models"
 	"net/http"
+	"os"
 	"path"
 	"regexp"
 	"runtime/debug"
@@ -188,4 +190,30 @@ func GetQsValue(ctx *gin.Context, key string) string {
 		return ""
 	}
 	return value
+}
+
+func ParsePort() int {
+	var err error
+	defaultPort := 8072
+	port := 0
+	p := flag.String("port", "", "Web Server Port Number")
+	flag.Parse()
+
+	ep := os.Getenv("WEBSERVER_HOST")
+	if len(ep) > 0 {
+		port, err = strconv.Atoi(ep)
+		if err != nil {
+			port = defaultPort
+			log.Println("An error occurred while converting Redis port value from environment variable: " + err.Error())
+		}
+	} else if len(*p) > 0 {
+		port, err = strconv.Atoi(*p)
+		if err != nil {
+			port = defaultPort
+			log.Println("An error occurred while converting Redis port value from arguments :" + err.Error())
+		}
+	} else {
+		port = defaultPort
+	}
+	return port
 }

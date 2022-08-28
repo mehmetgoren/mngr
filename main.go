@@ -15,6 +15,7 @@ import (
 	"mngr/ws"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -42,6 +43,7 @@ func checkDefaultUser(rb *reps.RepoBucket) {
 }
 
 var rb = &reps.RepoBucket{}
+var holders = &ws.Holders{Rb: rb}
 var whiteList = make([]string, 0)
 
 func initWhiteList() {
@@ -65,7 +67,6 @@ func main() {
 
 	initWhiteList()
 	rb.Init()
-	holders := &ws.Holders{Rb: rb}
 	holders.Init()
 	WhoAreYou(rb)
 
@@ -124,7 +125,9 @@ func main() {
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
-	err = router.Run(":2072")
+	port := strconv.Itoa(utils.ParsePort())
+	log.Println("web server port is " + port)
+	err = router.Run(":" + port)
 	if err != nil {
 		log.Println(err.Error())
 		return
@@ -141,21 +144,22 @@ func authMiddleware(ctx *gin.Context) {
 		qs := ctx.Request.URL.Query()
 		if _, ok := qs["token"]; !ok {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
-			ctx.Abort()
+			ctx.AbortWithStatus(http.StatusBadRequest)
 			log.Println("websocket invalid query string parameters")
 			return
 		}
 		token := qs["token"][0]
 		if len(token) == 0 {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
-			ctx.Abort()
+			ctx.AbortWithStatus(http.StatusBadRequest)
 			log.Println("websocket invalid query string parameters")
 			return
 		}
 
 		if _, ok := rb.IsUserAuthenticated(token); !ok {
-			ctx.Writer.WriteHeader(http.StatusBadRequest)
-			ctx.Abort()
+			err := errors.New("unauthorized 401")
+			holders.UserLogout(token, true)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err})
 			log.Println("websocket token was not found")
 		}
 	} else {
@@ -169,8 +173,9 @@ func authMiddleware(ctx *gin.Context) {
 				}
 			}
 			if !isWhitelisted {
-				ctx.JSON(http.StatusUnauthorized, gin.H{"error": errors.New("unauthorized")})
-				ctx.Abort()
+				err := errors.New("unauthorized 401")
+				holders.UserLogout(token, true)
+				ctx.AbortWithError(http.StatusUnauthorized, err)
 				log.Println("an unauthorized request has been detected: ", req)
 			}
 		}

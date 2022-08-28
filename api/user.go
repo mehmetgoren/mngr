@@ -27,7 +27,7 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		logoutUser(u, true)
+		logoutUser(u, false)
 		time.Sleep(1 * time.Second)
 		if u != nil {
 			rb.AddUser(u)
