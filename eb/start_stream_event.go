@@ -30,8 +30,7 @@ func (s *StartStreamRequestEvent) Publish() error {
 
 type StartStreamResponseEvent struct {
 	models.StreamModel
-	Rb     *reps.RepoBucket `json:"-"`
-	Pusher utils.WsPusher   `json:"-"`
+	Pusher utils.WsPusher `json:"-"`
 }
 
 func (s *StartStreamResponseEvent) Handle(event *redis.Message) error {

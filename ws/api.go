@@ -98,21 +98,21 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 // Publish End
 
 // RegisterWsEndpoints Subscribe Start
-func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
+func RegisterWsEndpoints(router *gin.Engine, hldrs *Holders) {
 	hub := NewHub()
 	go hub.Run()
 
 	router.GET("/wsstartstream", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, StartStreamEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, StartStream, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsstopstream", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, StopStreamEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, StopStream, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wseditor", func(ctx *gin.Context) {
 		requester := utils.GetQsValue(ctx, "requester")
-		holders.RegisterEndPoint(hub, ctx, EditorEvent, requester)
+		hldrs.RegisterEndPoint(hub, ctx, Editor, requester)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsffmpegreader", func(ctx *gin.Context) {
@@ -122,27 +122,27 @@ func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 			log.Println("wsffmpegreader invalid source Id value")
 			return
 		}
-		holders.RegisterEndPoint(hub, ctx, FFmpegReaderEvent, id)
+		hldrs.RegisterEndPoint(hub, ctx, FFmpegReader, id)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsonvif", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, OnvifEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, Onvif, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsvideomerge", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, VideoMergeEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, VideoMerge, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsfrtrain", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, FrTrainEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, FrTrain, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsprobe", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, ProbeEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, Probe, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsnotifier", func(ctx *gin.Context) {
-		holders.RegisterEndPoint(hub, ctx, NotifierEvent, "")
+		hldrs.RegisterEndPoint(hub, ctx, Notifier, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsuserlogout", func(ctx *gin.Context) {
@@ -151,7 +151,7 @@ func RegisterWsEndpoints(router *gin.Engine, holders *Holders) {
 			if len(val) > 0 {
 				userToken := val[0]
 				client := CreateClient(hub, ctx.Writer, ctx.Request)
-				holders.UserLogin(userToken, client)
+				hldrs.UserLogin(userToken, client)
 				ctx.Writer.WriteHeader(http.StatusOK)
 				return
 			}
