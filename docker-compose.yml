@@ -16,36 +16,12 @@ services:
       - 27017:27017
     restart: "unless-stopped"
 
-  ffmpeg_service:
-    image: gokalpgoren/ffmpeg_service:v1.0.0-amd64
-    container_name: "ffmpeg_service-instance"
-    depends_on:
-      - redis
-    environment:
-      - "TZ=Europe/Istanbul"
-      - "REDIS_HOST=127.0.0.1"
-      - "REDIS_PORT=6379"
-      - "NVIDIA_DRIVER_CAPABILITIES=all"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [ gpu ]
-    restart: "unless-stopped"
-    network_mode: "host"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/sda1:/mnt/sda1
-
   mngr:
     image: gokalpgoren/mngr:v1.0.0-amd64
     container_name: "mngr-instance"
     depends_on:
       - redis
       - mongo
-      - ffmpeg_service
     environment:
       - "TZ=Europe/Istanbul"
       - "REDIS_HOST=127.0.0.1"
@@ -57,6 +33,30 @@ services:
           devices:
             - driver: nvidia
               count: 1
+              capabilities: [ gpu ]
+    restart: "unless-stopped"
+    network_mode: "host"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/sda1:/mnt/sda1
+
+  ffmpeg_service:
+    image: gokalpgoren/ffmpeg_service:v1.0.0-amd64
+    container_name: "ffmpeg_service-instance"
+    depends_on:
+      - redis
+      - mngr
+    environment:
+      - "TZ=Europe/Istanbul"
+      - "REDIS_HOST=127.0.0.1"
+      - "REDIS_PORT=6379"
+      - "NVIDIA_DRIVER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
               capabilities: [ gpu ]
     restart: "unless-stopped"
     network_mode: "host"
