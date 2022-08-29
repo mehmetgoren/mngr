@@ -7,6 +7,7 @@ import (
 	"mngr/dckr"
 	"mngr/models"
 	"mngr/reps"
+	"mngr/view_models"
 	"net/http"
 )
 
@@ -16,7 +17,13 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
-		ctx.JSON(http.StatusOK, services)
+		vms := make([]*view_models.ServiceViewModel, 0)
+		for _, service := range services {
+			vm := &view_models.ServiceViewModel{ServiceModel: service}
+			vm.SetupButtonEnabled()
+			vms = append(vms, vm)
+		}
+		ctx.JSON(http.StatusOK, vms)
 	})
 
 	router.POST("/registerwebappservice", func(ctx *gin.Context) {

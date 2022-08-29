@@ -13,7 +13,7 @@ type DockerManager struct {
 }
 
 func (d *DockerManager) getContainer(instanceName string) (*types.Container, error) {
-	containers, err := d.Client.ContainerList(context.Background(), types.ContainerListOptions{All: false})
+	containers, err := d.Client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
 	if err != nil {
 		log.Println("an error occurred while getting the container, err: ", err.Error())
 		return nil, err
@@ -54,7 +54,7 @@ func (d *DockerManager) StartContainer(instanceName string) bool {
 	}
 
 	cntr, _ := d.getContainer(instanceName)
-	if cntr == nil || cntr.State != "running" {
+	if cntr == nil || cntr.State == "running" {
 		return false
 	}
 	err := d.Client.ContainerStart(context.Background(), cntr.ID, types.ContainerStartOptions{})
@@ -71,18 +71,15 @@ func (d *DockerManager) StopContainer(instanceName string) bool {
 	}
 
 	cntr, _ := d.getContainer(instanceName)
-	if cntr == nil {
+	if cntr == nil || cntr.State != "running" {
 		return false
 	}
-	if cntr.State == "running" {
-		err := d.Client.ContainerStop(context.Background(), cntr.ID, nil)
-		if err != nil {
-			log.Println(err.Error())
-			return false
-		}
-		return true
+	err := d.Client.ContainerStop(context.Background(), cntr.ID, nil)
+	if err != nil {
+		log.Println(err.Error())
+		return false
 	}
-	return false
+	return true
 }
 
 func (d *DockerManager) RestartAfterCloudChanges() bool {
