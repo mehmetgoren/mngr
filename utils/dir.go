@@ -60,19 +60,16 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	od := GetOdPath(config)
 	createDirIfNotExist(path.Join(od, sourceId))
 	createDirIfNotExist(path.Join(od, sourceId, "images"))
-	createDirIfNotExist(path.Join(od, sourceId, "videos"))
 
 	// Create facial recognition folder for the source
 	fr := GetFrPath(config)
 	createDirIfNotExist(path.Join(fr, sourceId))
 	createDirIfNotExist(path.Join(fr, sourceId, "images"))
-	createDirIfNotExist(path.Join(fr, sourceId, "videos"))
 
 	// Create automatic plate license recognizer
 	alpr := GetAlprPath(config)
 	createDirIfNotExist(path.Join(alpr, sourceId))
 	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
-	createDirIfNotExist(path.Join(alpr, sourceId, "videos"))
 
 	//create DeepStack backup directory
 	ds := getDeepStackBackupPath(config)
