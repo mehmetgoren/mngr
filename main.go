@@ -111,8 +111,6 @@ func main() {
 	api.RegisterOdEndpoints(router, rb)
 	api.RegisterOdImagesEndpoints(router, rb, factory)
 	api.RegisterOdVideoClipEndpoints(router, rb, factory)
-	api.RegisterFrImagesEndpoints(router, rb, factory)
-	api.RegisterAlprImagesEndpoints(router, rb, factory)
 	api.RegisterOnvifEndpoints(router, rb)
 	api.RegisterFrTrainingEndpoints(router, rb)
 	api.RegisterUserEndpoints(router, holders)

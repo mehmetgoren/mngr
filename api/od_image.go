@@ -84,19 +84,32 @@ type ImageItem struct {
 type ImagesParams struct {
 	RootPath string `json:"rootPath"`
 	SourceId string `json:"sourceId"`
+	AiType   int    `json:"ai_type"`
 }
 
 func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory *cmn.Factory) {
-	router.GET("/odimagesfolders/:id/:date", func(ctx *gin.Context) {
+	router.GET("/aiimagesfolders/:id/:date/:aitype", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
 		date := ctx.Param("date")
+		aiType, _ := strconv.Atoi(ctx.Param("aitype"))
 		config, _ := rb.ConfigRep.GetConfig()
-		odPath := utils.GetHourlyOdImagesPathBySourceId(config, sourceId, date)
+		var odPath string
+		switch aiType {
+		case models.Od:
+			odPath = utils.GetHourlyOdImagesPathBySourceId(config, sourceId, date)
+			break
+		case models.Fr:
+			odPath = utils.GetHourlyFrImagesPathBySourceId(config, sourceId, date)
+			break
+		case models.Alpr:
+			odPath = utils.GetHourlyAlprImagesPathBySourceId(config, sourceId, date)
+			break
+		}
 		items, _ := newTree(odPath, true)
 		ctx.JSON(http.StatusOK, items)
 	})
 	// it has potential security risk
-	router.POST("odimages", func(ctx *gin.Context) {
+	router.POST("aiimages", func(ctx *gin.Context) {
 		var model ImagesParams
 		if err := ctx.ShouldBindJSON(&model); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,15 +118,41 @@ func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory 
 
 		items := make([]*ImageItem, 0)
 		si := models.CreateDateSort(factory.GetCreatedDateFieldName())
-		dtos, err := factory.CreateRepository().QueryOds(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
-		if err != nil || dtos == nil {
-			ctx.JSON(http.StatusOK, items)
-			return
-		}
 
-		for _, dto := range dtos {
-			item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
-			items = append(items, item)
+		switch model.AiType {
+		case models.Od:
+			dtos, err := factory.CreateRepository().QueryOds(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
+			if err != nil || dtos == nil {
+				ctx.JSON(http.StatusOK, items)
+				return
+			}
+			for _, dto := range dtos {
+				item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
+				items = append(items, item)
+			}
+			break
+		case models.Fr:
+			dtos, err := factory.CreateRepository().QueryFrs(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
+			if err != nil {
+				ctx.JSON(http.StatusOK, items)
+				return
+			}
+			for _, dto := range dtos {
+				item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
+				items = append(items, item)
+			}
+			break
+		case models.Alpr:
+			dtos, err := factory.CreateRepository().QueryAlprs(*data.GetParamsByHour(model.SourceId, model.RootPath, si))
+			if err != nil {
+				ctx.JSON(http.StatusOK, items)
+				return
+			}
+			for _, dto := range dtos {
+				item := &ImageItem{Id: dto.Id, ImagePath: dto.ImageFileName, CreatedAt: dto.CreatedAt}
+				items = append(items, item)
+			}
+			break
 		}
 		ctx.JSON(http.StatusOK, items)
 	})
