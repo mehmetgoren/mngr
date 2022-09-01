@@ -51,6 +51,8 @@ type Repository interface {
 	CountAlprs(params QueryParams) (int64, error)
 
 	RemoveOd(id string) error
+	RemoveFr(id string) error
+	RemoveAlpr(id string) error
 
 	DeleteOds(options *DeleteOptions) error
 	DeleteFrs(options *DeleteOptions) error

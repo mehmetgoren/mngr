@@ -145,17 +145,6 @@ func (m *MongoRepository) CountAlprs(params data.QueryParams) (int64, error) {
 	return count(m.Db.Alprs.coll, q)
 }
 
-func (m *MongoRepository) RemoveOd(id string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.Db.Ods.DeleteOneById(objectId)
-
-	return err
-}
-
 func deleteRec[T any](coll *mongo.Collection, options *data.DeleteOptions,
 	getGroupId func(t *T) string, getImageFileName func(t *T) string, getVideoFileName func(t *T) string) error {
 	objectId, err := primitive.ObjectIDFromHex(options.Id)
@@ -238,4 +227,37 @@ func (m *MongoRepository) DeleteAlprs(options *data.DeleteOptions) error {
 		return t.VideoFile.Name
 	}
 	return deleteRec[AlprEntity](m.Db.Alprs.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
+}
+
+func (m *MongoRepository) RemoveOd(id string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.Db.Ods.DeleteOneById(objectId)
+
+	return err
+}
+
+func (m *MongoRepository) RemoveFr(id string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.Db.Frs.DeleteOneById(objectId)
+
+	return err
+}
+
+func (m *MongoRepository) RemoveAlpr(id string) error {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.Db.Alprs.DeleteOneById(objectId)
+
+	return err
 }

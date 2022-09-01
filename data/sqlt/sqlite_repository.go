@@ -140,15 +140,6 @@ func (s *SqliteRepository) CountAlprs(params data.QueryParams) (int64, error) {
 	return count[AlprEntity](db)
 }
 
-func (s *SqliteRepository) RemoveOd(id string) error {
-	result := s.Db.Ods.GetGormDb().Unscoped().Delete(&OdEntity{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
 func deleteRec[T any](db *gorm.DB, options *data.DeleteOptions, cast func(t *T) *BaseEntity) error {
 	if options.Id == "" {
 		return nil
@@ -220,4 +211,31 @@ func (s *SqliteRepository) DeleteAlprs(options *data.DeleteOptions) error {
 		return &t.BaseEntity
 	}
 	return deleteRec[AlprEntity](s.Db.Alprs.GetGormDb(), options, cast)
+}
+
+func (s *SqliteRepository) RemoveOd(id string) error {
+	result := s.Db.Ods.GetGormDb().Unscoped().Delete(&OdEntity{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (s *SqliteRepository) RemoveFr(id string) error {
+	result := s.Db.Frs.GetGormDb().Unscoped().Delete(&FrEntity{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (s *SqliteRepository) RemoveAlpr(id string) error {
+	result := s.Db.Alprs.GetGormDb().Unscoped().Delete(&AlprEntity{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
