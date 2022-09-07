@@ -9,6 +9,7 @@ import (
 	"log"
 	"mngr/api"
 	"mngr/data/cmn"
+	"mngr/dsk_usg"
 	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
@@ -81,6 +82,10 @@ func main() {
 			err = dockerClient.Close()
 			log.Println(err.Error())
 		}
+	}()
+	dskChckr := dsk_usg.InitDiskUsageChecker(factory, rb)
+	defer func() {
+		dskChckr.StopScheduler()
 	}()
 
 	checkDefaultUser(rb)

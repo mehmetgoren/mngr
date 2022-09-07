@@ -217,3 +217,20 @@ func ParsePort() int {
 	}
 	return port
 }
+
+func MinMax(array []int) (int, int) {
+	if len(array) == 0 {
+		return -1, -1
+	}
+	var max = array[0]
+	var min = array[0]
+	for _, value := range array {
+		if max < value {
+			max = value
+		}
+		if min > value {
+			min = value
+		}
+	}
+	return min, max
+}
