@@ -78,6 +78,7 @@ type SourceModel struct {
 	RecordEnabled bool `json:"record_enabled" redis:"record_enabled"`
 	AiClipEnabled bool `json:"ai_clip_enabled" redis:"ai_clip_enabled"`
 
+	FlvPlayerType  int  `json:"flv_player_type" redis:"flv_player_type"`
 	BoosterEnabled bool `json:"booster_enabled" redis:"booster_enabled"`
 
 	CreatedAt string `json:"created_at" redis:"created_at"`
