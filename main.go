@@ -70,6 +70,7 @@ func main() {
 	rb.Init()
 	holders.Init()
 	WhoAreYou(rb)
+	FetchRtspTemplates(rb)
 
 	factory := createFactory()
 	defer factory.Close()

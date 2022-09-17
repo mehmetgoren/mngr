@@ -8,7 +8,6 @@ type RtspTemplateModel struct {
 	DefaultUser     string `json:"default_user" redis:"default_user"`
 	DefaultPassword string `json:"default_password" redis:"default_password"`
 	DefaultPort     string `json:"default_port" redis:"default_port"`
-	Address         string `json:"address" redis:"address"`
 	Route           string `json:"route" redis:"route"`
 	Templates       string `json:"templates" redis:"templates"`
 }
