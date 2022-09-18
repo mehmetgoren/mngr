@@ -1,6 +1,9 @@
 package utils
 
 import (
+	cp "github.com/otiai10/copy"
+	"io/ioutil"
+	"log"
 	"mngr/models"
 	"os"
 	"path"
@@ -37,6 +40,7 @@ func CreateRequiredDirectories(config *models.Config) {
 	createDirIfNotExist(ml)
 	train := GetFrTrainPath(config)
 	createDirIfNotExist(train)
+	checkIfMlFolderEmpty(train)
 	test := path.Join(ml, "test")
 	createDirIfNotExist(test)
 
@@ -181,4 +185,20 @@ func SetRelativeRecordPath(config *models.Config, fullRecordPath string) string 
 
 func getDeepStackBackupPath(config *models.Config) string {
 	return path.Join(config.General.RootFolderPath, "deepstack")
+}
+
+func checkIfMlFolderEmpty(mlTrainDirPath string) error {
+	dirs, err := ioutil.ReadDir(mlTrainDirPath)
+	if err != nil {
+		log.Println("an error occurred while checking the ml train directory, err: " + err.Error())
+		return err
+	}
+	if len(dirs) == 0 {
+		staticPath := "static/train"
+		err = cp.Copy(staticPath, path.Join(mlTrainDirPath))
+		if err != nil {
+			log.Println("an error occurred while copying the ml train directory, err: " + err.Error())
+		}
+	}
+	return err
 }
