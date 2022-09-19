@@ -63,6 +63,7 @@ type SourceModel struct {
 	IpAddress  string `json:"ip_address" redis:"ip_address"`
 
 	Enabled        bool `json:"enabled" redis:"enabled"`
+	State          int  `json:"state" redis:"state"`
 	RtmpServerType int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
 
 	SnapshotEnabled   bool `json:"snapshot_enabled" redis:"snapshot_enabled"`

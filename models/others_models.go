@@ -25,6 +25,7 @@ type FailedStreamModel struct {
 	RecordFailedCount        int    `json:"record_failed_count" redis:"record_failed_count"`
 	SnapshotFailedCount      int    `json:"snapshot_failed_count" redis:"snapshot_failed_count"`
 	RecordStuckProcessCount  int    `json:"record_stuck_process_count" redis:"record_stuck_process_count"`
+	SourceStateConflictCount int    `json:"source_state_conflict_count" redis:"source_state_conflict_count"`
 	LastCheckAt              string `json:"last_check_at" redis:"last_check_at"`
 }
 
