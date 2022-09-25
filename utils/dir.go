@@ -101,6 +101,10 @@ func GetFrMlPath(config *models.Config) string {
 	return path.Join(fr, "ml")
 }
 
+func GetAiClipPathBySourceId(config *models.Config, sourceId string) string {
+	return path.Join(GetRecordPath(config), sourceId, "ai")
+}
+
 // od starts
 func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
 	return path.Join(GetOdPath(config), sourceId, "images")

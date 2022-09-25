@@ -1,4 +1,4 @@
-package dsk_usg
+package dsk_archv
 
 import (
 	cp "github.com/otiai10/copy"
@@ -102,7 +102,7 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 	params.SourceId = sourceId
 	params.T1 = oldest.CreateMinTime()
 	params.T2 = oldest.CreateMaxTime()
-	deleteOptions := &data.DeleteOptions{DeleteImage: true, DeleteVideo: true}
+	deleteOptions := &data.DeleteOptions{DeleteImage: false, DeleteVideo: false}
 	rep := fc.CreateRepository()
 
 	ods, _ := rep.QueryOds(params)
@@ -125,6 +125,39 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 			deleteOptions.Id = alpr.Id
 			rep.DeleteAlprs(deleteOptions)
 		}
+	}
+
+	// delete daily ai clips by source id
+	rootDailyAiPath := oldest.CreateDailyPathName(utils.GetAiClipPathBySourceId(fc.Config, sourceId))
+	err := os.RemoveAll(rootDailyAiPath)
+	if err != nil {
+		log.Println("an error occurred while deleting daily AI Clips root path, err: " + err.Error())
+	} else {
+		log.Println("AI Clips parent folder has been deleted: " + rootDailyAiPath)
+	}
+	// delete daily od images by source id
+	rootDailyOdImagePath := oldest.CreateDailyPathName(utils.GetOdImagesPathBySourceId(fc.Config, sourceId))
+	err = os.RemoveAll(rootDailyOdImagePath)
+	if err != nil {
+		log.Println("an error occurred while deleting daily Od Images root path, err: " + err.Error())
+	} else {
+		log.Println("Od Images parent folder has been deleted: " + rootDailyOdImagePath)
+	}
+	// delete daily fr images by source id
+	rootDailyFrImagePath := oldest.CreateDailyPathName(utils.GetFrImagesPathBySourceId(fc.Config, sourceId))
+	err = os.RemoveAll(rootDailyFrImagePath)
+	if err != nil {
+		log.Println("an error occurred while deleting daily Fr Images root path, err: " + err.Error())
+	} else {
+		log.Println("Fr Images parent folder has been deleted: " + rootDailyFrImagePath)
+	}
+	// delete daily alpr images by source id
+	rootDailyAlprImagePath := oldest.CreateDailyPathName(utils.GetAlprImagesPathBySourceId(fc.Config, sourceId))
+	err = os.RemoveAll(rootDailyAlprImagePath)
+	if err != nil {
+		log.Println("an error occurred while deleting daily Alpr Images root path, err: " + err.Error())
+	} else {
+		log.Println("Alpr Images parent folder has been deleted: " + rootDailyAlprImagePath)
 	}
 }
 

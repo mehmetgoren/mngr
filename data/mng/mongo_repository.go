@@ -172,7 +172,7 @@ func deleteRec[T any](coll *mongo.Collection, options *data.DeleteOptions,
 		imageFileName := getImageFileName(entity)
 		err = os.Remove(imageFileName)
 		if err != nil {
-			return err
+			log.Println("an error occurred while deleting an ai image, err: " + err.Error())
 		}
 	}
 

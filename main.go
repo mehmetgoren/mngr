@@ -9,7 +9,7 @@ import (
 	"log"
 	"mngr/api"
 	"mngr/data/cmn"
-	"mngr/dsk_usg"
+	"mngr/dsk_archv"
 	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
@@ -84,7 +84,7 @@ func main() {
 			log.Println(err.Error())
 		}
 	}()
-	dskChckr := dsk_usg.InitDiskUsageChecker(factory, rb)
+	dskChckr := dsk_archv.InitDiskUsageChecker(factory, rb)
 	defer func() {
 		dskChckr.StopScheduler()
 	}()

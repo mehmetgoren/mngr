@@ -1,4 +1,4 @@
-package dsk_usg
+package dsk_archv
 
 import (
 	"github.com/go-co-op/gocron"

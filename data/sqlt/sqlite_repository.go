@@ -2,6 +2,7 @@ package sqlt
 
 import (
 	"gorm.io/gorm"
+	"log"
 	"mngr/data"
 	"mngr/models"
 	"os"
@@ -170,7 +171,7 @@ func deleteRec[T any](db *gorm.DB, options *data.DeleteOptions, cast func(t *T) 
 			}
 			err = os.Remove(be.ImageFileName)
 			if err != nil {
-				return err
+				log.Println("an error occurred while deleting an ai image, err: " + err.Error())
 			}
 		}
 	}

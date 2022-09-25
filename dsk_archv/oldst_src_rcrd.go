@@ -1,4 +1,4 @@
-package dsk_usg
+package dsk_archv
 
 import (
 	"io/ioutil"
@@ -65,6 +65,9 @@ func (o *OldestSourceRecord) CreateMaxTime() time.Time {
 }
 func (o *OldestSourceRecord) CreateTmpFolderPathName() string {
 	return path.Join(o.YearStr, o.MonthStr, o.DayStr)
+}
+func (o *OldestSourceRecord) CreateDailyPathName(fullPath string) string {
+	return path.Join(fullPath, o.CreateTmpFolderPathName())
 }
 func (o *OldestSourceRecord) DeleteParentDirectoryIfEmpty(fullPath string) {
 	monthDirPath := path.Join(fullPath, o.YearStr, o.MonthStr)

@@ -167,6 +167,8 @@ services:
               capabilities: [ gpu ]
     restart: "unless-stopped"
     network_mode: "host"
+    volumes:
+      - /mnt/sda1:/mnt/sda1
 
   alpr:
     image: gokalpgoren/alpr:v1.0.0-amd64
