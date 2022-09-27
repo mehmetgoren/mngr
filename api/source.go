@@ -88,4 +88,31 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 		context.JSON(http.StatusOK, modelList)
 	})
+
+	router.POST("/setsourceenabled", func(ctx *gin.Context) {
+		var model models.SourceEnabledModel
+		if err := ctx.ShouldBindJSON(&model); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if len(model.SourceId) == 0 {
+			ctx.JSON(http.StatusNotFound, nil)
+			return
+		}
+
+		source, err := rb.SourceRep.Get(model.SourceId)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, nil)
+			return
+		}
+		if !model.Enabled {
+			//stops the stream before disable.
+			ssrEvent := eb.StopStreamRequestEvent{Rb: rb, Id: source.Id}
+			ssrEvent.Publish()
+			time.Sleep(time.Second * 5)
+		}
+		source.Enabled = model.Enabled
+		rb.SourceRep.Save(source)
+		ctx.JSON(http.StatusOK, source)
+	})
 }

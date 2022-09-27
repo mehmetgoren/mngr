@@ -91,11 +91,13 @@ func (r *SourceRepository) GetSourceStreamStatus(streamRepository *StreamReposit
 			log.Println("Error getting source from redis: ", err)
 			return nil, err
 		}
-		sourceStatus := models.SourceStatusModel{SourceId: source.Id, Recording: false}
-		stream, _ := streamRepository.Get(source.Id)
-		sourceStatus.Streaming = stream != nil && len(stream.Id) > 0
-		if sourceStatus.Streaming {
-			sourceStatus.Recording = stream.RecordEnabled
+		sourceStatus := models.SourceStatusModel{SourceId: source.Id, Enabled: source.Enabled, Streaming: false, Recording: false}
+		if sourceStatus.Enabled {
+			stream, _ := streamRepository.Get(source.Id)
+			sourceStatus.Streaming = stream != nil && len(stream.Id) > 0
+			if sourceStatus.Streaming {
+				sourceStatus.Recording = stream.RecordEnabled
+			}
 		}
 
 		list = append(list, &sourceStatus)
