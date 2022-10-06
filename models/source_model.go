@@ -66,11 +66,16 @@ type SourceModel struct {
 	State          int  `json:"state" redis:"state"`
 	RtmpServerType int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
 
-	SnapshotEnabled   bool `json:"snapshot_enabled" redis:"snapshot_enabled"`
-	SnapshotType      int  `json:"snapshot_type" redis:"snapshot_type"`
-	SnapshotFrameRate int  `json:"snapshot_frame_rate" redis:"snapshot_frame_rate"`
-	SnapshotWidth     int  `json:"snapshot_width" redis:"snapshot_width"`
-	SnapshotHeight    int  `json:"snapshot_height" redis:"snapshot_height"`
+	SnapshotEnabled      bool    `json:"snapshot_enabled" redis:"snapshot_enabled"`
+	SnapshotType         int     `json:"snapshot_type" redis:"snapshot_type"`
+	SnapshotFrameRate    int     `json:"snapshot_frame_rate" redis:"snapshot_frame_rate"`
+	SnapshotWidth        int     `json:"snapshot_width" redis:"snapshot_width"`
+	SnapshotHeight       int     `json:"snapshot_height" redis:"snapshot_height"`
+	MdType               int     `json:"md_type" redis:"md_type"`
+	MdOpencvThreshold    int     `json:"md_opencv_threshold" redis:"md_opencv_threshold"`
+	MdContourAreaLimit   int     `json:"md_contour_area_limit" redis:"md_contour_area_limit"`
+	MdImagehashThreshold int     `json:"md_imagehash_threshold" redis:"md_imagehash_threshold"`
+	MdPsnrThreshold      float32 `json:"md_psnr_threshold" redis:"md_psnr_threshold"`
 
 	FfmpegReaderFrameRate int `json:"ffmpeg_reader_frame_rate" redis:"ffmpeg_reader_frame_rate"`
 	FfmpegReaderWidth     int `json:"ffmpeg_reader_width" redis:"ffmpeg_reader_width"`

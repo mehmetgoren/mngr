@@ -44,6 +44,10 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 				ctx.Writer.WriteHeader(http.StatusOK)
 			}
 		}
+		mc := eb.ModelChanged{SourceId: model.Id}
+		mcJson, _ := utils.SerializeJson(mc)
+		dataChangedPub := eb.DataChangedEvent{Rb: rb, ModelName: "source", ParamsJson: mcJson, Op: eb.SAVE}
+		dataChangedPub.Publish()
 
 		config, _ := rb.ConfigRep.GetConfig()
 		utils.CreateSourceDefaultDirectories(config, model.Id)
@@ -73,10 +77,11 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		mc := eb.ModelChanged{SourceId: id}
 		mcJson, _ := utils.SerializeJson(mc)
 		dcEvent := eb.DataChangedEvent{Rb: rb, ModelName: "od", ParamsJson: mcJson, Op: eb.DELETE}
-		err = dcEvent.Publish()
-		if err == nil {
-			ctx.Writer.WriteHeader(http.StatusOK)
-		}
+		dcEvent.Publish()
+
+		dataChangedPub := eb.DataChangedEvent{Rb: rb, ModelName: "source", ParamsJson: mcJson, Op: eb.DELETE}
+		dataChangedPub.Publish()
+
 		ctx.JSON(http.StatusOK, gin.H{"id": id})
 	})
 	router.GET("/sourcestreamstatus", func(context *gin.Context) {

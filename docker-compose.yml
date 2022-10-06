@@ -64,6 +64,19 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/sda1:/mnt/sda1
 
+    snapshot_service:
+      image: gokalpgoren/snapshot_service:v1.0.0-amd64
+      container_name: "snapshot_service-instance"
+      depends_on:
+        - redis
+        - ffmpeg_service
+      environment:
+        - "TZ=Europe/Istanbul"
+        - "REDIS_HOST=127.0.0.1"
+        - "REDIS_PORT=6379"
+      restart: "unless-stopped"
+      network_mode: "host"
+
   smcp:
     image: gokalpgoren/smcp:v1.0.0-amd64
     container_name: "smcp-instance"
@@ -231,6 +244,7 @@ services:
     depends_on:
       - redis
       - ffmpeg_service
+      - snapshot_service
       - smcp
     environment:
       - "TZ=Europe/Istanbul"
