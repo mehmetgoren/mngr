@@ -31,6 +31,5 @@ func WhoAreYou(rb *reps.RepoBucket) {
 }
 
 func FetchRtspTemplates(rb *reps.RepoBucket) {
-	// this operation will be fetched by the Hub Portal instead of redis local db
-	rb.RtspTemplateRep.AddAll()
+	// todo: this operation will be fetched by the Hub Portal instead of redis local db
 }

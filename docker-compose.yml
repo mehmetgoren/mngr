@@ -99,6 +99,7 @@ services:
     depends_on:
       - redis
       - ffmpeg_service
+      - snapshot_service
       - smcp
     environment:
       - "TZ=Europe/Istanbul"
@@ -121,6 +122,8 @@ services:
     depends_on:
       - redis
       - ffmpeg_service
+      - snapshot_service
+      - smcp
     environment:
       - "TZ=Europe/Istanbul"
       - "REDIS_HOST=127.0.0.1"
@@ -142,6 +145,8 @@ services:
     depends_on:
       - redis
       - ffmpeg_service
+      - snapshot_service
+      - smcp
     runtime: nvidia
     environment:
       - "TZ=Europe/Istanbul"
@@ -166,6 +171,8 @@ services:
     depends_on:
       - redis
       - ffmpeg_service
+      - snapshot_service
+      - smcp
     environment:
       - "TZ=Europe/Istanbul"
       - "REDIS_HOST=127.0.0.1"

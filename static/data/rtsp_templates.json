@@ -1,0 +1,57 @@
+[
+  {
+    "id": "ConcordIpc",
+    "name": "ConcordIpc",
+    "description": "Generic Smart IP Camera",
+    "brand": "Concord",
+    "default_user": "admin",
+    "default_password": "admin123456",
+    "default_port": "8554",
+    "route": "/profile0",
+    "templates": "rtsp://{user}:{password}@{ip}:{port}/{route}"
+  },
+  {
+    "id": "Tapo",
+    "name": "Tapo",
+    "description": "TP-Lik Smart IP Camera Series",
+    "brand": "TP-Link",
+    "default_user": "",
+    "default_password": "",
+    "default_port": "554",
+    "route": "/stream1",
+    "templates": "rtsp://{user}:{password}@{ip}:{port}/{route}"
+  },
+  {
+    "id": "Anker Eufy Security 2K",
+    "name": "Anker Eufy Security 2K",
+    "description": "Anker Smart IP Camera Series",
+    "brand": "Anker Ltd",
+    "default_user": "",
+    "default_password": "",
+    "default_port": "554",
+    "route": "/live0",
+    "templates": "rtsp://{user}:{password}@{ip}:{port}/{route}"
+  },
+  {
+    "id": "Dahua DVR",
+    "name": "Dahua DVR",
+    "description": "Dahua Analog Camera Series",
+    "brand": "Dahua Ltd",
+    "default_user": "admin",
+    "default_password": "",
+    "default_port": "554",
+    "route": "/cam/realmonitor?channel={camera_no}\u0026subtype={subtype}",
+    "templates": "rtsp://{user}:{password}@{ip}:{port}/{route}"
+  },
+  {
+    "id": "Hikvision IP Cameras",
+    "name": "Hikvision IP Cameras",
+    "description": "HIKVISION Leading IP Camera Series",
+    "brand": "HIKVISION Ltd",
+    "default_user": "admin",
+    "default_password": "",
+    "default_port": "554",
+    "route": "/Streaming/Channels/101",
+    "templates": "rtsp://{user}:{password}@{ip}:{port}/{route}"
+  }
+]

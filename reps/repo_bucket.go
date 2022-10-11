@@ -42,7 +42,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.OvRep = &OnvifRepository{Connection: r.connMain}
 	r.UserRep = &UserRepository{Connection: r.connMain}
 	r.ServiceRep = &ServiceRepository{Connection: r.connMain}
-	r.RtspTemplateRep = &RtspTemplateRepository{Connection: r.connMain}
+	r.RtspTemplateRep = &RtspTemplateRepository{}
 	r.FailedStreamRep = &FailedStreamRepository{Connection: r.connMain}
 	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
 	r.VariousRep = &VariousInfosRepository{Connection: r.connMain}
