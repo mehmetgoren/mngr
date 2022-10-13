@@ -6,8 +6,8 @@ type FrTrainViewModel struct {
 }
 
 type FrTrainScreenshotViewModel struct {
-	Name        string `json:"name"`
-	Base64Image string `json:"base64_image"`
+	Name         string   `json:"name"`
+	Base64Images []string `json:"base64_images"`
 }
 
 type FrTrainRename struct {

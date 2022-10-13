@@ -117,22 +117,22 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 
-		b, err := base64.StdEncoding.DecodeString(viewModel.Base64Image)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
-		img, err := jpeg.Decode(bytes.NewReader(b))
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
-		filename := path.Join(utils.GetFrTrainPathByPerson(config, viewModel.Name), utils.NewId()+".jpg")
-		f, err := os.Create(filename)
-		defer f.Close()
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
-		if err = jpeg.Encode(f, img, nil); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		for _, base64Image := range viewModel.Base64Images {
+			b, err := base64.StdEncoding.DecodeString(base64Image)
+			if err != nil || len(b) == 0 {
+				continue
+			}
+			img, err := jpeg.Decode(bytes.NewReader(b))
+			if err != nil {
+				continue
+			}
+			filename := path.Join(utils.GetFrTrainPathByPerson(config, viewModel.Name), utils.NewId()+".jpg")
+			f, err := os.Create(filename)
+			if err != nil {
+				continue
+			}
+			err = jpeg.Encode(f, img, nil)
+			f.Close()
 		}
 		ctx.JSON(http.StatusOK, true)
 	})
