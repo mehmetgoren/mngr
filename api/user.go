@@ -27,6 +27,10 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
+		if u == nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "401 Unauthorized"})
+			return
+		}
 		logoutUser(u, false)
 		time.Sleep(1 * time.Second)
 		if u != nil {

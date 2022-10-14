@@ -1,36 +1,26 @@
 package utils
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+	"golang.org/x/crypto/bcrypt"
 )
 
-var bytes = []byte{35, 46, 57, 24, 85, 35, 24, 74, 87, 35, 88, 98, 66, 32, 14, 05}
-
-const secretKey string = "abc&1*~#^2^#s0^=)^^7%b34"
-
 // Encrypt method is to encrypt or hide any classified text
-func Encrypt(text string) (string, error) {
-	block, err := aes.NewCipher([]byte(secretKey))
+func Encrypt(password string) (string, error) {
+	// Generate "hash" to store from user password
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
+		// TODO: Properly handle error
 		return "", err
 	}
-	plainText := []byte(text)
-	cfb := cipher.NewCFBEncrypter(block, bytes)
-	cipherText := make([]byte, len(plainText))
-	cfb.XORKeyStream(cipherText, plainText)
-	return EncodeBase64(cipherText), nil
+
+	return string(hash), nil
 }
 
-// Decrypt method is to extract back the encrypted text
-func Decrypt(text string) (string, error) {
-	block, err := aes.NewCipher([]byte(secretKey))
-	if err != nil {
-		return "", err
+func CompareEncrypt(hashFromDatabase string, password string) bool {
+	// Comparing the password with the hash
+	if err := bcrypt.CompareHashAndPassword([]byte(hashFromDatabase), []byte(password)); err != nil {
+		return false
 	}
-	cipherText := DecodeBase64(text)
-	cfb := cipher.NewCFBDecrypter(block, bytes)
-	plainText := make([]byte, len(cipherText))
-	cfb.XORKeyStream(plainText, cipherText)
-	return string(plainText), nil
+
+	return true
 }
