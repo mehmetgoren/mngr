@@ -39,7 +39,7 @@ func FetchRtspTemplates(rb *reps.RepoBucket) {
 
 func ReadEnvVariables(rb *reps.RepoBucket) {
 	config, _ := rb.ConfigRep.GetConfig()
-	if config == nil {
+	if config == nil || len(config.General.RootFolderPath) == 0 {
 		config, _ = rb.ConfigRep.RestoreConfig()
 	}
 
