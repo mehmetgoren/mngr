@@ -68,6 +68,7 @@ func main() {
 
 	initWhiteList()
 	rb.Init()
+	ReadEnvVariables(rb)
 	holders.Init()
 	WhoAreYou(rb)
 	FetchRtspTemplates(rb)

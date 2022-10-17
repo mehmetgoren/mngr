@@ -26,7 +26,7 @@ services:
       - "TZ=Europe/Istanbul"
       - "REDIS_HOST=127.0.0.1"
       - "REDIS_PORT=6379"
-      - "WEBSERVER_PORt=8072"
+      - "WEBSERVER_PORT=8072"
     deploy:
       resources:
         reservations:
