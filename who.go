@@ -84,5 +84,17 @@ func ReadEnvVariables(rb *reps.RepoBucket) {
 		fmt.Println("ROOT_DIR_PATH not found")
 	}
 
+	snapShotProcessCount := os.Getenv("SNAPSHOT_PROC_COUNT")
+	if len(snapShotProcessCount) > 0 {
+		processCount, _ := strconv.Atoi(snapShotProcessCount)
+		if processCount < 1 {
+			processCount = 1
+		}
+		config.Snapshot.ProcessCount = processCount
+		fmt.Println("SNAPSHOT_PROC_COUNT: " + snapShotProcessCount)
+	} else {
+		fmt.Println("SNAPSHOT_PROC_COUNT not found")
+	}
+
 	rb.ConfigRep.SaveConfig(config)
 }
