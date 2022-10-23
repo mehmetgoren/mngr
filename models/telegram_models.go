@@ -1,7 +1,7 @@
 package models
 
 type TelegramBot struct {
-	Token string `json:"token" redis:"token"` // 5485450521:AAGDbYn5EvP67jjTchgaV88gfUVKMuaWc08 //"1944447440:AAF8C0vJ2rjd__9CWT7PVcg9cON8QixdAMs"
+	Token string `json:"token" redis:"token"`
 	URL   string `json:"url" redis:"url"`
 }
 

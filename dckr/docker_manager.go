@@ -6,11 +6,15 @@ import (
 	"github.com/docker/docker/client"
 	"log"
 	"mngr/models"
+	"time"
 )
 
 type DockerManager struct {
 	Client *client.Client
 }
+
+var smcpInstance = "smcp-instance"
+var mngrInstance = "mngr-instance"
 
 func (d *DockerManager) getContainer(instanceName string) (*types.Container, error) {
 	containers, err := d.Client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
@@ -86,7 +90,7 @@ func (d *DockerManager) RestartAfterCloudChanges() bool {
 	if d.Client == nil {
 		return false
 	}
-	names := []string{"smcp-instance"}
+	names := []string{smcpInstance}
 	for _, name := range names {
 		cntr, _ := d.getContainer(name)
 		if cntr == nil || cntr.State != "running" {
@@ -101,9 +105,27 @@ func (d *DockerManager) RestartAfterCloudChanges() bool {
 	return true
 }
 
+var isRestartAllRunning = false
+
 func (d *DockerManager) RestartAll(services []*models.ServiceModel) bool {
+	if isRestartAllRunning {
+		return false
+	}
+	isRestartAllRunning = true
+	defer func() {
+		isRestartAllRunning = false
+	}()
 	if d.Client == nil || services == nil {
 		return false
+	}
+	count := len(services)
+	for index, service := range services {
+		if service.InstanceName == mngrInstance {
+			lastService := services[count-1]
+			services[count-1] = service
+			services[index] = lastService
+			break
+		}
 	}
 	for _, service := range services {
 		if service.InstanceType == models.Systemd {
@@ -117,6 +139,7 @@ func (d *DockerManager) RestartAll(services []*models.ServiceModel) bool {
 		if err != nil {
 			log.Println(err.Error())
 		}
+		time.Sleep(time.Second)
 	}
 	return true
 }
