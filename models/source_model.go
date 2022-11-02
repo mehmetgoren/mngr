@@ -87,7 +87,8 @@ type SourceModel struct {
 	FlvPlayerType  int  `json:"flv_player_type" redis:"flv_player_type"`
 	BoosterEnabled bool `json:"booster_enabled" redis:"booster_enabled"`
 
-	CreatedAt string `json:"created_at" redis:"created_at"`
+	BlackScreenCheckEnabled bool   `json:"black_screen_check_enabled" redis:"black_screen_check_enabled"`
+	CreatedAt               string `json:"created_at" redis:"created_at"`
 	// SourceModel section ends
 }
 
