@@ -18,9 +18,11 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		vms := make([]*view_models.ServiceViewModel, 0)
+		dm := dckr.DockerManager{Client: dockerClient}
+		containers, _ := dm.GetContainers()
 		for _, service := range services {
 			vm := &view_models.ServiceViewModel{ServiceModel: service}
-			vm.SetupButtonEnabled()
+			vm.SetupButtonEnabled(containers)
 			vms = append(vms, vm)
 		}
 		ctx.JSON(http.StatusOK, vms)

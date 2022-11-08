@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/client"
 	"log"
 	"mngr/models"
+	"strings"
 	"time"
 )
 
@@ -142,4 +143,24 @@ func (d *DockerManager) RestartAll(services []*models.ServiceModel) bool {
 		time.Sleep(time.Second)
 	}
 	return true
+}
+
+func (d *DockerManager) GetContainers() (map[string]*models.DockerContainer, error) {
+	ret := make(map[string]*models.DockerContainer)
+	containers, err := d.Client.ContainerList(context.Background(), types.ContainerListOptions{All: true})
+	if err != nil {
+		log.Println("an error occurred while getting the container, err: ", err.Error())
+		return ret, err
+	}
+	for _, c := range containers {
+		if c.Names == nil || len(c.Names) == 0 {
+			continue
+		}
+		name := c.Names[0]
+		name = strings.Replace(name, "/", "", -1)
+		dc := &models.DockerContainer{Name: name, State: c.State}
+		ret[name] = dc
+	}
+
+	return ret, nil
 }
