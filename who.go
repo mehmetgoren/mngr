@@ -37,7 +37,7 @@ func FetchRtspTemplates(rb *reps.RepoBucket) {
 	// todo: this operation will be fetched by the Hub Portal instead of redis local db
 }
 
-func ReadEnvVariables(rb *reps.RepoBucket) {
+func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 	config, _ := rb.ConfigRep.GetConfig()
 	if config == nil || len(config.General.RootFolderPath) == 0 {
 		config, _ = rb.ConfigRep.RestoreConfig()
@@ -96,5 +96,40 @@ func ReadEnvVariables(rb *reps.RepoBucket) {
 		fmt.Println("SNAPSHOT_PROC_COUNT not found")
 	}
 
+	rtmpServerPortStartStr := os.Getenv("RTMP_PORT_START")
+	if len(rtmpServerPortStartStr) > 0 {
+		rtmpServerPortStart, _ := strconv.Atoi(rtmpServerPortStartStr)
+		if rtmpServerPortStart < 1 {
+			rtmpServerPortStart = 1024
+		}
+		config.FFmpeg.RtmpServerPortStart = rtmpServerPortStart
+		fmt.Println("RTMP_PORT_START: " + rtmpServerPortStartStr)
+	} else {
+		fmt.Println("RTMP_PORT_START not found")
+	}
+
+	rtmpServerPortEndStr := os.Getenv("RTMP_PORT_END")
+	if len(rtmpServerPortEndStr) > 0 {
+		rtmpServerPortEnd, _ := strconv.Atoi(rtmpServerPortEndStr)
+		if rtmpServerPortEnd <= config.FFmpeg.RtmpServerPortStart {
+			rtmpServerPortEnd = 65535
+		}
+		config.FFmpeg.RtmpServerPortEnd = rtmpServerPortEnd
+		fmt.Println("RTMP_PORT_END: " + rtmpServerPortEndStr)
+	} else {
+		fmt.Println("RTMP_PORT_END not found")
+	}
+
+	ret := &models.GlobalModel{}
+	feniksDemoStr := os.Getenv("FENIKS_DEMO")
+	if len(feniksDemoStr) > 0 {
+		ret.DemoMode = feniksDemoStr == "1"
+		fmt.Println("FENIKS_DEMO: " + deepStackFr)
+	} else {
+		fmt.Println("FENIKS_DEMO not found")
+	}
+
 	rb.ConfigRep.SaveConfig(config)
+
+	return ret
 }
