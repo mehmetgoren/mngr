@@ -79,7 +79,7 @@ func (r *RepoBucket) AddUser(user *models.User) {
 
 func (r *RepoBucket) RemoveUser(token string) {
 	delete(r.users, token)
-	log.Println("a user who's token is " + token + " has been deleted")
+	log.Println("a user with a token " + token + " has been deleted")
 }
 
 func (r *RepoBucket) IsUserAuthenticated(token string) (*models.UserSession, bool) {

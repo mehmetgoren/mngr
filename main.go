@@ -68,7 +68,7 @@ func main() {
 
 	initWhiteList()
 	rb.Init()
-	ReadEnvVariables(rb)
+	global := ReadEnvVariables(rb)
 	holders.Init()
 	WhoAreYou(rb)
 	FetchRtspTemplates(rb)
@@ -97,6 +97,9 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(f)
 	router.Use(gin.Logger())
 	router.Use(authMiddleware)
+	if global.ReadOnlyMode {
+		router.Use(readonlyMiddleware)
+	}
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"*"},
@@ -184,5 +187,33 @@ func authMiddleware(ctx *gin.Context) {
 				log.Println("an unauthorized request has been detected: ", req)
 			}
 		}
+	}
+}
+
+var mutableEndPoints = map[string]int{"DELETE/aiclips": 1, "DELETE/deleteaidata": 1,
+	"POST/telegram": 1, "DELETE/telegramuser": 1, "POST/gdrive": 1, "POST/resetgdrivetokenandurl": 1,
+	"POST/config": 1, "GET/restoreconfig": 1,
+	"DELETE/frtrainpersonimage": 1, "POST/frtrainpersonimage": 1, "POST/frtrainpersonrename": 1, "POST/frtrainpersonnew": 1, "DELETE/frtrainpersondelete": 1,
+	"POST/ods":            1,
+	"DELETE/records":      1,
+	"POST/restartservice": 1, "POST/startservice": 1, "POST/stopservice": 1, "POST/restartaftercloudchanges": 1, "POST/restartallservices": 1,
+	"POST/sources": 1, "DELETE/sources": 1, "POST/setsourceenabled": 1,
+	"POST/registeruser": 1, "DELETE/users": 1,
+	"POST/startstream": 1, "POST/stopstream": 1, "POST/restartstream": 1, "POST/videomerge": 1, "POST/frtrain": 1,
+}
+
+func readonlyMiddleware(ctx *gin.Context) {
+	req := ctx.Request
+	if req.Method == "OPTIONS" {
+		return
+	}
+	var params = ctx.Params
+	key := req.Method + req.RequestURI
+	for _, param := range params {
+		key = strings.Replace(key, "/"+param.Value, "", -1)
+	}
+	if _, ok := mutableEndPoints[key]; ok {
+		err := errors.New("unauthorized 401")
+		ctx.AbortWithError(http.StatusUnauthorized, err)
 	}
 }

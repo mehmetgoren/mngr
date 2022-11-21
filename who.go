@@ -120,16 +120,16 @@ func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 		fmt.Println("RTMP_PORT_END not found")
 	}
 
-	ret := &models.GlobalModel{}
-	feniksDemoStr := os.Getenv("FENIKS_DEMO")
-	if len(feniksDemoStr) > 0 {
-		ret.DemoMode = feniksDemoStr == "1"
-		fmt.Println("FENIKS_DEMO: " + deepStackFr)
+	global := &models.GlobalModel{}
+	readOnlyModeStr := os.Getenv("READONLY_MODE")
+	if len(readOnlyModeStr) > 0 {
+		global.ReadOnlyMode = readOnlyModeStr == "1"
+		fmt.Println("READONLY_MODE: " + readOnlyModeStr)
 	} else {
-		fmt.Println("FENIKS_DEMO not found")
+		fmt.Println("READONLY_MODE not found")
 	}
 
 	rb.ConfigRep.SaveConfig(config)
 
-	return ret
+	return global
 }
