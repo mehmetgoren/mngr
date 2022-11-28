@@ -60,6 +60,10 @@ func (u *UserRepository) Register(uv *models.RegisterUserViewModel) (*models.Use
 	user.Email = uv.Email
 	user.Token = utils.GenerateSecureToken(4)
 	user.LastLoginAt = utils.DatetimeNow()
+	user.Ip = uv.Ip
+	user.Uag = uv.Uag
+	user.Location = uv.Location
+	user.DataCenterLocation = uv.DataCenterLocation
 
 	_, err = u.addToRedis(user)
 	if err != nil {

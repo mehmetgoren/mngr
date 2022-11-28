@@ -51,7 +51,7 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 		}
 		u, err := rb.UserRep.Login(&models.LoginUserViewModel{Username: ru.Username, Password: ru.Password})
 		if u != nil && err == nil {
-			ctx.JSON(http.StatusNotFound, true)
+			ctx.JSON(http.StatusOK, true)
 			return
 		}
 		u, err = rb.UserRep.Register(&ru)

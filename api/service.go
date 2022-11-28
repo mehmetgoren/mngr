@@ -16,6 +16,7 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 		services, err := rb.ServiceRep.GetServices()
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		vms := make([]*view_models.ServiceViewModel, 0)
 		dm := dckr.DockerManager{Client: dockerClient}
@@ -32,6 +33,7 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 		_, err := rb.ServiceRep.AddWebApp("web_application")
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		ctx.JSON(http.StatusOK, true)
 	})

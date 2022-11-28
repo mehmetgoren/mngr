@@ -2,12 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
 	"net/http"
 )
 
-func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket, global *models.GlobalModel) {
 	router.GET("/rtsptemplates", func(ctx *gin.Context) {
 		ret, err := rb.RtspTemplateRep.GetAll()
 		if err != nil {
@@ -48,5 +49,9 @@ func RegisterOthersEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			return
 		}
 		ctx.JSON(http.StatusOK, &viewModel)
+	})
+
+	router.GET("isReadOnlyMode", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, global.ReadOnlyMode)
 	})
 }

@@ -47,6 +47,10 @@ func CreateRequiredDirectories(config *models.Config) {
 	// Create automatic plate license recognizer
 	alpr := GetAlprPath(config)
 	createDirIfNotExist(alpr)
+
+	//create DeepStack backup directory
+	ds := getDeepStackBackupPath(config)
+	createDirIfNotExist(ds)
 }
 
 func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
@@ -74,10 +78,6 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 	alpr := GetAlprPath(config)
 	createDirIfNotExist(path.Join(alpr, sourceId))
 	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
-
-	//create DeepStack backup directory
-	ds := getDeepStackBackupPath(config)
-	createDirIfNotExist(ds)
 }
 
 func GetStreamPath(config *models.Config) string {

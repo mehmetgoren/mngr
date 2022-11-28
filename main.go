@@ -126,7 +126,7 @@ func main() {
 	api.RegisterUserEndpoints(router, holders)
 	api.RegisterServiceEndpoints(router, rb, dockerClient)
 	api.RegisterServerStatsEndpoints(router, rb)
-	api.RegisterOthersEndpoints(router, rb)
+	api.RegisterOthersEndpoints(router, rb, global)
 	api.RegisterCloudEndpoints(router, rb)
 	api.RegisterAiDataEndpoints(router, factory)
 
@@ -142,10 +142,15 @@ func main() {
 	}
 }
 
+var anonymousEndPoints = map[string]int{"/login": 1, "/registeruser": 1, "/isReadOnlyMode": 1}
+
 func authMiddleware(ctx *gin.Context) {
 	req := ctx.Request
+	if req.Method == "OPTIONS" {
+		return
+	}
 	uri := req.RequestURI
-	if req.Method == "OPTIONS" || uri == "/login" || uri == "/registeruser" {
+	if _, ok := anonymousEndPoints[uri]; ok {
 		return
 	}
 	if strings.HasPrefix(uri, "/ws") { // if it is a websocket request
@@ -198,7 +203,7 @@ var mutableEndPoints = map[string]int{"DELETE/aiclips": 1, "DELETE/deleteaidata"
 	"DELETE/records":      1,
 	"POST/restartservice": 1, "POST/startservice": 1, "POST/stopservice": 1, "POST/restartaftercloudchanges": 1, "POST/restartallservices": 1,
 	"POST/sources": 1, "DELETE/sources": 1, "POST/setsourceenabled": 1,
-	"POST/registeruser": 1, "DELETE/users": 1,
+	"DELETE/users":     1,
 	"POST/startstream": 1, "POST/stopstream": 1, "POST/restartstream": 1, "POST/videomerge": 1, "POST/frtrain": 1,
 }
 

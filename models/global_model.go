@@ -1,5 +1,5 @@
 package models
 
 type GlobalModel struct {
-	ReadOnlyMode bool
+	ReadOnlyMode bool `json:"readOnlyMode"`
 }
