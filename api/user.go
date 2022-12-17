@@ -54,6 +54,9 @@ func RegisterUserEndpoints(router *gin.Engine, holders *ws.Holders) {
 			ctx.JSON(http.StatusOK, true)
 			return
 		}
+		if len(ru.Ip) == 0 {
+			ru.Ip = ctx.ClientIP()
+		}
 		u, err = rb.UserRep.Register(&ru)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, false)

@@ -59,7 +59,10 @@ func initWhiteList() {
 func createFactory() *cmn.Factory {
 	config, _ := rb.ConfigRep.GetConfig()
 	factory := &cmn.Factory{Config: config}
-	factory.Init()
+	err := factory.Init()
+	if err != nil {
+		log.Fatalln("factory init error: ", err.Error())
+	}
 	return factory
 }
 
@@ -74,7 +77,12 @@ func main() {
 	FetchRtspTemplates(rb)
 
 	factory := createFactory()
-	defer factory.Close()
+	defer func(factory *cmn.Factory) {
+		err := factory.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}(factory)
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Println(err.Error())
@@ -133,6 +141,8 @@ func main() {
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
+	config, _ := rb.ConfigRep.GetConfig()
+	log.Println("Root path is", config.General.RootFolderPath)
 	port := strconv.Itoa(utils.ParsePort())
 	log.Println("web server port is " + port)
 	err = router.Run(":" + port)
@@ -188,7 +198,10 @@ func authMiddleware(ctx *gin.Context) {
 			if !isWhitelisted {
 				err := errors.New("unauthorized 401")
 				holders.UserLogout(token, true)
-				ctx.AbortWithError(http.StatusUnauthorized, err)
+				err2 := ctx.AbortWithError(http.StatusUnauthorized, err)
+				if err2 != nil {
+					log.Println(err2.Error())
+				}
 				log.Println("an unauthorized request has been detected: ", req)
 			}
 		}
@@ -219,6 +232,9 @@ func readonlyMiddleware(ctx *gin.Context) {
 	}
 	if _, ok := mutableEndPoints[key]; ok {
 		err := errors.New("unauthorized 401")
-		ctx.AbortWithError(http.StatusUnauthorized, err)
+		err2 := ctx.AbortWithError(http.StatusUnauthorized, err)
+		if err2 != nil {
+			log.Println(err2.Error())
+		}
 	}
 }
