@@ -36,6 +36,7 @@ func (u *UserRepository) Login(lu *models.LoginUserViewModel) (*models.User, err
 	for _, user := range users {
 		if user.Username == lu.Username && utils.CompareEncrypt(user.Password, lu.Password) {
 			user.LastLoginAt = utils.DatetimeNow()
+			user.VisitCount += 1
 			u.addToRedis(user)
 			return user, nil
 		}

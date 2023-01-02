@@ -13,6 +13,7 @@ type User struct {
 	Uag                string `json:"uag" redis:"uag"`
 	Location           string `json:"location" redis:"location"`
 	DataCenterLocation string `json:"data_center_location" redis:"data_center_location"`
+	VisitCount         int    `json:"visit_count" redis:"visit_count"`
 }
 
 type RegisterUserViewModel struct {
