@@ -21,10 +21,10 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 		Plate:      source.Plate,
 		Confidence: utils.RoundFloat64(source.Confidence),
 	}
-	ret.ImageFileName = utils.SetRelativeImagePath(a.Config, source.ImageFileName)
+	ret.ImageFileName = source.ImageFileName
 
 	ret.VideoFile = &data.VideoFileDto{}
-	ret.VideoFile.Name = utils.SetRelativeRecordPath(a.Config, source.VideoFileName)
+	ret.VideoFile.Name = source.VideoFileName
 	if source.VideoFileCreatedDate != nil {
 		ret.VideoFile.CreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
 	}
@@ -34,7 +34,7 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 
 	ret.AiClip = &data.AiClip{
 		Enabled:        source.AiClipEnabled,
-		FileName:       utils.SetRelativeOdAiVideoClipPath(a.Config, source.AiClipFileName),
+		FileName:       source.AiClipFileName,
 		CreatedAt:      source.CreatedAtStr,
 		LastModifiedAt: source.AiClipLastModifiedAtStr,
 		Duration:       source.AiClipDuration,

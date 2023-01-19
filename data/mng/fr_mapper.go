@@ -21,17 +21,17 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 		PredClsIdx:  source.DetectedFace.PredClsIdx,
 		PredClsName: source.DetectedFace.PredClsName,
 	}
-	ret.ImageFileName = utils.SetRelativeImagePath(f.Config, source.ImageFileName)
+	ret.ImageFileName = source.ImageFileName
 	ret.VideoFile = &data.VideoFileDto{}
 	if source.VideoFile != nil {
-		ret.VideoFile.Name = utils.SetRelativeRecordPath(f.Config, source.VideoFile.Name)
+		ret.VideoFile.Name = source.VideoFile.Name
 		ret.VideoFile.CreatedAt = utils.TimeToString(source.VideoFile.CreatedDate.Time(), false)
 		ret.VideoFile.Duration = source.VideoFile.Duration
 		ret.VideoFile.Merged = source.VideoFile.Merged
 		ret.VideoFile.ObjectAppearsAt = source.VideoFile.ObjectAppearsAt
 	}
 	ret.AiClip = source.AiClip
-	ret.AiClip.FileName = utils.SetRelativeOdAiVideoClipPath(f.Config, source.AiClip.FileName)
+	ret.AiClip.FileName = source.AiClip.FileName
 
 	return ret
 }

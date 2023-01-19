@@ -8,6 +8,7 @@ import (
 	"mngr/reps"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func createHeartbeatRepository(client *redis.Client, serviceName string, config *models.Config) *reps.HeartbeatRepository {
@@ -39,8 +40,21 @@ func FetchRtspTemplates(rb *reps.RepoBucket) {
 
 func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 	config, _ := rb.ConfigRep.GetConfig()
-	if config == nil || len(config.General.RootFolderPath) == 0 {
+	if config == nil {
 		config, _ = rb.ConfigRep.RestoreConfig()
+	}
+
+	rootDirPath := os.Getenv("ROOT_DIR_PATHS")
+	if len(rootDirPath) > 0 {
+		splits := strings.Split(rootDirPath, ",")
+		l := len(splits)
+		for i := 0; i < l; i++ {
+			splits[i] = strings.TrimSpace(splits[i])
+		}
+		config.General.DirPaths = splits
+		fmt.Println("ROOT_DIR_PATHS: " + rootDirPath)
+	} else {
+		fmt.Println("ROOT_DIR_PATHS not found")
 	}
 
 	mongoDbCs := os.Getenv("MONGODB_CS")
@@ -74,14 +88,6 @@ func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 		fmt.Println("DEEPSTACK_FR: " + deepStackFr)
 	} else {
 		fmt.Println("DEEPSTACK_FR not found")
-	}
-
-	rootDirPath := os.Getenv("ROOT_DIR_PATH")
-	if len(rootDirPath) > 0 {
-		config.General.RootFolderPath = rootDirPath
-		fmt.Println("ROOT_DIR_PATH: " + rootDirPath)
-	} else {
-		fmt.Println("ROOT_DIR_PATH not found")
 	}
 
 	snapShotProcessCount := os.Getenv("SNAPSHOT_PROC_COUNT")

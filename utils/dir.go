@@ -7,7 +7,7 @@ import (
 	"mngr/models"
 	"os"
 	"path"
-	"strings"
+	"regexp"
 )
 
 func createDirIfNotExist(dir string) error {
@@ -20,22 +20,30 @@ func createDirIfNotExist(dir string) error {
 	return nil
 }
 
+// CreateRequiredDirectories we are ensure that dirPaths exists
 func CreateRequiredDirectories(config *models.Config) {
-	// Create HLS stream folder
-	stream := GetStreamPath(config)
-	createDirIfNotExist(stream)
+	for _, dirPath := range config.General.DirPaths {
+		// Create HLS stream folder
+		stream := GetStreamPath(dirPath)
+		createDirIfNotExist(stream)
 
-	// Create record folder
-	record := GetRecordPath(config)
-	createDirIfNotExist(record)
+		// Create record folder
+		record := GetRecordPath(dirPath)
+		createDirIfNotExist(record)
 
-	// Create object detection folder
-	od := GetOdPath(config)
-	createDirIfNotExist(od)
+		// Create object detection folder
+		od := GetOdPath(dirPath)
+		createDirIfNotExist(od)
 
-	// Create facial recognition folder
-	fr := GetFrPath(config)
-	createDirIfNotExist(fr)
+		// Create facial recognition folder
+		fr := GetFrPath(dirPath)
+		createDirIfNotExist(fr)
+
+		// Create automatic plate license recognizer
+		alpr := GetAlprPath(dirPath)
+		createDirIfNotExist(alpr)
+	}
+
 	ml := GetFrMlPath(config)
 	createDirIfNotExist(ml)
 	train := GetFrTrainPath(config)
@@ -44,92 +52,91 @@ func CreateRequiredDirectories(config *models.Config) {
 	test := path.Join(ml, "test")
 	createDirIfNotExist(test)
 
-	// Create automatic plate license recognizer
-	alpr := GetAlprPath(config)
-	createDirIfNotExist(alpr)
-
 	//create DeepStack backup directory
 	ds := getDeepStackBackupPath(config)
 	createDirIfNotExist(ds)
 }
 
 func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
-	// Create HLS stream folder for the source
-	stream := GetStreamPath(config)
-	createDirIfNotExist(path.Join(stream, sourceId))
+	for _, dirPath := range config.General.DirPaths {
+		// Create HLS stream folder for the source
+		stream := GetStreamPath(dirPath)
+		createDirIfNotExist(path.Join(stream, sourceId))
 
-	// Create record folder for the source
-	record := GetRecordPath(config)
-	createDirIfNotExist(path.Join(record, sourceId))
-	//and also short video clips folder
-	createDirIfNotExist(path.Join(record, sourceId, "ai"))
+		// Create record folder for the source
+		record := GetRecordPath(dirPath)
+		createDirIfNotExist(path.Join(record, sourceId))
+		//and also short video clips folder
+		createDirIfNotExist(path.Join(record, sourceId, "ai"))
 
-	// Create object detection folder for the source
-	od := GetOdPath(config)
-	createDirIfNotExist(path.Join(od, sourceId))
-	createDirIfNotExist(path.Join(od, sourceId, "images"))
+		// Create object detection folder for the source
+		od := GetOdPath(dirPath)
+		createDirIfNotExist(path.Join(od, sourceId))
+		createDirIfNotExist(path.Join(od, sourceId, "images"))
 
-	// Create facial recognition folder for the source
-	fr := GetFrPath(config)
-	createDirIfNotExist(path.Join(fr, sourceId))
-	createDirIfNotExist(path.Join(fr, sourceId, "images"))
+		// Create facial recognition folder for the source
+		fr := GetFrPath(dirPath)
+		createDirIfNotExist(path.Join(fr, sourceId))
+		createDirIfNotExist(path.Join(fr, sourceId, "images"))
 
-	// Create automatic plate license recognizer
-	alpr := GetAlprPath(config)
-	createDirIfNotExist(path.Join(alpr, sourceId))
-	createDirIfNotExist(path.Join(alpr, sourceId, "images"))
+		// Create automatic plate license recognizer
+		alpr := GetAlprPath(dirPath)
+		createDirIfNotExist(path.Join(alpr, sourceId))
+		createDirIfNotExist(path.Join(alpr, sourceId, "images"))
+	}
 }
 
-func GetStreamPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "stream")
+func GetStreamPath(dirPath string) string {
+	return path.Join(dirPath, "stream")
 }
 
-func GetRecordPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "record")
+func GetRecordPath(dirPath string) string {
+	return path.Join(dirPath, "record")
 }
 
-func GetOdPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "od")
+func GetOdPath(dirPath string) string {
+	return path.Join(dirPath, "od")
 }
 
-func GetFrPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "fr")
+func GetFrPath(dirPath string) string {
+	return path.Join(dirPath, "fr")
 }
 
+func GetAlprPath(dirPath string) string {
+	return path.Join(dirPath, "alpr")
+}
+
+// GetFrMlPath returns only first path from config.General.DirPaths
 func GetFrMlPath(config *models.Config) string {
-	fr := GetFrPath(config)
+	rootDirPath := GetDefaultDirPath(config)
+	fr := GetFrPath(rootDirPath)
 	return path.Join(fr, "ml")
 }
 
-func GetAiClipPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(GetRecordPath(config), sourceId, "ai")
+func GetAiClipPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
+	return path.Join(GetRecordPath(sourceDirPath), ffmpegModel.GetSourceId(), "ai")
 }
 
-// od starts
-func GetOdImagesPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(GetOdPath(config), sourceId, "images")
+func GetOdImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
+	return path.Join(GetOdPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
 }
 
-func GetHourlyOdImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+func GetHourlyOdImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetOdImagesPathBySourceId(config, sourceId))
+	return di.GetIndexedPath(GetOdImagesPathBySource(config, ffmpegModel))
 }
 
-// od ends
-
-// fr starts
-func getFrPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "fr")
+func GetFrImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
+	return path.Join(GetFrPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
 }
-
-func GetFrImagesPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(getFrPath(config), sourceId, "images")
-}
-func GetHourlyFrImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+func GetHourlyFrImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetFrImagesPathBySourceId(config, sourceId))
+	return di.GetIndexedPath(GetFrImagesPathBySource(config, ffmpegModel))
 }
 
 func GetFrTrainPath(config *models.Config) string {
@@ -140,55 +147,30 @@ func GetFrTrainPathByPerson(config *models.Config, person string) string {
 	return path.Join(GetFrTrainPath(config), person)
 }
 
-//fr ends
-
-// record starts
-func GetRecordPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(GetRecordPath(config), sourceId)
+func GetRecordPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
+	return path.Join(GetRecordPath(sourceDirPath), ffmpegModel.GetSourceId())
 }
 
-func GetHourlyRecordPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+func GetHourlyRecordPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetRecordPathBySourceId(config, sourceId))
+	return di.GetIndexedPath(GetRecordPathBySource(config, ffmpegModel))
 }
 
-// record ends
-
-// alpr starts
-func GetAlprPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "alpr")
+func GetAlprImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
+	return path.Join(GetAlprPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
 }
-
-func getAlprPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "alpr")
-}
-
-func GetAlprImagesPathBySourceId(config *models.Config, sourceId string) string {
-	return path.Join(getAlprPath(config), sourceId, "images")
-}
-func GetHourlyAlprImagesPathBySourceId(config *models.Config, sourceId string, dateStr string) string {
+func GetHourlyAlprImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetAlprImagesPathBySourceId(config, sourceId))
-}
-
-// alpr ends
-
-func SetRelativeImagePath(config *models.Config, fullImagePath string) string {
-	return strings.Replace(fullImagePath, config.General.RootFolderPath+"/", "", -1)
-}
-
-func SetRelativeOdAiVideoClipPath(config *models.Config, fullVideoPath string) string {
-	return strings.Replace(fullVideoPath, config.General.RootFolderPath+"/", "", -1)
-}
-
-func SetRelativeRecordPath(config *models.Config, fullRecordPath string) string {
-	return strings.Replace(fullRecordPath, config.General.RootFolderPath+"/record", "playback", -1)
+	return di.GetIndexedPath(GetAlprImagesPathBySource(config, ffmpegModel))
 }
 
 func getDeepStackBackupPath(config *models.Config) string {
-	return path.Join(config.General.RootFolderPath, "deepstack")
+	rootDirPath := GetDefaultDirPath(config)
+	return path.Join(rootDirPath, "deepstack")
 }
 
 func checkIfMlFolderEmpty(mlTrainDirPath string) error {
@@ -205,4 +187,47 @@ func checkIfMlFolderEmpty(mlTrainDirPath string) error {
 		}
 	}
 	return err
+}
+
+func IsDirExists(dir string) bool {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func GetVideoFileAbsolutePath(v *models.VideoFile, config *models.Config, source models.FFmpegModel) string {
+	sourceDirPath := GetRecordPath(GetSourceDirPath(config, source))
+	return path.Join(sourceDirPath, v.SourceId, v.Year, FixZeroStr(v.Month), FixZeroStr(v.Day), FixZeroStr(v.Hour), v.Name)
+}
+
+func IsDirNameValid(fileName string) bool {
+	regExpString := "\\/?%*:|\"<>"
+	reg, err := regexp.Compile(regExpString)
+	if err != nil {
+		return false
+	}
+	return !reg.MatchString(fileName)
+}
+
+func GetDirPaths(config *models.Config) []string {
+	return config.General.DirPaths
+}
+
+// GetDefaultDirPath The first item of the dirPaths is default and the Deepstack backup file also use it
+func GetDefaultDirPath(config *models.Config) string {
+	dirPaths := config.General.DirPaths
+	if dirPaths == nil || len(dirPaths) == 0 || dirPaths[0] == "" {
+		log.Fatal("Config.General.DirPaths is empty, the program will be terminated")
+	}
+	rootPath := dirPaths[0]
+	return rootPath
+}
+
+func GetSourceDirPath(config *models.Config, ffmpegModel models.FFmpegModel) string {
+	sourceDirPath := ffmpegModel.GetDirPath()
+	if len(sourceDirPath) > 0 {
+		return sourceDirPath
+	}
+	return GetDefaultDirPath(config)
 }

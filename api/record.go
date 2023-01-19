@@ -17,9 +17,14 @@ import (
 func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	router.GET("/recordhours/:id/:datestr", func(ctx *gin.Context) {
 		id := ctx.Param("id")
+		source, err := rb.SourceRep.Get(id)
+		if err != nil || source == nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		dateStr := ctx.Param("datestr")
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath := utils.GetHourlyRecordPathBySourceId(config, id, dateStr)
+		recordFolderPath := utils.GetHourlyRecordPathBySource(config, source, dateStr)
 		files, _ := ioutil.ReadDir(recordFolderPath)
 		var list = make([]string, 0)
 		for _, file := range files {
@@ -35,7 +40,12 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		dateStr := ctx.Param("datestr")
 		hour := ctx.Param("hour")
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath := path.Join(utils.GetHourlyRecordPathBySourceId(config, id, dateStr), hour)
+		source, err := rb.SourceRep.Get(id)
+		if err != nil || source == nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		recordFolderPath := path.Join(utils.GetHourlyRecordPathBySource(config, source, dateStr), hour)
 		files, _ := ioutil.ReadDir(recordFolderPath)
 		date := utils.StringToTime(dateStr)
 		var list = make([]*models.VideoFile, 0)
@@ -51,7 +61,7 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			videoFile.Day = utils.FixZero(date.Day())
 			intHour, _ := strconv.Atoi(hour)
 			videoFile.Hour = utils.FixZero(intHour)
-			utils.SetVideoFilePath(&videoFile)
+			videoFile.Path = utils.GetVideoFileAbsolutePath(&videoFile, config, source)
 			videoFile.Size = utils.RoundFloat64(float64(file.Size()) * 0.000001)
 			videoFile.CreatedAt = strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 			videoFile.ModifiedAt = utils.TimeToString(file.ModTime(), true)
@@ -66,10 +76,14 @@ func RegisterRecordEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		source, err := rb.SourceRep.Get(vf.SourceId)
+		if err != nil || source == nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
 		config, _ := rb.ConfigRep.GetConfig()
-		recordFolderPath := utils.GetRecordPath(config)
-		err := os.Remove(utils.GetVideoFileAbsolutePath(&vf, recordFolderPath))
+		err = os.Remove(utils.GetVideoFileAbsolutePath(&vf, config, source))
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, err)
 		} else {

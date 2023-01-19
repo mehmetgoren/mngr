@@ -22,10 +22,10 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 		PredClsIdx:  source.PredClsIdx,
 		PredClsName: source.PredClsName,
 	}
-	ret.ImageFileName = utils.SetRelativeImagePath(f.Config, source.ImageFileName)
+	ret.ImageFileName = source.ImageFileName
 
 	ret.VideoFile = &data.VideoFileDto{}
-	ret.VideoFile.Name = utils.SetRelativeRecordPath(f.Config, source.VideoFileName)
+	ret.VideoFile.Name = source.VideoFileName
 	if source.VideoFileCreatedDate != nil {
 		ret.VideoFile.CreatedAt = utils.TimeToString(*source.VideoFileCreatedDate, false)
 	}
@@ -35,7 +35,7 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 
 	ret.AiClip = &data.AiClip{
 		Enabled:        source.AiClipEnabled,
-		FileName:       utils.SetRelativeOdAiVideoClipPath(f.Config, source.AiClipFileName),
+		FileName:       source.AiClipFileName,
 		CreatedAt:      source.CreatedAtStr,
 		LastModifiedAt: source.AiClipLastModifiedAtStr,
 		Duration:       source.AiClipDuration,

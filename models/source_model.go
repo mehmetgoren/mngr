@@ -51,6 +51,8 @@ type SourceModel struct {
 	RecordAudioSampleRate int `json:"record_audio_sample_rate" redis:"record_audio_sample_rate"`
 	RecordAudioVolume     int `json:"record_audio_volume" redis:"record_audio_volume"`
 
+	RootDirPath string `json:"root_dir_path" redis:"root_dir_path"`
+
 	LogLevel int `json:"log_level" redis:"log_level"`
 	// FFmpegModel section ends
 
@@ -95,4 +97,12 @@ type SourceModel struct {
 
 func (s SourceModel) MarshalBinary() ([]byte, error) {
 	return json.Marshal(s)
+}
+
+func (s *SourceModel) GetSourceId() string {
+	return s.Id
+}
+
+func (s *SourceModel) GetDirPath() string {
+	return s.RootDirPath
 }

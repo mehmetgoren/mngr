@@ -4,8 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"mngr/reps"
 	"mngr/utils"
+	"strings"
 )
 
+var whiteList = make([]string, 0)
+
+func initWhiteList() {
+	whiteList = append(whiteList, "/blank.mp4")
+}
+func GetWhiteList() []string {
+	return whiteList
+}
 func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 	config, _ := rb.ConfigRep.GetConfig()
 
@@ -14,25 +23,20 @@ func RegisterStaticResources(router *gin.Engine, rb *reps.RepoBucket) {
 	router.StaticFile("/favicon.ico", "./static/icons/favicon.ico")
 	router.StaticFile("/blank.mp4", "./static/playback/blank.mp4")
 
-	streamFolderPath := utils.GetStreamPath(config)
-	router.Static("/livestream", streamFolderPath)
+	initWhiteList()
+	for _, dirPath := range config.General.DirPaths {
+		relativePath := dirPath
+		if !strings.HasPrefix(relativePath, "/") {
+			relativePath = "/" + relativePath
+		}
+		router.Static(relativePath, dirPath)
+		whiteList = append(whiteList, relativePath)
+	}
 
-	recordFolderPath := utils.GetRecordPath(config)
-	router.Static("/playback", recordFolderPath)
-
-	// od is not used here since od images are loaded from a temp file since the gallery performs better on non hierarchical filename instead of base64 strings
-	router.Static("/od", utils.GetOdPath(config))
-
-	// also add fr
-	router.Static("/fr", utils.GetFrPath(config))
-
-	// last ine is alpr
-	router.Static("/alpr", utils.GetAlprPath(config))
-
-	streams, err := rb.StreamRep.GetAll()
-	if err == nil && streams != nil {
-		for _, s := range streams {
-			utils.CreateSourceDefaultDirectories(config, s.Id)
+	sources, err := rb.SourceRep.GetAll()
+	if err == nil && sources != nil {
+		for _, source := range sources {
+			utils.CreateSourceDefaultDirectories(config, source.Id)
 		}
 	}
 }

@@ -30,14 +30,8 @@ type AiClipViewModel struct {
 	VideoFileName       string              `json:"video_file_name"`
 	VideoBaseFileName   string              `json:"video_base_file_name"`
 	Duration            int                 `json:"duration"`
-}
 
-func (a *AiClipViewModel) SetupVideoFileName() {
-	a.VideoFileName = strings.Replace(a.VideoFileName, "record", "playback", -1)
-}
-
-func (a *AiClipViewModel) RollbackVideoFileName() {
-	a.VideoFileName = strings.Replace(a.VideoFileName, "playback", "record", -1)
+	SourceId string `json:"source_id"`
 }
 
 func createAiClipViewModelFrom(source *data.AiClip) *AiClipViewModel {
@@ -67,7 +61,7 @@ func setAiPreviewViewModel(ret []*AiClipViewModel) {
 	}
 }
 
-func Map(dtos []data.AiDto) []*AiClipViewModel {
+func Map(sourceId string, dtos []data.AiDto) []*AiClipViewModel {
 	ret := make([]*AiClipViewModel, 0)
 	dic := make(map[string]*AiClipViewModel)
 	for _, dto := range dtos {
@@ -93,7 +87,7 @@ func Map(dtos []data.AiDto) []*AiClipViewModel {
 		do.PredScore = dto.GetPredScore()
 		val.AiObjects = append(val.AiObjects, do)
 		val.Ids = append(val.Ids, dto.GetId())
-		val.SetupVideoFileName()
+		val.SourceId = sourceId
 	}
 	setAiPreviewViewModel(ret)
 	return ret

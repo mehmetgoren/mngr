@@ -2,6 +2,7 @@ package dsk_archv
 
 import (
 	"mngr/models"
+	"mngr/server_stats"
 	"strings"
 )
 
@@ -11,7 +12,8 @@ const (
 )
 
 type ActionTypeConfirmer struct {
-	Config *models.Config
+	Config   *models.Config
+	DiskInfo *server_stats.DiskInfo
 }
 
 func (a *ActionTypeConfirmer) GetActionType() int {
@@ -22,7 +24,7 @@ func (a *ActionTypeConfirmer) GetActionType() int {
 	if len(c.Archive.MoveLocation) == 0 {
 		return Delete
 	}
-	if strings.Contains(c.Archive.MoveLocation, c.General.RootFolderPath) { //means move location is on the same physical disk
+	if strings.Contains(c.Archive.MoveLocation, a.DiskInfo.MountPoint) { //means move location is on the same physical disk
 		return Delete
 	}
 

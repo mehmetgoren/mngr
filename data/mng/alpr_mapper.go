@@ -20,17 +20,17 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 		Plate:      source.DetectedPlate.Plate,
 		Confidence: utils.RoundFloat64(source.DetectedPlate.Confidence),
 	}
-	ret.ImageFileName = utils.SetRelativeImagePath(a.Config, source.ImageFileName)
+	ret.ImageFileName = source.ImageFileName
 	ret.VideoFile = &data.VideoFileDto{}
 	if source.VideoFile != nil {
-		ret.VideoFile.Name = utils.SetRelativeRecordPath(a.Config, source.VideoFile.Name)
+		ret.VideoFile.Name = source.VideoFile.Name
 		ret.VideoFile.CreatedAt = utils.TimeToString(source.VideoFile.CreatedDate.Time(), false)
 		ret.VideoFile.Duration = source.VideoFile.Duration
 		ret.VideoFile.Merged = source.VideoFile.Merged
 		ret.VideoFile.ObjectAppearsAt = source.VideoFile.ObjectAppearsAt
 	}
 	ret.AiClip = source.AiClip
-	ret.AiClip.FileName = utils.SetRelativeOdAiVideoClipPath(a.Config, source.AiClip.FileName)
+	ret.AiClip.FileName = source.AiClip.FileName
 
 	return ret
 }

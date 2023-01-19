@@ -90,19 +90,24 @@ type ImagesParams struct {
 func RegisterOdImagesEndpoints(router *gin.Engine, rb *reps.RepoBucket, factory *cmn.Factory) {
 	router.GET("/aiimagesfolders/:id/:date/:aitype", func(ctx *gin.Context) {
 		sourceId := ctx.Param("id")
+		source, err := rb.SourceRep.Get(sourceId)
+		if err != nil || source == nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		date := ctx.Param("date")
 		aiType, _ := strconv.Atoi(ctx.Param("aitype"))
 		config, _ := rb.ConfigRep.GetConfig()
 		var odPath string
 		switch aiType {
 		case models.Od:
-			odPath = utils.GetHourlyOdImagesPathBySourceId(config, sourceId, date)
+			odPath = utils.GetHourlyOdImagesPathBySource(config, source, date)
 			break
 		case models.Fr:
-			odPath = utils.GetHourlyFrImagesPathBySourceId(config, sourceId, date)
+			odPath = utils.GetHourlyFrImagesPathBySource(config, source, date)
 			break
 		case models.Alpr:
-			odPath = utils.GetHourlyAlprImagesPathBySourceId(config, sourceId, date)
+			odPath = utils.GetHourlyAlprImagesPathBySource(config, source, date)
 			break
 		}
 		items, _ := newTree(odPath, true)

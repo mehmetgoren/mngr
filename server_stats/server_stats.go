@@ -16,7 +16,7 @@ import (
 type ServerStats struct {
 	Cpu     CpuInfo     `json:"cpu"`
 	Memory  MemoryInfo  `json:"memory"`
-	Disk    DiskInfo    `json:"disk"`
+	Disks   []DiskInfo  `json:"disks"`
 	Network NetworkInfo `json:"network"`
 }
 
@@ -73,34 +73,38 @@ func (s *ServerStats) InitDiskInfos(config *models.Config) error {
 	if err != nil {
 		return err
 	}
+	s.Disks = make([]DiskInfo, 0)
+	dirs := utils.GetDirPaths(config)
 	for _, p := range parts {
 		if p.Mountpoint == "/" {
 			continue
 		}
-		if strings.HasPrefix(config.General.RootFolderPath, p.Mountpoint) {
-			device := p.Mountpoint
-			u, err := disk.Usage(device)
-			if err != nil {
-				return err
-			}
-			if u == nil || u.Total == 0 {
-				return errors.New("null reference exceptions")
-			}
+		for _, dir := range dirs {
+			if strings.HasPrefix(dir, p.Mountpoint) {
+				device := p.Mountpoint
+				u, err := disk.Usage(device)
+				if err != nil {
+					return err
+				}
+				if u == nil || u.Total == 0 {
+					return errors.New("null reference exceptions")
+				}
 
-			d := DiskInfo{}
-			d.MountPoint = p.Mountpoint
-			d.Fstype = u.Fstype
-			d.Total = u.Total / 1024 / 1024
-			d.TotalHuman = human.Bytes(u.Total)
-			d.Used = u.Used / 1024 / 1024
-			d.UsedHuman = human.Bytes(u.Used)
-			d.Free = u.Free / 1024 / 1024
-			d.FreeHuman = human.Bytes(u.Free)
-			d.UsagePercent = utils.RoundFloat64(u.UsedPercent)
-			d.UsagePercentHuman = human.CommafWithDigits(d.UsagePercent, 2) + " %"
-			s.Disk = d
+				d := DiskInfo{}
+				d.MountPoint = p.Mountpoint
+				d.Fstype = u.Fstype
+				d.Total = u.Total / 1024 / 1024
+				d.TotalHuman = human.Bytes(u.Total)
+				d.Used = u.Used / 1024 / 1024
+				d.UsedHuman = human.Bytes(u.Used)
+				d.Free = u.Free / 1024 / 1024
+				d.FreeHuman = human.Bytes(u.Free)
+				d.UsagePercent = utils.RoundFloat64(u.UsedPercent)
+				d.UsagePercentHuman = human.CommafWithDigits(d.UsagePercent, 2) + " %"
+				s.Disks = append(s.Disks, d)
 
-			break
+				break
+			}
 		}
 	}
 	return nil

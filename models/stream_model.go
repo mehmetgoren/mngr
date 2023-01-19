@@ -46,7 +46,17 @@ type StreamModel struct {
 	ConcatDemuxerPid  int    `json:"concat_demuxer_pid" redis:"concat_demuxer_pid"`
 	ConcatDemuxerArgs string `json:"concat_demuxer_args" redis:"concat_demuxer_args"`
 
+	RootDirPath string `json:"root_dir_path" redis:"root_dir_path"`
+
 	FlvPlayerType            int  `json:"flv_player_type" redis:"flv_player_type"`
 	BoosterEnabled           bool `json:"booster_enabled" redis:"booster_enabled"`
 	LiveBufferLatencyChasing bool `json:"live_buffer_latency_chasing" redis:"live_buffer_latency_chasing"`
+}
+
+func (s *StreamModel) GetSourceId() string {
+	return s.Id
+}
+
+func (s *StreamModel) GetDirPath() string {
+	return s.RootDirPath
 }

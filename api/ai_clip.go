@@ -10,7 +10,6 @@ import (
 	"mngr/view_models"
 	"net/http"
 	"os"
-	"path"
 	"strconv"
 )
 
@@ -64,7 +63,7 @@ func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket, facto
 			return
 		}
 
-		list := view_models.Map(interfaces)
+		list := view_models.Map(params.SourceId, interfaces)
 		ctx.JSON(http.StatusOK, list)
 	})
 
@@ -76,17 +75,14 @@ func RegisterOdVideoClipEndpoints(router *gin.Engine, rb *reps.RepoBucket, facto
 			return
 		}
 
-		if len(vm.Ids) == 0 {
+		if len(vm.SourceId) == 0 || len(vm.Ids) == 0 {
 			ctx.JSON(http.StatusBadRequest, false)
 			return
 		}
 
-		config, _ := rb.ConfigRep.GetConfig()
-		rootPath := config.General.RootFolderPath
-		vm.RollbackVideoFileName()
-		os.Remove(path.Join(rootPath, vm.VideoFileName))
+		os.Remove(vm.VideoFileName)
 		for _, ifn := range vm.ImageFileNames {
-			os.Remove(path.Join(rootPath, ifn))
+			os.Remove(ifn)
 		}
 		rep := factory.CreateRepository()
 		for _, id := range vm.Ids {

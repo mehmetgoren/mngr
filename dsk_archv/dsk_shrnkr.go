@@ -9,15 +9,18 @@ import (
 	"mngr/data/cmn"
 	"mngr/models"
 	"mngr/reps"
+	"mngr/server_stats"
 	"mngr/utils"
 	"os"
 	"path"
 	"sort"
+	"strings"
 )
 
 type DiskShrinker struct {
 	Factory      *cmn.Factory
 	Rb           *reps.RepoBucket
+	DiskInfo     *server_stats.DiskInfo
 	stillWorking bool
 }
 
@@ -30,7 +33,7 @@ func (d *DiskShrinker) Shrink() error {
 	defer func() {
 		d.stillWorking = false
 	}()
-	confirmer := ActionTypeConfirmer{Config: d.Factory.Config}
+	confirmer := ActionTypeConfirmer{Config: d.Factory.Config, DiskInfo: d.DiskInfo}
 	actionType := confirmer.GetActionType()
 	opName := "deleting"
 	if actionType == MoveToNewLocation {
@@ -39,23 +42,30 @@ func (d *DiskShrinker) Shrink() error {
 	log.Println("disk shrink action type is " + opName)
 	switch actionType {
 	case Delete:
-		delete_(d.Factory, d.Rb)
+		d.delete_()
 		break
 	case MoveToNewLocation:
-		move(d.Factory, d.Rb)
+		d.move()
 		break
 	}
 	return nil
 }
 
-func shrink(fc *cmn.Factory, rb *reps.RepoBucket, fn func(oldest *OldestSourceRecord, sourceId string) error) {
+func (d *DiskShrinker) shrink(fn func(oldest *OldestSourceRecord, source *models.SourceModel) error) {
+	fc, rb := d.Factory, d.Rb
+	mountPoint := d.DiskInfo.MountPoint
 	sources, _ := rb.SourceRep.GetAll()
 	if sources == nil {
 		return
 	}
 	oldest := &OldestSourceRecord{}
 	for _, source := range sources {
-		fullPath := utils.GetRecordPathBySourceId(fc.Config, source.Id)
+		// if source does not record on this disk, it is pointless to delete AI data.
+		sourceDirPath := utils.GetSourceDirPath(fc.Config, source)
+		if !strings.HasPrefix(sourceDirPath, mountPoint) {
+			continue
+		}
+		fullPath := utils.GetRecordPathBySource(fc.Config, source)
 		deleteAllTempAiClipFiles(fullPath)
 
 		oldest.Init(fullPath)
@@ -63,13 +73,13 @@ func shrink(fc *cmn.Factory, rb *reps.RepoBucket, fn func(oldest *OldestSourceRe
 			oldest.DeleteParentDirectoryIfEmpty(fullPath)
 			continue
 		}
-		err := fn(oldest, source.Id)
+		err := fn(oldest, source)
 		if err != nil {
 			log.Println("an error occurred while shrinking the oldest record directory, err: " + err.Error())
 		}
 		oldest.DeleteParentDirectoryIfEmpty(fullPath)
 
-		deleteAllAiData(oldest, fc, source.Id)
+		deleteAllAiData(oldest, fc, source)
 	}
 }
 
@@ -82,7 +92,7 @@ func deleteAllTempAiClipFiles(fullPath string) int {
 	}
 	mp4Files := make([]fs.FileInfo, 0)
 	for _, file := range files {
-		if !file.IsDir() {
+		if !file.IsDir() { //means only video file, not indexed directories.
 			mp4Files = append(mp4Files, file)
 		}
 	}
@@ -96,10 +106,10 @@ func deleteAllTempAiClipFiles(fullPath string) int {
 	return ret
 }
 
-func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId string) {
+func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, source *models.SourceModel) {
 	params := data.QueryParams{ClassName: "", NoPreparingVideoFile: false,
 		Sort: models.SortInfo{Enabled: false}, Paging: models.PagingInfo{Enabled: false}}
-	params.SourceId = sourceId
+	params.SourceId = source.Id
 	params.T1 = oldest.CreateMinTime()
 	params.T2 = oldest.CreateMaxTime()
 	deleteOptions := &data.DeleteOptions{DeleteImage: false, DeleteVideo: false}
@@ -128,7 +138,7 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 	}
 
 	// delete daily ai clips by source id
-	rootDailyAiPath := oldest.CreateDailyPathName(utils.GetAiClipPathBySourceId(fc.Config, sourceId))
+	rootDailyAiPath := oldest.CreateDailyPathName(utils.GetAiClipPathBySource(fc.Config, source))
 	err := os.RemoveAll(rootDailyAiPath)
 	if err != nil {
 		log.Println("an error occurred while deleting daily AI Clips root path, err: " + err.Error())
@@ -136,7 +146,7 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 		log.Println("AI Clips parent folder has been deleted: " + rootDailyAiPath)
 	}
 	// delete daily od images by source id
-	rootDailyOdImagePath := oldest.CreateDailyPathName(utils.GetOdImagesPathBySourceId(fc.Config, sourceId))
+	rootDailyOdImagePath := oldest.CreateDailyPathName(utils.GetOdImagesPathBySource(fc.Config, source))
 	err = os.RemoveAll(rootDailyOdImagePath)
 	if err != nil {
 		log.Println("an error occurred while deleting daily Od Images root path, err: " + err.Error())
@@ -144,7 +154,7 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 		log.Println("Od Images parent folder has been deleted: " + rootDailyOdImagePath)
 	}
 	// delete daily fr images by source id
-	rootDailyFrImagePath := oldest.CreateDailyPathName(utils.GetFrImagesPathBySourceId(fc.Config, sourceId))
+	rootDailyFrImagePath := oldest.CreateDailyPathName(utils.GetFrImagesPathBySource(fc.Config, source))
 	err = os.RemoveAll(rootDailyFrImagePath)
 	if err != nil {
 		log.Println("an error occurred while deleting daily Fr Images root path, err: " + err.Error())
@@ -152,7 +162,7 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 		log.Println("Fr Images parent folder has been deleted: " + rootDailyFrImagePath)
 	}
 	// delete daily alpr images by source id
-	rootDailyAlprImagePath := oldest.CreateDailyPathName(utils.GetAlprImagesPathBySourceId(fc.Config, sourceId))
+	rootDailyAlprImagePath := oldest.CreateDailyPathName(utils.GetAlprImagesPathBySource(fc.Config, source))
 	err = os.RemoveAll(rootDailyAlprImagePath)
 	if err != nil {
 		log.Println("an error occurred while deleting daily Alpr Images root path, err: " + err.Error())
@@ -161,15 +171,16 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, sourceId strin
 	}
 }
 
-func delete_(fc *cmn.Factory, rb *reps.RepoBucket) {
-	shrink(fc, rb, func(oldest *OldestSourceRecord, sourceId string) error {
+func (d *DiskShrinker) delete_() {
+	d.shrink(func(oldest *OldestSourceRecord, source *models.SourceModel) error {
 		return os.RemoveAll(oldest.Path)
 	})
 }
 
-func move(fc *cmn.Factory, rb *reps.RepoBucket) {
-	shrink(fc, rb, func(oldest *OldestSourceRecord, sourceId string) error {
-		moveLoc := path.Join(fc.Config.Archive.MoveLocation, sourceId, "record", oldest.CreateTmpFolderPathName())
+// todo: It requires two more options: 1. create multiple multiple locations 2. update all AI data to new location.
+func (d *DiskShrinker) move() {
+	d.shrink(func(oldest *OldestSourceRecord, source *models.SourceModel) error {
+		moveLoc := path.Join(d.Factory.Config.Archive.MoveLocation, source.GetSourceId(), "record", oldest.CreateTmpFolderPathName())
 		err := cp.Copy(oldest.Path, moveLoc)
 		if err != nil {
 			log.Println("an error occurred while copying the old data to new directory, err: " + err.Error())

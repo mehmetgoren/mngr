@@ -45,16 +45,7 @@ func checkDefaultUser(rb *reps.RepoBucket) {
 
 var rb = &reps.RepoBucket{}
 var holders = &ws.Holders{Rb: rb}
-var whiteList = make([]string, 0)
-
-func initWhiteList() {
-	whiteList = append(whiteList, "/livestream/")
-	whiteList = append(whiteList, "/playback/")
-	whiteList = append(whiteList, "/od/")
-	whiteList = append(whiteList, "/fr/")
-	whiteList = append(whiteList, "/alpr/")
-	whiteList = append(whiteList, "/blank.mp4")
-}
+var whiteList []string
 
 func createFactory() *cmn.Factory {
 	config, _ := rb.ConfigRep.GetConfig()
@@ -67,11 +58,24 @@ func createFactory() *cmn.Factory {
 }
 
 func main() {
-	defer utils.HandlePanic()
-
-	initWhiteList()
 	rb.Init()
 	global := ReadEnvVariables(rb)
+
+	config, _ := rb.ConfigRep.GetConfig()
+	if config.General.DirPaths == nil || len(config.General.DirPaths) == 0 {
+		log.Println("No directory path is set, the program will be terminated")
+		return
+	}
+	for _, dirPath := range config.General.DirPaths {
+		if !utils.IsDirExists(dirPath) {
+			log.Println("The directory path (" + dirPath + ") does not exist, the program will be terminated")
+			return
+		}
+	}
+	log.Println("DirPaths: ", config.General.DirPaths)
+
+	checkSourceDirPaths(config, rb)
+
 	holders.Init()
 	WhoAreYou(rb)
 	FetchRtspTemplates(rb)
@@ -122,6 +126,8 @@ func main() {
 	})
 
 	api.RegisterStaticResources(router, rb)
+	whiteList = api.GetWhiteList()
+
 	api.RegisterSourceEndpoints(router, rb)
 	api.RegisterStreamEndpoints(router, rb)
 	api.RegisterConfigEndpoints(router, rb)
@@ -141,8 +147,6 @@ func main() {
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
-	config, _ := rb.ConfigRep.GetConfig()
-	log.Println("Root path is", config.General.RootFolderPath)
 	port := strconv.Itoa(utils.ParsePort())
 	log.Println("web server port is " + port)
 	err = router.Run(":" + port)
@@ -235,6 +239,23 @@ func readonlyMiddleware(ctx *gin.Context) {
 		err2 := ctx.AbortWithError(http.StatusUnauthorized, err)
 		if err2 != nil {
 			log.Println(err2.Error())
+		}
+	}
+}
+
+func checkSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
+	setRootDir := func(c *models.Config, sourceId string) {
+		sourceDirPath := utils.GetDefaultDirPath(c)
+		s, _ := rb.SourceRep.Get(sourceId)
+		s.RootDirPath = sourceDirPath
+		rb.SourceRep.Save(s)
+	}
+	sources, _ := rb.SourceRep.GetAll()
+	for _, source := range sources {
+		if len(source.RootDirPath) == 0 {
+			setRootDir(config, source.Id)
+		} else if _, err := os.Stat(source.RootDirPath); os.IsNotExist(err) {
+			setRootDir(config, source.Id)
 		}
 	}
 }

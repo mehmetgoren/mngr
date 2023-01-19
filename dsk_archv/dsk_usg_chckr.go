@@ -13,16 +13,12 @@ type DiskUsageChecker struct {
 	Factory   *cmn.Factory
 	Rb        *reps.RepoBucket
 	stats     *server_stats.ServerStats
-	checker   *DiskShrinker
 	scheduler *gocron.Scheduler
 }
 
 func (d *DiskUsageChecker) StartScheduler() {
 	if d.stats == nil {
 		d.stats = &server_stats.ServerStats{}
-	}
-	if d.checker == nil {
-		d.checker = &DiskShrinker{Factory: d.Factory, Rb: d.Rb}
 	}
 	config := d.Factory.Config
 	limitPercent := config.Archive.LimitPercent
@@ -38,13 +34,16 @@ func (d *DiskUsageChecker) StartScheduler() {
 			log.Println("an error occurred while getting disk usage info for DiskUsageChecker, err: " + err.Error())
 			return
 		}
-		if int(d.stats.Disk.UsagePercent) >= limitPercent {
-			err = d.checker.Shrink()
-			if err != nil {
-				log.Println("an error occurred while shrinking the disk, err: " + err.Error())
+		for _, disk := range d.stats.Disks {
+			if int(disk.UsagePercent) >= limitPercent {
+				ds := &DiskShrinker{Factory: d.Factory, Rb: d.Rb, DiskInfo: &disk}
+				err = ds.Shrink()
+				if err != nil {
+					log.Println("an error occurred while shrinking the disk, err: " + err.Error())
+				}
+			} else {
+				log.Println("Disk Usage has checked the disk and no action has been taken")
 			}
-		} else {
-			log.Println("Disk Usage has checked the disk and no action has been taken")
 		}
 	})
 	d.scheduler.StartAsync()

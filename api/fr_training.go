@@ -3,7 +3,6 @@ package api
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"image/jpeg"
 	"io/ioutil"
@@ -15,7 +14,6 @@ import (
 	"os"
 	"path"
 	"sort"
-	"strings"
 )
 
 func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
@@ -33,14 +31,14 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 				continue
 			}
 			item := &models.FrTrainViewModel{Name: dir.Name()}
-			subRoot := path.Join(trainPath, dir.Name())
-			subDirectories, err := ioutil.ReadDir(subRoot)
+			personDir := path.Join(trainPath, dir.Name())
+			personImages, err := ioutil.ReadDir(personDir)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			}
 			item.ImagePaths = make([]string, 0)
-			for _, subDir := range subDirectories {
-				item.ImagePaths = append(item.ImagePaths, path.Join("fr", "ml", "train", item.Name, subDir.Name()))
+			for _, personImage := range personImages {
+				item.ImagePaths = append(item.ImagePaths, path.Join(personDir, personImage.Name()))
 			}
 			ret = append(ret, item)
 		}
@@ -64,7 +62,6 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 
-		rootPath = strings.Replace(rootPath, config.General.RootFolderPath+"/", "", -1)
 		items := make([]*ImageItem, 0)
 		for _, dir := range directories {
 			name := dir.Name()
@@ -91,15 +88,8 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			panic(err)
 		}
-		config, err := rb.ConfigRep.GetConfig()
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		}
 
-		p := u.Path
-		fullPath := path.Join(config.General.RootFolderPath, p)
-		fmt.Println(u)
-		err = os.Remove(fullPath)
+		err = os.Remove(u.Path)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
