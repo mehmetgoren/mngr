@@ -16,10 +16,25 @@ type VideoFileDto struct {
 	ObjectAppearsAt int    `json:"object_appears_at"`
 }
 
+type ColorDto struct {
+	R int `json:"r"`
+	G int `json:"g"`
+	B int `json:"b"`
+}
+
+type MetadataDto struct {
+	Colors []ColorDto `json:"colors"`
+}
+
 type DetectedObjectDto struct {
-	PredScore   float32 `json:"pred_score"`
-	PredClsIdx  int     `json:"pred_cls_idx"`
-	PredClsName string  `json:"pred_cls_name"`
+	PredScore   float32      `json:"pred_score"`
+	PredClsIdx  int          `json:"pred_cls_idx"`
+	PredClsName string       `json:"pred_cls_name"`
+	X1          float32      `json:"x1" bson:"x1"`
+	Y1          float32      `json:"y1" bson:"y1"`
+	X2          float32      `json:"x2" bson:"x2"`
+	Y2          float32      `json:"y2" bson:"y2"`
+	Metadata    *MetadataDto `json:"metadata" bson:"metadata"`
 }
 
 type OdDto struct {
@@ -58,6 +73,10 @@ type DetectedPlateDto struct {
 	Plate            string  `json:"plate"`
 	Confidence       float64 `json:"confidence"`
 	ProcessingTimeMs float64 `json:"processing_time_ms"`
+	X1               int     `json:"x1" bson:"x1"`
+	Y1               int     `json:"y1" bson:"y1"`
+	X2               int     `json:"x2" bson:"x2"`
+	Y2               int     `json:"y2" bson:"y2"`
 }
 
 type AlprDto struct {

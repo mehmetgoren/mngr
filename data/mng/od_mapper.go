@@ -20,6 +20,23 @@ func (o *OdMapper) Map(source *OdEntity) *data.OdDto {
 		PredScore:   utils.RoundFloat32(source.DetectedObject.PredScore),
 		PredClsIdx:  source.DetectedObject.PredClsIdx,
 		PredClsName: source.DetectedObject.PredClsName,
+		X1:          utils.RoundFloat32(source.DetectedObject.X1),
+		Y1:          utils.RoundFloat32(source.DetectedObject.Y1),
+		X2:          utils.RoundFloat32(source.DetectedObject.X2),
+		Y2:          utils.RoundFloat32(source.DetectedObject.Y2),
+	}
+	if source.DetectedObject.Metadata != nil {
+		ret.DetectedObject.Metadata = &data.MetadataDto{}
+		if source.DetectedObject.Metadata.Colors != nil {
+			ret.DetectedObject.Metadata.Colors = make([]data.ColorDto, 0)
+			for _, color := range source.DetectedObject.Metadata.Colors {
+				ret.DetectedObject.Metadata.Colors = append(ret.DetectedObject.Metadata.Colors, data.ColorDto{
+					R: color.R,
+					G: color.G,
+					B: color.B,
+				})
+			}
+		}
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFile = &data.VideoFileDto{}

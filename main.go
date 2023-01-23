@@ -74,7 +74,7 @@ func main() {
 	}
 	log.Println("DirPaths: ", config.General.DirPaths)
 
-	checkSourceDirPaths(config, rb)
+	CheckSourceDirPaths(config, rb)
 
 	holders.Init()
 	WhoAreYou(rb)
@@ -143,6 +143,7 @@ func main() {
 	api.RegisterOthersEndpoints(router, rb, global)
 	api.RegisterCloudEndpoints(router, rb)
 	api.RegisterAiDataEndpoints(router, factory)
+	api.RegisterSmartSearchEndpoints(router, factory)
 
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
@@ -239,23 +240,6 @@ func readonlyMiddleware(ctx *gin.Context) {
 		err2 := ctx.AbortWithError(http.StatusUnauthorized, err)
 		if err2 != nil {
 			log.Println(err2.Error())
-		}
-	}
-}
-
-func checkSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
-	setRootDir := func(c *models.Config, sourceId string) {
-		sourceDirPath := utils.GetDefaultDirPath(c)
-		s, _ := rb.SourceRep.Get(sourceId)
-		s.RootDirPath = sourceDirPath
-		rb.SourceRep.Save(s)
-	}
-	sources, _ := rb.SourceRep.GetAll()
-	for _, source := range sources {
-		if len(source.RootDirPath) == 0 {
-			setRootDir(config, source.Id)
-		} else if _, err := os.Stat(source.RootDirPath); os.IsNotExist(err) {
-			setRootDir(config, source.Id)
 		}
 	}
 }

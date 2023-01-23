@@ -6,6 +6,7 @@ import (
 	"log"
 	"mngr/models"
 	"mngr/reps"
+	"mngr/utils"
 	"os"
 	"strconv"
 	"strings"
@@ -138,4 +139,21 @@ func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 	rb.ConfigRep.SaveConfig(config)
 
 	return global
+}
+
+func CheckSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
+	setRootDir := func(c *models.Config, sourceId string) {
+		sourceDirPath := utils.GetDefaultDirPath(c)
+		s, _ := rb.SourceRep.Get(sourceId)
+		s.RootDirPath = sourceDirPath
+		rb.SourceRep.Save(s)
+	}
+	sources, _ := rb.SourceRep.GetAll()
+	for _, source := range sources {
+		if len(source.RootDirPath) == 0 {
+			setRootDir(config, source.Id)
+		} else if _, err := os.Stat(source.RootDirPath); os.IsNotExist(err) {
+			setRootDir(config, source.Id)
+		}
+	}
 }

@@ -17,8 +17,13 @@ func (a *AlprMapper) Map(source *AlprEntity) *data.AlprDto {
 	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAt
 	ret.DetectedPlate = &data.DetectedPlateDto{
-		Plate:      source.DetectedPlate.Plate,
-		Confidence: utils.RoundFloat64(source.DetectedPlate.Confidence),
+		Plate:            source.DetectedPlate.Plate,
+		Confidence:       utils.RoundFloat64(source.DetectedPlate.Confidence),
+		ProcessingTimeMs: source.DetectedPlate.ProcessingTimeMs,
+		X1:               source.DetectedPlate.Coordinates.X0,
+		Y1:               source.DetectedPlate.Coordinates.Y0,
+		X2:               source.DetectedPlate.Coordinates.X1,
+		Y2:               source.DetectedPlate.Coordinates.Y1,
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFile = &data.VideoFileDto{}

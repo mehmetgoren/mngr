@@ -13,6 +13,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/gorilla/websocket v1.4.2
 	github.com/lithammer/shortuuid/v3 v3.0.7
+	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mackerelio/go-osstat v0.2.2
 	github.com/otiai10/copy v1.7.0
 	github.com/shirou/gopsutil v3.21.11+incompatible

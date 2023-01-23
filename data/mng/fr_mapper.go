@@ -20,6 +20,10 @@ func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
 		PredScore:   utils.RoundFloat32(source.DetectedFace.PredScore),
 		PredClsIdx:  source.DetectedFace.PredClsIdx,
 		PredClsName: source.DetectedFace.PredClsName,
+		X1:          utils.RoundFloat32(source.DetectedFace.X1),
+		Y1:          utils.RoundFloat32(source.DetectedFace.Y1),
+		X2:          utils.RoundFloat32(source.DetectedFace.X2),
+		Y2:          utils.RoundFloat32(source.DetectedFace.Y2),
 	}
 	ret.ImageFileName = source.ImageFileName
 	ret.VideoFile = &data.VideoFileDto{}
