@@ -41,7 +41,7 @@ func FetchRtspTemplates(rb *reps.RepoBucket) {
 
 func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 	config, _ := rb.ConfigRep.GetConfig()
-	if config == nil {
+	if config == nil || config.General.HeartbeatInterval == 0 { //config.General.HeartbeatInterval == 0  means that the config is not initialized
 		config, _ = rb.ConfigRep.RestoreConfig()
 	}
 
