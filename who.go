@@ -1,15 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"io"
 	"log"
 	"mngr/models"
 	"mngr/reps"
 	"mngr/utils"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func createHeartbeatRepository(client *redis.Client, serviceName string, config *models.Config) *reps.HeartbeatRepository {
@@ -33,10 +38,6 @@ func WhoAreYou(rb *reps.RepoBucket) {
 			log.Println("An error occurred while registering process id, error is:" + err.Error())
 		}
 	}()
-}
-
-func FetchRtspTemplates(rb *reps.RepoBucket) {
-	// todo: this operation will be fetched by the Hub Portal instead of redis local db
 }
 
 func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
@@ -156,4 +157,144 @@ func CheckSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
 			setRootDir(config, source.Id)
 		}
 	}
+}
+
+func CheckHubContinuous(config *models.Config, rb *reps.RepoBucket, port int) {
+	if !config.Hub.Enabled || len(config.Hub.Address) == 0 && len(config.Hub.Token) == 0 {
+		log.Println("Hub integration is disabled")
+		return
+	}
+	log.Println("Hub integration is enabled")
+	maxRetry := config.Hub.MaxRetry
+	if maxRetry < 1 {
+		maxRetry = 100
+	}
+	count := 0
+	for {
+		if checkHub(config, rb, port) {
+			if fetchRtspTemplates(config, rb) {
+				log.Println("RTSP templates fetched from hub")
+				break
+			} else {
+				log.Println("Failed to fetch RTSP templates from hub, retrying in 1 minute")
+			}
+		}
+		if count > config.Hub.MaxRetry {
+			log.Println("Hub max retry count reached, aborting")
+			break
+		}
+		time.Sleep(time.Minute)
+		count++
+		log.Println("Hub integration retry count: " + strconv.Itoa(count))
+	}
+	log.Println("Hub integration completed")
+}
+
+func checkHub(config *models.Config, rb *reps.RepoBucket, port int) bool {
+	ip, err := utils.GetExternalIP()
+	if err != nil {
+		log.Println(err.Error())
+		return false
+	}
+	if len(ip) == 0 {
+		log.Println("External IP not found")
+		return false
+	}
+	var adminUser *models.User
+	users, err := rb.UserRep.GetUsers()
+	if err != nil {
+		log.Println("an error occurred while gathering users", err.Error())
+		return false
+	}
+	for _, user := range users {
+		if user.Username == "admin" {
+			adminUser = user
+			break
+		}
+	}
+	if adminUser == nil {
+		log.Println("admin user not found")
+		return false
+	}
+
+	requestModel := &models.NodeActivationRequest{
+		NodeAddress:   "http://" + ip + ":" + strconv.Itoa(port),
+		HubToken:      config.Hub.Token,
+		NodeToken:     adminUser.Token,
+		WebAppAddress: config.Hub.WebAppAddress,
+	}
+
+	url := config.Hub.Address + "/api/v1/node/activate"
+	jsonBytes, err := json.Marshal(requestModel)
+	if err != nil {
+		log.Println(err.Error())
+		return false
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
+	if err != nil {
+		log.Println("an error an error occurred while creating a request", err.Error())
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("an error occurred while sending request", err.Error())
+		return false
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}(resp.Body)
+	response := &models.NodeActivationResponse{}
+	err = json.NewDecoder(resp.Body).Decode(response)
+	if err != nil {
+		log.Println("an error occurred while decoding response", err.Error())
+		return false
+	}
+
+	if response.Success {
+		rb.AddUser(adminUser)
+	}
+
+	return response.Success
+}
+
+func fetchRtspTemplates(config *models.Config, rb *reps.RepoBucket) bool {
+	url := config.Hub.Address + "/api/v1/node/getrtsptemplates"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("an error an error occurred while creating a request", err.Error())
+		return false
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("an error occurred while sending request", err.Error())
+		return false
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}(resp.Body)
+	response := make([]*models.RtspTemplateModel, 0)
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		log.Println("an error occurred while decoding response", err.Error())
+		return false
+	}
+
+	_, err = rb.RtspTemplateRep.SaveAll(response)
+	if err != nil {
+		log.Println("an error occurred while saving rtsp templates", err.Error())
+	}
+
+	return true
 }

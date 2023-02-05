@@ -2,33 +2,55 @@ package reps
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/go-redis/redis/v8"
-	"io/ioutil"
 	"log"
 	"mngr/models"
 	"strconv"
 )
 
 type RtspTemplateRepository struct {
+	Connection *redis.Client
 }
+
+var redisKeyRtspTemplate = "rtsp_templates:"
 
 func (r *RtspTemplateRepository) GetAll() ([]*models.RtspTemplateModel, error) {
 	ret := make([]*models.RtspTemplateModel, 0)
 
-	bs, err := ioutil.ReadFile("./static/data/rtsp_templates.json")
+	conn := r.Connection
+	keys, err := conn.Keys(context.Background(), redisKeyRtspTemplate+"*").Result()
 	if err != nil {
-		log.Println("Error reading rtsp templates from the file: ", err)
 		return ret, err
 	}
-
-	err = json.Unmarshal(bs, &ret)
-	if err != nil {
-		log.Println("Error deserializing rtsp templates from the file: ", err)
-		return ret, err
+	for _, key := range keys {
+		var p models.RtspTemplateModel
+		err := conn.HGetAll(context.Background(), key).Scan(&p)
+		if err != nil {
+			log.Println("Error getting failed rtsp templates from redis: ", err)
+			return nil, err
+		}
+		ret = append(ret, &p)
 	}
-
 	return ret, nil
+}
+
+func (r *RtspTemplateRepository) SaveAll(models []*models.RtspTemplateModel) (int, error) {
+	conn := r.Connection
+	if models == nil || len(models) == 0 {
+		return 0, nil
+	}
+	affectedCount := 0
+	for _, model := range models {
+		model.Id = model.Name
+
+		_, err := conn.HSet(context.Background(), redisKeyRtspTemplate+model.Id, Map(model)).Result()
+		if err != nil {
+			log.Println("Error while adding a rtsp template: ", err.Error())
+		} else {
+			affectedCount++
+		}
+	}
+	return affectedCount, nil
 }
 
 type FailedStreamRepository struct {

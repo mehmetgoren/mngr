@@ -34,7 +34,24 @@ func (u *UserRepository) Login(lu *models.LoginUserViewModel) (*models.User, err
 		return nil, err
 	}
 	for _, user := range users {
-		if user.Username == lu.Username && utils.CompareEncrypt(user.Password, lu.Password) {
+		if user.Username == lu.Username && utils.VerifyPassword(user.Password, lu.Password) {
+			user.LastLoginAt = utils.DatetimeNow()
+			user.VisitCount += 1
+			u.addToRedis(user)
+			return user, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (u *UserRepository) LoginByToken(token string) (*models.User, error) {
+	users, err := u.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	for _, user := range users {
+		if user.Token == token {
 			user.LastLoginAt = utils.DatetimeNow()
 			user.VisitCount += 1
 			u.addToRedis(user)
@@ -57,7 +74,7 @@ func (u *UserRepository) Register(uv *models.RegisterUserViewModel) (*models.Use
 	user := &models.User{}
 	user.Id = utils.NewId()
 	user.Username = uv.Username
-	user.Password, _ = utils.Encrypt(uv.Password)
+	user.Password, _ = utils.EncryptPassword(uv.Password)
 	user.Email = uv.Email
 	user.Token = utils.GenerateSecureToken(4)
 	user.LastLoginAt = utils.DatetimeNow()

@@ -32,6 +32,10 @@ type LoginUserViewModel struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type LoginUserByTokenViewModel struct {
+	Token string `json:"token" validate:"token"`
+}
+
 type UserSession struct {
 	*User
 	LastVisitAt time.Time

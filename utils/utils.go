@@ -2,7 +2,6 @@ package utils
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -15,7 +14,10 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 )
+
+var StartupTime = time.Now()
 
 func HandlePanic() {
 	if r := recover(); r != nil {
@@ -42,17 +44,6 @@ func GenerateSecureToken(length int) string {
 	return hex.EncodeToString(b)
 }
 
-func EncodeBase64(b []byte) string {
-	return base64.StdEncoding.EncodeToString(b)
-}
-func DecodeBase64(s string) []byte {
-	data, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
 func GetQsValue(ctx *gin.Context, key string) string {
 	qs := ctx.Request.URL.Query()
 	if _, ok := qs[key]; !ok {
@@ -68,12 +59,21 @@ func GetQsValue(ctx *gin.Context, key string) string {
 	return value
 }
 
+var flagString *string = nil
+
 func ParsePort() int {
 	var err error
 	defaultPort := 8072
 	port := 0
-	p := flag.String("port", "", "Web Server Port Number")
-	flag.Parse()
+	if flagString == nil {
+		lock := make(chan bool, 1)
+		lock <- true
+		if flagString == nil {
+			flagString = flag.String("port", "", "Web Server Port Number")
+			flag.Parse()
+		}
+		<-lock
+	}
 
 	ep := os.Getenv("WEBSERVER_HOST")
 	if len(ep) > 0 {
@@ -82,8 +82,8 @@ func ParsePort() int {
 			port = defaultPort
 			log.Println("An error occurred while converting Redis port value from environment variable: " + err.Error())
 		}
-	} else if len(*p) > 0 {
-		port, err = strconv.Atoi(*p)
+	} else if len(*flagString) > 0 {
+		port, err = strconv.Atoi(*flagString)
 		if err != nil {
 			port = defaultPort
 			log.Println("An error occurred while converting Redis port value from arguments :" + err.Error())

@@ -24,3 +24,7 @@ type ServiceModel struct {
 	CreatedAt       string       `json:"created_at" redis:"created_at"`
 	Heartbeat       string       `json:"heartbeat" redis:"heartbeat"`
 }
+
+type RegisterWebAppServiceModel struct {
+	AppAddress string `json:"app_address"`
+}

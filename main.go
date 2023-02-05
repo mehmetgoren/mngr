@@ -78,7 +78,6 @@ func main() {
 
 	holders.Init()
 	WhoAreYou(rb)
-	FetchRtspTemplates(rb)
 
 	factory := createFactory()
 	defer func(factory *cmn.Factory) {
@@ -94,7 +93,9 @@ func main() {
 	defer func() {
 		if dockerClient != nil {
 			err = dockerClient.Close()
-			log.Println(err.Error())
+			if err != nil {
+				log.Println(err.Error())
+			}
 		}
 	}()
 	dskChckr := dsk_archv.InitDiskUsageChecker(factory, rb)
@@ -144,20 +145,24 @@ func main() {
 	api.RegisterCloudEndpoints(router, rb)
 	api.RegisterAiDataEndpoints(router, factory)
 	api.RegisterSmartSearchEndpoints(router, factory)
+	api.RegisterHubEndpoints(router, rb, holders, factory)
 
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
 
-	port := strconv.Itoa(utils.ParsePort())
-	log.Println("web server port is " + port)
-	err = router.Run(":" + port)
+	port := utils.ParsePort()
+	portStr := strconv.Itoa(port)
+	log.Println("web server port is " + portStr)
+	go CheckHubContinuous(config, rb, port)
+	err = router.Run(":" + portStr)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 }
 
-var anonymousEndPoints = map[string]int{"/login": 1, "/registeruser": 1, "/isReadOnlyMode": 1}
+var anonymousEndPoints = map[string]int{"/login": 1, "/loginbytoken": 1,
+	"/registeruser": 1, "/isReadOnlyMode": 1}
 
 func authMiddleware(ctx *gin.Context) {
 	req := ctx.Request

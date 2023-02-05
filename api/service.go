@@ -9,6 +9,7 @@ import (
 	"mngr/reps"
 	"mngr/view_models"
 	"net/http"
+	"strings"
 )
 
 func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerClient *client.Client) {
@@ -30,6 +31,33 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 	})
 
 	router.POST("/registerwebappservice", func(ctx *gin.Context) {
+		var p models.RegisterWebAppServiceModel
+		if err := ctx.ShouldBindJSON(&p); err != nil {
+			log.Println("Got error while unmarshalling RegisterWebAppServiceModel, err", err.Error())
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if len(p.AppAddress) > 0 {
+			c, _ := rb.ConfigRep.GetConfig()
+			if len(c.Hub.WebAppAddress) == 0 {
+				address := p.AppAddress
+				address = strings.ReplaceAll(address, "#/", "")
+				splits := strings.Split(address, "?")
+				if len(splits) > 0 {
+					address = splits[0]
+					if strings.HasSuffix(address, "/") {
+						address = address[:len(address)-1]
+					}
+				}
+				c.Hub.WebAppAddress = address
+				err := rb.ConfigRep.SaveConfig(c)
+				if err != nil {
+					log.Println("Error while saving config: ", err.Error())
+				}
+			}
+		}
+
 		_, err := rb.ServiceRep.AddWebApp("web_application")
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
