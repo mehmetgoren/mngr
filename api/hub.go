@@ -208,8 +208,8 @@ func setFailedInfo(nodeDto *models.NodeDto, rb *reps.RepoBucket) {
 	failedStreams, _ := rep.GetAll()
 	if failedStreams != nil {
 		for _, failedStream := range failedStreams {
-			nodeDto.RtmpContainerFailedCount += failedStream.RtmpContainerFailedCount
-			nodeDto.RtmpFeederFailedCount += failedStream.RtmpFeederFailedCount
+			nodeDto.MsContainerFailedCount += failedStream.MsContainerFailedCount
+			nodeDto.MsFeederFailedCount += failedStream.MsFeederFailedCount
 			nodeDto.HlsFailedCount += failedStream.HlsFailedCount
 			nodeDto.FfmpegReaderFailedCount += failedStream.FFmpegReaderFailedCount
 			nodeDto.RecordFailedCount += failedStream.RecordFailedCount

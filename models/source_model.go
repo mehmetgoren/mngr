@@ -20,7 +20,7 @@ type SourceModel struct {
 	HwaccelDevice       string `json:"hwaccel_device" redis:"hwaccel_device"`
 
 	StreamType            int    `json:"stream_type" redis:"stream_type"`
-	RtmpAddress           string `json:"rtmp_address" redis:"rtmp_address"`
+	MsAddress             string `json:"ms_address" redis:"ms_address"`
 	StreamVideoCodec      int    `json:"stream_video_codec" redis:"stream_video_codec"`
 	Preset                int    `json:"preset" redis:"preset"`
 	HlsTime               int    `json:"hls_time" redis:"hls_time"`
@@ -64,9 +64,9 @@ type SourceModel struct {
 	MacAddress string `json:"mac_address" redis:"mac_address"`
 	IpAddress  string `json:"ip_address" redis:"ip_address"`
 
-	Enabled        bool `json:"enabled" redis:"enabled"`
-	State          int  `json:"state" redis:"state"`
-	RtmpServerType int  `json:"rtmp_server_type" redis:"rtmp_server_type"`
+	Enabled      bool `json:"enabled" redis:"enabled"`
+	State        int  `json:"state" redis:"state"`
+	MsServerType int  `json:"ms_type" redis:"ms_type"`
 
 	SnapshotEnabled      bool    `json:"snapshot_enabled" redis:"snapshot_enabled"`
 	SnapshotType         int     `json:"snapshot_type" redis:"snapshot_type"`
@@ -89,6 +89,8 @@ type SourceModel struct {
 	FlvPlayerType            int  `json:"flv_player_type" redis:"flv_player_type"`
 	BoosterEnabled           bool `json:"booster_enabled" redis:"booster_enabled"`
 	LiveBufferLatencyChasing bool `json:"live_buffer_latency_chasing" redis:"live_buffer_latency_chasing"`
+
+	Go2RtcPlayerMode int `json:"go2rtc_player_mode" redis:"go2rtc_player_mode"`
 
 	BlackScreenCheckEnabled bool   `json:"black_screen_check_enabled" redis:"black_screen_check_enabled"`
 	CreatedAt               string `json:"created_at" redis:"created_at"`

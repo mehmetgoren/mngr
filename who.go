@@ -104,28 +104,28 @@ func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 		fmt.Println("SNAPSHOT_PROC_COUNT not found")
 	}
 
-	rtmpServerPortStartStr := os.Getenv("RTMP_PORT_START")
-	if len(rtmpServerPortStartStr) > 0 {
-		rtmpServerPortStart, _ := strconv.Atoi(rtmpServerPortStartStr)
-		if rtmpServerPortStart < 1 {
-			rtmpServerPortStart = 1024
+	msPortStartStr := os.Getenv("MS_PORT_START")
+	if len(msPortStartStr) > 0 {
+		msPortStart, _ := strconv.Atoi(msPortStartStr)
+		if msPortStart < 1 {
+			msPortStart = 1024
 		}
-		config.FFmpeg.RtmpServerPortStart = rtmpServerPortStart
-		fmt.Println("RTMP_PORT_START: " + rtmpServerPortStartStr)
+		config.FFmpeg.MsPortStart = msPortStart
+		fmt.Println("MS_PORT_START: " + msPortStartStr)
 	} else {
-		fmt.Println("RTMP_PORT_START not found")
+		fmt.Println("MS_PORT_START not found")
 	}
 
-	rtmpServerPortEndStr := os.Getenv("RTMP_PORT_END")
-	if len(rtmpServerPortEndStr) > 0 {
-		rtmpServerPortEnd, _ := strconv.Atoi(rtmpServerPortEndStr)
-		if rtmpServerPortEnd <= config.FFmpeg.RtmpServerPortStart {
-			rtmpServerPortEnd = 65535
+	msPortEndStr := os.Getenv("MS_PORT_END")
+	if len(msPortEndStr) > 0 {
+		msPortEnd, _ := strconv.Atoi(msPortEndStr)
+		if msPortEnd <= config.FFmpeg.MsPortStart {
+			msPortEnd = 65535
 		}
-		config.FFmpeg.RtmpServerPortEnd = rtmpServerPortEnd
-		fmt.Println("RTMP_PORT_END: " + rtmpServerPortEndStr)
+		config.FFmpeg.MsPortEnd = msPortEnd
+		fmt.Println("MS_PORT_END: " + msPortEndStr)
 	} else {
-		fmt.Println("RTMP_PORT_END not found")
+		fmt.Println("MS_PORT_END not found")
 	}
 
 	global := &models.GlobalModel{}

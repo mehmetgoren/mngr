@@ -65,8 +65,8 @@ type NodeDto struct {
 	GdriveEnabled              bool   `json:"GdriveEnabled"`
 	TelegramEnabled            bool   `json:"TelegramEnabled"`
 	TotalUserCount             int    `json:"TotalUserCount"`
-	RtmpContainerFailedCount   int    `json:"RtmpContainerFailedCount"`
-	RtmpFeederFailedCount      int    `json:"RtmpFeederFailedCount"`
+	MsContainerFailedCount     int    `json:"MsContainerFailedCount"`
+	MsFeederFailedCount        int    `json:"MsFeederFailedCount"`
 	HlsFailedCount             int    `json:"HlsFailedCount"`
 	FfmpegReaderFailedCount    int    `json:"FfmpegReaderFailedCount"`
 	RecordFailedCount          int    `json:"RecordFailedCount"`

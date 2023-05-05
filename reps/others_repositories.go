@@ -110,21 +110,21 @@ type VariousInfosRepository struct {
 func (v *VariousInfosRepository) Get() (*models.VariousInfos, error) {
 	conn := v.Connection
 	ctx := context.Background()
-	result, err := conn.HGet(ctx, "rtmpports", "ports_count").Result()
+	result, err := conn.HGet(ctx, "media_server_ports", "ports_count").Result()
 	if err != nil {
 		return nil, err
 	}
 	ret := &models.VariousInfos{}
-	ret.RtmpPortCounter, _ = strconv.Atoi(result)
+	ret.MsPortCounter, _ = strconv.Atoi(result)
 
 	result2, err := conn.SMembers(ctx, "zombies:docker").Result()
 	if err != nil {
 		return nil, err
 	}
 	if result2 != nil {
-		ret.RtmpContainerZombies = make([]string, 0)
+		ret.MsContainerZombies = make([]string, 0)
 		for _, v := range result2 {
-			ret.RtmpContainerZombies = append(ret.RtmpContainerZombies, v)
+			ret.MsContainerZombies = append(ret.MsContainerZombies, v)
 		}
 	}
 

@@ -18,8 +18,8 @@ type FailedStreamModel struct {
 	Name    string `json:"name" redis:"name"`
 	Address string `json:"address" redis:"address"`
 
-	RtmpContainerFailedCount int    `json:"rtmp_container_failed_count" redis:"rtmp_container_failed_count"`
-	RtmpFeederFailedCount    int    `json:"rtmp_feeder_failed_count" redis:"rtmp_feeder_failed_count"`
+	MsContainerFailedCount   int    `json:"ms_container_failed_count" redis:"ms_container_failed_count"`
+	MsFeederFailedCount      int    `json:"ms_feeder_failed_count" redis:"ms_feeder_failed_count"`
 	HlsFailedCount           int    `json:"hls_failed_count" redis:"hls_failed_count"`
 	FFmpegReaderFailedCount  int    `json:"ffmpeg_reader_failed_count" redis:"ffmpeg_reader_failed_count"`
 	RecordFailedCount        int    `json:"record_failed_count" redis:"record_failed_count"`
@@ -46,7 +46,7 @@ type RecStuckModel struct {
 }
 
 type VariousInfos struct {
-	RtmpPortCounter      int      `json:"rtmp_port_counter"`
-	RtmpContainerZombies []string `json:"rtmp_container_zombies"`
+	MsPortCounter        int      `json:"ms_port_counter"`
+	MsContainerZombies   []string `json:"ms_container_zombies"`
 	FFmpegProcessZombies []int    `json:"ffmpeg_process_zombies"`
 }
