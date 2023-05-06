@@ -62,18 +62,7 @@ func main() {
 	global := ReadEnvVariables(rb)
 
 	config, _ := rb.ConfigRep.GetConfig()
-	if config.General.DirPaths == nil || len(config.General.DirPaths) == 0 {
-		log.Println("No directory path is set, the program will be terminated")
-		return
-	}
-	for _, dirPath := range config.General.DirPaths {
-		if !utils.IsDirExists(dirPath) {
-			log.Println("The directory path (" + dirPath + ") does not exist, the program will be terminated")
-			return
-		}
-	}
-	log.Println("DirPaths: ", config.General.DirPaths)
-
+	CheckMissingConfigValues(config, rb)
 	CheckSourceDirPaths(config, rb)
 
 	holders.Init()

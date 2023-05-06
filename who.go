@@ -12,6 +12,7 @@ import (
 	"mngr/utils"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -149,12 +150,24 @@ func CheckSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
 		s.RootDirPath = sourceDirPath
 		rb.SourceRep.Save(s)
 	}
+	dirPathsMap := make(map[string]bool)
+	for _, dirPath := range config.General.DirPaths {
+		dirPathsMap[dirPath] = true
+	}
+
 	sources, _ := rb.SourceRep.GetAll()
 	for _, source := range sources {
 		if len(source.RootDirPath) == 0 {
 			setRootDir(config, source.Id)
-		} else if _, err := os.Stat(source.RootDirPath); os.IsNotExist(err) {
+			log.Println("RootDirPath is not set for source: "+source.Id, source.Name)
+		} else if !utils.IsDirExists(source.RootDirPath) {
 			setRootDir(config, source.Id)
+			log.Println("RootDirPath is not exists for source: "+source.Id, source.Name)
+		} else if _, ok := dirPathsMap[source.RootDirPath]; !ok {
+			setRootDir(config, source.Id)
+			log.Println("RootDirPath is not exists in Config.General.DirPaths for source: "+source.Id, source.Name)
+		} else {
+			log.Println("RootDirPath is ok for: "+source.Id, source.Name)
 		}
 	}
 }
@@ -297,4 +310,164 @@ func fetchRtspTemplates(config *models.Config, rb *reps.RepoBucket) bool {
 	}
 
 	return true
+}
+
+func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
+	if config.General.DirPaths == nil || len(config.General.DirPaths) == 0 {
+		log.Println("No directory path is set, the program will be terminated")
+		os.Exit(1)
+		return
+	}
+	for _, dirPath := range config.General.DirPaths {
+		if !utils.IsDirExists(dirPath) {
+			log.Println("The directory path (" + dirPath + ") does not exist, the program will be terminated")
+			os.Exit(1)
+			return
+		}
+	}
+	log.Println("DirPaths: ", config.General.DirPaths)
+
+	orginalConfig, _ := utils.DeepCopy(config)
+
+	if len(config.Jetson.ModelName) == 0 {
+		config.Jetson.ModelName = "ssd-mobilenet-v2"
+	}
+
+	if len(config.Torch.ModelName) == 0 {
+		config.Torch.ModelName = "ultralytics/yolov5"
+	}
+	if len(config.Torch.ModelNameSpecific) == 0 {
+		config.Torch.ModelNameSpecific = "yolov5x6"
+	}
+
+	if len(config.Tensorflow.ModelName) == 0 {
+		config.Tensorflow.ModelName = "efficientdet/lite4/detection"
+	}
+
+	if config.SourceReader.BufferSize == 0 {
+		config.SourceReader.BufferSize = 2
+	}
+	if config.SourceReader.MaxRetry == 0 {
+		config.SourceReader.MaxRetry = 150
+	}
+	if config.SourceReader.MaxRetryIn == 0 {
+		config.SourceReader.MaxRetryIn = 6
+	}
+
+	if config.General.HeartbeatInterval == 0 {
+		config.General.HeartbeatInterval = 30
+	}
+
+	if len(config.Db.ConnectionString) == 0 {
+		config.Db.Type = 1 // 0:SQLite, 1: mongodb
+		config.Db.ConnectionString = "mongodb://localhost:27017"
+	}
+
+	if config.FFmpeg.MaxOperationRetryCount == 0 {
+		config.FFmpeg.MaxOperationRetryCount = 10000000
+	}
+	if config.FFmpeg.MsInitInterval == 0 {
+		config.FFmpeg.MsInitInterval = 3
+	}
+	if config.FFmpeg.WatchDogInterval == 0 {
+		config.FFmpeg.WatchDogInterval = 23
+	}
+	if config.FFmpeg.WatchDogFailedWaitInterval == 0 {
+		config.FFmpeg.WatchDogFailedWaitInterval = 3
+	}
+	if config.FFmpeg.StartTaskWaitForInterval == 0 {
+		config.FFmpeg.StartTaskWaitForInterval = 1
+	}
+	if config.FFmpeg.RecordConcatLimit == 0 {
+		config.FFmpeg.RecordConcatLimit = 1
+	}
+	if config.FFmpeg.RecordVideoFileIndexerInterval == 0 {
+		config.FFmpeg.RecordVideoFileIndexerInterval = 60
+	}
+	if config.FFmpeg.MsPortStart == 0 {
+		config.FFmpeg.MsPortStart = 7000
+	}
+	if config.FFmpeg.MsPortEnd == 0 {
+		config.FFmpeg.MsPortEnd = 8000
+	}
+
+	if config.Ai.VideoClipDuration == 0 {
+		config.Ai.VideoClipDuration = 10
+	}
+	if config.Ai.FaceRecogMtcnnThreshold == 0 {
+		config.Ai.FaceRecogMtcnnThreshold = .86
+	}
+	if config.Ai.FaceRecogProbThreshold == 0 {
+		config.Ai.FaceRecogProbThreshold = .98
+	}
+	if config.Ai.PlateRecogInstanceCount == 0 {
+		config.Ai.PlateRecogInstanceCount = 2
+	}
+
+	if config.Ui.GsWidth == 0 {
+		config.Ui.GsWidth = 4
+	}
+	if config.Ui.GsHeight == 0 {
+		config.Ui.GsHeight = 2
+	}
+	if config.Ui.BoosterInterval == 0 {
+		config.Ui.BoosterInterval = .3
+	}
+	if config.Ui.SeekToLiveEdgeInternal == 0 {
+		config.Ui.SeekToLiveEdgeInternal = 30
+	}
+
+	if config.Jobs.MacIpMatchingInterval == 0 {
+		config.Jobs.MacIpMatchingInterval = 120
+	}
+	if config.Jobs.BlackScreenMonitorInterval == 0 {
+		config.Jobs.BlackScreenMonitorInterval = 600
+	}
+
+	if len(config.DeepStack.ServerUrl) == 0 {
+		config.DeepStack.ServerUrl = "http://127.0.0.1"
+	}
+	if config.DeepStack.ServerPort == 0 {
+		config.DeepStack.ServerPort = 1009
+	}
+	if config.DeepStack.OdThreshold == 0 {
+		config.DeepStack.OdThreshold = .45
+	}
+	if config.DeepStack.FrThreshold == 0 {
+		config.DeepStack.FrThreshold = .7
+	}
+
+	if config.Archive.LimitPercent == 0 {
+		config.Archive.LimitPercent = 95
+	}
+
+	if config.Snapshot.ProcessCount == 0 {
+		config.Snapshot.ProcessCount = 4
+	}
+	if config.Snapshot.MetaColorCount == 0 {
+		config.Snapshot.MetaColorCount = 5
+	}
+	if config.Snapshot.MetaColorQuality == 0 {
+		config.Snapshot.MetaColorQuality = 1
+	}
+
+	if len(config.Hub.Address) == 0 {
+		config.Hub.Address = "http://localhost:5268"
+	}
+	if len(config.Hub.WebAppAddress) == 0 {
+		config.Hub.WebAppAddress = "http://localhost:8080"
+	}
+	if config.Hub.MaxRetry == 0 {
+		config.Hub.MaxRetry = 100
+	}
+
+	if !reflect.DeepEqual(orginalConfig, config) {
+		err := rb.ConfigRep.SaveConfig(config)
+		if err != nil {
+			log.Println("Error while saving config file: ", err)
+		}
+		log.Println("Config file is updated")
+	} else {
+		log.Println("Config file is not changed")
+	}
 }

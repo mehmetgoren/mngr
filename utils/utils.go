@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -109,4 +110,18 @@ func MinMax(array []int) (int, int) {
 		}
 	}
 	return min, max
+}
+
+func DeepCopy[T any](orig *T) (*T, error) {
+	origJSON, err := json.Marshal(orig)
+	if err != nil {
+		return nil, err
+	}
+
+	clone := new(T)
+	if err = json.Unmarshal(origJSON, &clone); err != nil {
+		return nil, err
+	}
+
+	return clone, nil
 }
