@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	"io"
 	"log"
 	"mngr/models"
@@ -18,20 +17,8 @@ import (
 	"time"
 )
 
-func createHeartbeatRepository(client *redis.Client, serviceName string, config *models.Config) *reps.HeartbeatRepository {
-	var heartbeatRepository = reps.HeartbeatRepository{Connection: client, TimeSecond: int64(config.General.HeartbeatInterval), ServiceName: serviceName}
-
-	return &heartbeatRepository
-}
-
 func WhoAreYou(rb *reps.RepoBucket) {
-	connMain := rb.GetMainConnection()
-	config, _ := rb.ConfigRep.GetConfig()
-
 	serviceName := "web_server_manager"
-	heartbeat := createHeartbeatRepository(connMain, serviceName, config)
-	go heartbeat.Start()
-
 	serviceRepository := rb.ServiceRep
 	go func() {
 		_, err := serviceRepository.Add(serviceName)
@@ -43,7 +30,7 @@ func WhoAreYou(rb *reps.RepoBucket) {
 
 func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 	config, _ := rb.ConfigRep.GetConfig()
-	if config == nil || config.General.HeartbeatInterval == 0 { //config.General.HeartbeatInterval == 0  means that the config is not initialized
+	if config == nil || config.Archive.LimitPercent == 0 { //config.Archive.LimitPercent == 0  means that the config is not initialized
 		config, _ = rb.ConfigRep.RestoreConfig()
 	}
 
@@ -68,29 +55,34 @@ func ReadEnvVariables(rb *reps.RepoBucket) *models.GlobalModel {
 		fmt.Println("MONGODB_CS not found")
 	}
 
-	deepStackDt := os.Getenv("DEEPSTACK_DT")
-	if len(deepStackDt) > 0 {
-		val, _ := strconv.Atoi(deepStackDt)
-		config.DeepStack.DockerType = val
-		fmt.Println("DEEPSTACK_DT: " + deepStackDt)
+	// todo: Move this env variable to the wizard
+	senseAiImage := os.Getenv("SENSE_AI_IMAGE")
+	if len(senseAiImage) > 0 {
+		img, _ := strconv.Atoi(senseAiImage)
+		config.SenseAi.Image = img
+		fmt.Println("SENSE_AI_IMAGE: " + strconv.Itoa(img))
 	} else {
-		fmt.Println("DEEPSTACK_DT not found")
+		fmt.Println("SENSE_AI_IMAGE not found")
 	}
 
-	deepStackOd := os.Getenv("DEEPSTACK_OD")
-	if len(deepStackOd) > 0 {
-		config.DeepStack.OdEnabled = deepStackOd == "1"
-		fmt.Println("DEEPSTACK_OD: " + deepStackOd)
+	senseAiHost := os.Getenv("SENSE_AI_HOST")
+	if len(senseAiHost) > 0 {
+		config.SenseAi.Host = senseAiHost
+		fmt.Println("SENSE_AI_HOST: " + senseAiHost)
 	} else {
-		fmt.Println("DEEPSTACK_OD not found")
-	}
+		fmt.Println("SENSE_AI_HOST not found")
 
-	deepStackFr := os.Getenv("DEEPSTACK_FR")
-	if len(deepStackFr) > 0 {
-		config.DeepStack.FrEnabled = deepStackFr == "1"
-		fmt.Println("DEEPSTACK_FR: " + deepStackFr)
+	}
+	senseAiPort := os.Getenv("SENSE_AI_PORT")
+	if len(senseAiPort) > 0 {
+		port, _ := strconv.Atoi(senseAiPort)
+		if port > 0 {
+			config.SenseAi.Port = port
+		}
+		fmt.Println("SENSE_AI_PORT: " + strconv.Itoa(port))
 	} else {
-		fmt.Println("DEEPSTACK_FR not found")
+		fmt.Println("SENSE_AI_PORT not found")
+
 	}
 
 	snapShotProcessCount := os.Getenv("SNAPSHOT_PROC_COUNT")
@@ -327,36 +319,7 @@ func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
 	}
 	log.Println("DirPaths: ", config.General.DirPaths)
 
-	orginalConfig, _ := utils.DeepCopy(config)
-
-	if len(config.Jetson.ModelName) == 0 {
-		config.Jetson.ModelName = "ssd-mobilenet-v2"
-	}
-
-	if len(config.Torch.ModelName) == 0 {
-		config.Torch.ModelName = "ultralytics/yolov5"
-	}
-	if len(config.Torch.ModelNameSpecific) == 0 {
-		config.Torch.ModelNameSpecific = "yolov5x6"
-	}
-
-	if len(config.Tensorflow.ModelName) == 0 {
-		config.Tensorflow.ModelName = "efficientdet/lite4/detection"
-	}
-
-	if config.SourceReader.BufferSize == 0 {
-		config.SourceReader.BufferSize = 2
-	}
-	if config.SourceReader.MaxRetry == 0 {
-		config.SourceReader.MaxRetry = 150
-	}
-	if config.SourceReader.MaxRetryIn == 0 {
-		config.SourceReader.MaxRetryIn = 6
-	}
-
-	if config.General.HeartbeatInterval == 0 {
-		config.General.HeartbeatInterval = 30
-	}
+	originalConfig, _ := utils.DeepCopy(config)
 
 	if len(config.Db.ConnectionString) == 0 {
 		config.Db.Type = 1 // 0:SQLite, 1: mongodb
@@ -394,27 +357,12 @@ func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
 	if config.Ai.VideoClipDuration == 0 {
 		config.Ai.VideoClipDuration = 10
 	}
-	if config.Ai.FaceRecogMtcnnThreshold == 0 {
-		config.Ai.FaceRecogMtcnnThreshold = .86
-	}
-	if config.Ai.FaceRecogProbThreshold == 0 {
-		config.Ai.FaceRecogProbThreshold = .98
-	}
-	if config.Ai.PlateRecogInstanceCount == 0 {
-		config.Ai.PlateRecogInstanceCount = 2
-	}
 
-	if config.Ui.GsWidth == 0 {
-		config.Ui.GsWidth = 4
+	if len(config.SenseAi.Host) == 0 {
+		config.SenseAi.Host = "127.0.0.1"
 	}
-	if config.Ui.GsHeight == 0 {
-		config.Ui.GsHeight = 2
-	}
-	if config.Ui.BoosterInterval == 0 {
-		config.Ui.BoosterInterval = .3
-	}
-	if config.Ui.SeekToLiveEdgeInternal == 0 {
-		config.Ui.SeekToLiveEdgeInternal = 30
+	if config.SenseAi.Port == 0 {
+		config.SenseAi.Port = 32168
 	}
 
 	if config.Jobs.MacIpMatchingInterval == 0 {
@@ -424,31 +372,12 @@ func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
 		config.Jobs.BlackScreenMonitorInterval = 600
 	}
 
-	if len(config.DeepStack.ServerUrl) == 0 {
-		config.DeepStack.ServerUrl = "http://127.0.0.1"
-	}
-	if config.DeepStack.ServerPort == 0 {
-		config.DeepStack.ServerPort = 1009
-	}
-	if config.DeepStack.OdThreshold == 0 {
-		config.DeepStack.OdThreshold = .45
-	}
-	if config.DeepStack.FrThreshold == 0 {
-		config.DeepStack.FrThreshold = .7
-	}
-
 	if config.Archive.LimitPercent == 0 {
 		config.Archive.LimitPercent = 95
 	}
 
 	if config.Snapshot.ProcessCount == 0 {
 		config.Snapshot.ProcessCount = 4
-	}
-	if config.Snapshot.MetaColorCount == 0 {
-		config.Snapshot.MetaColorCount = 5
-	}
-	if config.Snapshot.MetaColorQuality == 0 {
-		config.Snapshot.MetaColorQuality = 1
 	}
 
 	if len(config.Hub.Address) == 0 {
@@ -461,7 +390,7 @@ func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
 		config.Hub.MaxRetry = 100
 	}
 
-	if !reflect.DeepEqual(orginalConfig, config) {
+	if !reflect.DeepEqual(originalConfig, config) {
 		err := rb.ConfigRep.SaveConfig(config)
 		if err != nil {
 			log.Println("Error while saving config file: ", err)

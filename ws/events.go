@@ -10,11 +10,10 @@ const (
 	StopStream   = 2
 	Editor       = 3
 	FFmpegReader = 4
-	Onvif        = 5
-	VideoMerge   = 6
-	FrTrain      = 7
-	Probe        = 8
-	Notifier     = 9
+	VideoMerge   = 5
+	FaceTrain    = 6
+	Probe        = 7
+	Notifier     = 8
 )
 
 type UserEvent struct {
@@ -94,22 +93,6 @@ func (FFmpegReaderEvent) CreateEventHandler() eb.EventHandler {
 	return &eb.FFmpegReaderResponseEvent{}
 }
 
-// OnvifEvent ////////////////////////////////////////////////////////////////////////////////////////////////////////
-type OnvifEvent struct {
-}
-
-func (OnvifEvent) GetOp() int {
-	return Onvif
-}
-
-func (OnvifEvent) GetChannelName(string) string {
-	return "onvif_response"
-}
-
-func (OnvifEvent) CreateEventHandler() eb.EventHandler {
-	return &eb.OnvifResponseEvent{}
-}
-
 // VideoMergeEvent ////////////////////////////////////////////////////////////////////////////////////////////////////////
 type VideoMergeEvent struct {
 }
@@ -126,19 +109,19 @@ func (VideoMergeEvent) CreateEventHandler() eb.EventHandler {
 	return &eb.VfmResponseEvent{}
 }
 
-// FrTrainEvent ////////////////////////////////////////////////////////////////////////////////////////////////////////
-type FrTrainEvent struct {
+// FaceTrainEvent ////////////////////////////////////////////////////////////////////////////////////////////////////////
+type FaceTrainEvent struct {
 }
 
-func (FrTrainEvent) GetOp() int {
-	return FrTrain
+func (FaceTrainEvent) GetOp() int {
+	return FaceTrain
 }
 
-func (FrTrainEvent) GetChannelName(string) string {
-	return "fr_train_response"
+func (FaceTrainEvent) GetChannelName(string) string {
+	return "face_train_response"
 }
 
-func (FrTrainEvent) CreateEventHandler() eb.EventHandler {
+func (FaceTrainEvent) CreateEventHandler() eb.EventHandler {
 	return &eb.FaceTrainResponseEvent{}
 }
 

@@ -39,9 +39,8 @@ func (h *Holders) Init() {
 	h.Events = append(h.Events, &StopStreamEvent{})
 	h.Events = append(h.Events, &EditorEvent{})
 	h.Events = append(h.Events, &FFmpegReaderEvent{})
-	h.Events = append(h.Events, &OnvifEvent{})
 	h.Events = append(h.Events, &VideoMergeEvent{})
-	h.Events = append(h.Events, &FrTrainEvent{})
+	h.Events = append(h.Events, &FaceTrainEvent{})
 	h.Events = append(h.Events, &ProbeEvent{})
 	h.Events = append(h.Events, &NotifierEvent{})
 

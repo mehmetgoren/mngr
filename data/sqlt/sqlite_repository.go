@@ -32,12 +32,16 @@ func createQuery(db *gorm.DB, params *data.QueryParams) *gorm.DB {
 		qarr = append(qarr, "source_id = ?")
 		ps = append(ps, params.SourceId)
 	}
+	if len(params.Module) > 0 {
+		qarr = append(qarr, "module = ?")
+		ps = append(ps, params.Module)
+	}
 	qarr = append(qarr, "created_date >= ? AND created_date < ?")
 	ps = append(ps, params.T1, params.T2)
 
-	if len(params.ClassName) > 0 {
-		qarr = append(qarr, "pred_cls_name LIKE ?")
-		ps = append(ps, "%"+params.ClassName+"%")
+	if len(params.Label) > 0 {
+		qarr = append(qarr, "label LIKE ?")
+		ps = append(ps, "%"+params.Label+"%")
 	}
 	if params.NoPreparingVideoFile {
 		qarr = append(qarr, "video_file_name IS NOT NULL AND LENGTH(video_file_name) > 0")
@@ -66,79 +70,29 @@ func createQuery(db *gorm.DB, params *data.QueryParams) *gorm.DB {
 	return q
 }
 
-func (s *SqliteRepository) QueryOds(params data.QueryParams) ([]*data.OdDto, error) {
-	ods := make([]*OdEntity, 0)
-	db := s.Db.Ods.GetGormDb()
+func (s *SqliteRepository) QueryAis(params data.QueryParams) ([]*data.AiDto, error) {
+	ods := make([]*AiEntity, 0)
+	db := s.Db.Ais.GetGormDb()
 	db = createQuery(db, &params)
 	result := db.Find(&ods)
-	ret := make([]*data.OdDto, 0)
+	ret := make([]*data.AiDto, 0)
 	if result.Error != nil {
 		return ret, result.Error
 	}
 
-	mapper := &OdMapper{Config: s.Db.Config}
+	mapper := &AiMapper{Config: s.Db.Config}
 	for _, entity := range ods {
 		ret = append(ret, mapper.Map(entity))
 	}
 
 	return ret, nil
 }
-func (s *SqliteRepository) CountOds(params data.QueryParams) (int64, error) {
+func (s *SqliteRepository) CountAis(params data.QueryParams) (int64, error) {
 	params.Sort.Enabled = false
 	params.Paging.Enabled = false
-	db := s.Db.Ods.GetGormDb()
+	db := s.Db.Ais.GetGormDb()
 	db = createQuery(db, &params)
-	return count[OdEntity](db)
-}
-
-func (s *SqliteRepository) QueryFrs(params data.QueryParams) ([]*data.FrDto, error) {
-	frs := make([]*FrEntity, 0)
-	db := s.Db.Frs.GetGormDb()
-	db = createQuery(db, &params)
-	result := db.Find(&frs)
-	ret := make([]*data.FrDto, 0)
-	if result.Error != nil {
-		return ret, result.Error
-	}
-
-	mapper := &FrMapper{Config: s.Db.Config}
-	for _, fr := range frs {
-		ret = append(ret, mapper.Map(fr))
-	}
-
-	return ret, nil
-}
-func (s *SqliteRepository) CountFrs(params data.QueryParams) (int64, error) {
-	params.Sort.Enabled = false
-	params.Paging.Enabled = false
-	db := s.Db.Frs.GetGormDb()
-	db = createQuery(db, &params)
-	return count[FrEntity](db)
-}
-
-func (s *SqliteRepository) QueryAlprs(params data.QueryParams) ([]*data.AlprDto, error) {
-	alprs := make([]*AlprEntity, 0)
-	db := s.Db.Alprs.GetGormDb()
-	db = createQuery(db, &params)
-	result := db.Find(&alprs)
-	ret := make([]*data.AlprDto, 0)
-	if result.Error != nil {
-		return ret, result.Error
-	}
-
-	mapper := &AlprMapper{Config: s.Db.Config}
-	for _, alpr := range alprs {
-		ret = append(ret, mapper.Map(alpr))
-	}
-
-	return ret, nil
-}
-func (s *SqliteRepository) CountAlprs(params data.QueryParams) (int64, error) {
-	params.Sort.Enabled = false
-	params.Paging.Enabled = false
-	db := s.Db.Alprs.GetGormDb()
-	db = createQuery(db, &params)
-	return count[AlprEntity](db)
+	return count[AiEntity](db)
 }
 
 func deleteRec[T any](db *gorm.DB, options *data.DeleteOptions, cast func(t *T) *BaseEntity) error {
@@ -193,47 +147,15 @@ func deleteRec[T any](db *gorm.DB, options *data.DeleteOptions, cast func(t *T) 
 	return nil
 }
 
-func (s *SqliteRepository) DeleteOds(options *data.DeleteOptions) error {
-	cast := func(t *OdEntity) *BaseEntity {
+func (s *SqliteRepository) DeleteAis(options *data.DeleteOptions) error {
+	cast := func(t *AiEntity) *BaseEntity {
 		return &t.BaseEntity
 	}
-	return deleteRec[OdEntity](s.Db.Ods.GetGormDb(), options, cast)
+	return deleteRec[AiEntity](s.Db.Ais.GetGormDb(), options, cast)
 }
 
-func (s *SqliteRepository) DeleteFrs(options *data.DeleteOptions) error {
-	cast := func(t *FrEntity) *BaseEntity {
-		return &t.BaseEntity
-	}
-	return deleteRec[FrEntity](s.Db.Frs.GetGormDb(), options, cast)
-}
-
-func (s *SqliteRepository) DeleteAlprs(options *data.DeleteOptions) error {
-	cast := func(t *AlprEntity) *BaseEntity {
-		return &t.BaseEntity
-	}
-	return deleteRec[AlprEntity](s.Db.Alprs.GetGormDb(), options, cast)
-}
-
-func (s *SqliteRepository) RemoveOd(id string) error {
-	result := s.Db.Ods.GetGormDb().Unscoped().Delete(&OdEntity{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-func (s *SqliteRepository) RemoveFr(id string) error {
-	result := s.Db.Frs.GetGormDb().Unscoped().Delete(&FrEntity{}, id)
-	if result.Error != nil {
-		return result.Error
-	}
-
-	return nil
-}
-
-func (s *SqliteRepository) RemoveAlpr(id string) error {
-	result := s.Db.Alprs.GetGormDb().Unscoped().Delete(&AlprEntity{}, id)
+func (s *SqliteRepository) RemoveAi(id string) error {
+	result := s.Db.Ais.GetGormDb().Unscoped().Delete(&AiEntity{}, id)
 	if result.Error != nil {
 		return result.Error
 	}

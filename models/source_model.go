@@ -69,7 +69,6 @@ type SourceModel struct {
 	MsServerType int  `json:"ms_type" redis:"ms_type"`
 
 	SnapshotEnabled      bool    `json:"snapshot_enabled" redis:"snapshot_enabled"`
-	SnapshotType         int     `json:"snapshot_type" redis:"snapshot_type"`
 	SnapshotFrameRate    int     `json:"snapshot_frame_rate" redis:"snapshot_frame_rate"`
 	SnapshotWidth        int     `json:"snapshot_width" redis:"snapshot_width"`
 	SnapshotHeight       int     `json:"snapshot_height" redis:"snapshot_height"`

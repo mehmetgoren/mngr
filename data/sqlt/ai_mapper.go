@@ -7,20 +7,20 @@ import (
 	"strconv"
 )
 
-type FrMapper struct {
+type AiMapper struct {
 	Config *models.Config
 }
 
-func (f *FrMapper) Map(source *FrEntity) *data.FrDto {
-	ret := &data.FrDto{}
+func (o *AiMapper) Map(source *AiEntity) *data.AiDto {
+	ret := &data.AiDto{}
 	ret.Id = strconv.FormatUint(uint64(source.ID), 10)
+	ret.Module = source.Module
 	ret.GroupId = source.GroupId
 	ret.SourceId = source.SourceId
 	ret.CreatedAt = source.CreatedAtStr
-	ret.DetectedFace = &data.DetectedFaceDto{
-		PredScore:   utils.RoundFloat32(source.PredScore),
-		PredClsIdx:  source.PredClsIdx,
-		PredClsName: source.PredClsName,
+	ret.DetectedObject = &data.DetectedObjectDto{
+		Score: utils.RoundFloat32(source.Score),
+		Label: source.Label,
 	}
 	ret.ImageFileName = source.ImageFileName
 

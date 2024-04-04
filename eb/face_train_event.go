@@ -13,7 +13,7 @@ type FaceTrainRequestEvent struct {
 }
 
 func (f *FaceTrainRequestEvent) Publish() error {
-	eventBusPub := EventBus{PubSubConnection: f.Rb.PubSubConnection, Channel: "fr_train_request"}
+	eventBusPub := EventBus{PubSubConnection: f.Rb.PubSubConnection, Channel: "face_train_request"}
 
 	js, err := json.Marshal(f)
 	if err != nil {

@@ -153,11 +153,9 @@ func setAiInfo(nodeDto *models.NodeDto, config *models.Config, factory *cmn.Fact
 
 	rep := factory.CreateRepository()
 
-	nodeDto.TotalObjectDetection, _ = rep.CountOds(queryParams)
-	nodeDto.TotalFaceDetection, _ = rep.CountFrs(queryParams)
-	nodeDto.TotalLicensePlateDetection, _ = rep.CountAlprs(queryParams)
+	nodeDto.TotalAiDetection, _ = rep.CountAis(queryParams)
 
-	mlTrainPath := utils.GetFrTrainPath(config)
+	mlTrainPath := utils.GetFaceTrainPath(config)
 	de, err := os.ReadDir(mlTrainPath)
 	if err == nil {
 		totalRegisteredFaces := 0

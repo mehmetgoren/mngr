@@ -122,19 +122,18 @@ func main() {
 	api.RegisterStreamEndpoints(router, rb)
 	api.RegisterConfigEndpoints(router, rb)
 	api.RegisterRecordEndpoints(router, rb)
-	api.RegisterOdEndpoints(router, rb)
-	api.RegisterOdImagesEndpoints(router, rb, factory)
-	api.RegisterOdVideoClipEndpoints(router, rb, factory)
-	api.RegisterOnvifEndpoints(router, rb)
-	api.RegisterFrTrainingEndpoints(router, rb)
+	api.RegisterSmartVisionEndpoints(router, rb)
+	api.RegisterAiImagesEndpoints(router, rb, factory)
+	api.RegisterAiVideoClipEndpoints(router, factory)
+	api.RegisterFaceTrainingEndpoints(router, rb)
 	api.RegisterUserEndpoints(router, holders)
 	api.RegisterServiceEndpoints(router, rb, dockerClient)
 	api.RegisterServerStatsEndpoints(router, rb)
 	api.RegisterOthersEndpoints(router, rb, global)
 	api.RegisterCloudEndpoints(router, rb)
 	api.RegisterAiDataEndpoints(router, factory)
-	api.RegisterSmartSearchEndpoints(router, factory)
 	api.RegisterHubEndpoints(router, rb, holders, factory)
+	api.RegisterAiModulesEndpoints(router, rb, dockerClient)
 
 	ws.RegisterApiEndpoints(router, rb)
 	ws.RegisterWsEndpoints(router, holders)
@@ -210,13 +209,13 @@ func authMiddleware(ctx *gin.Context) {
 var mutableEndPoints = map[string]int{"DELETE/aiclips": 1, "DELETE/deleteaidata": 1,
 	"POST/telegram": 1, "DELETE/telegramuser": 1, "POST/gdrive": 1, "POST/resetgdrivetokenandurl": 1,
 	"POST/config": 1, "GET/restoreconfig": 1,
-	"DELETE/frtrainpersonimage": 1, "POST/frtrainpersonimage": 1, "POST/frtrainpersonrename": 1, "POST/frtrainpersonnew": 1, "DELETE/frtrainpersondelete": 1,
+	"DELETE/facetrainpersonimage": 1, "POST/facetrainpersonimage": 1, "POST/facetrainpersonrename": 1, "POST/facetrainpersonnew": 1, "DELETE/facetrainpersondelete": 1,
 	"POST/ods":            1,
 	"DELETE/records":      1,
 	"POST/restartservice": 1, "POST/startservice": 1, "POST/stopservice": 1, "POST/restartaftercloudchanges": 1, "POST/restartallservices": 1,
 	"POST/sources": 1, "DELETE/sources": 1, "POST/setsourceenabled": 1,
 	"DELETE/users":     1,
-	"POST/startstream": 1, "POST/stopstream": 1, "POST/restartstream": 1, "POST/videomerge": 1, "POST/frtrain": 1,
+	"POST/startstream": 1, "POST/stopstream": 1, "POST/restartstream": 1, "POST/videomerge": 1, "POST/facetrain": 1,
 }
 
 func readonlyMiddleware(ctx *gin.Context) {

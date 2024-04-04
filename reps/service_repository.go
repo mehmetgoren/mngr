@@ -37,7 +37,6 @@ func (r *ServiceRepository) Add(serviceName string) (int64, error) {
 		InstanceType:    models.Container,
 		InstanceName:    "mngr-instance",
 		CreatedAt:       utils.TimeToString(now, true),
-		Heartbeat:       "",
 	}
 
 	return r.Connection.HSet(context.Background(), getServicesKey(serviceName), Map(sm)).Result()
@@ -61,7 +60,6 @@ func (r *ServiceRepository) AddWebApp(serviceName string) (int64, error) {
 		InstanceType:    models.Container,
 		InstanceName:    "webapp-instance",
 		CreatedAt:       utils.TimeToString(now, true),
-		Heartbeat:       "",
 	}
 
 	return r.Connection.HSet(context.Background(), getServicesKey(serviceName), Map(sm)).Result()

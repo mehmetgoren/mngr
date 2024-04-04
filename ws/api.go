@@ -55,15 +55,6 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 	})
-	router.POST("/onvif", func(ctx *gin.Context) {
-		var e models.OnvifEvent
-		ctx.BindJSON(&e)
-		eventPub := eb.OnvifRequestEvent{Rb: rb, OnvifEvent: e}
-		err := eventPub.Publish()
-		if err == nil {
-			ctx.Writer.WriteHeader(http.StatusOK)
-		}
-	})
 	router.POST("/videomerge", func(ctx *gin.Context) {
 		var event eb.VfmRequestEvent
 		ctx.BindJSON(&event)
@@ -74,7 +65,7 @@ func RegisterApiEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		}
 	})
 
-	router.POST("/frtrain", func(ctx *gin.Context) {
+	router.POST("/facetrain", func(ctx *gin.Context) {
 		var event eb.FaceTrainRequestEvent
 		ctx.BindJSON(&event)
 		event.Rb = rb
@@ -125,16 +116,12 @@ func RegisterWsEndpoints(router *gin.Engine, hldrs *Holders) {
 		hldrs.RegisterEndPoint(hub, ctx, FFmpegReader, id)
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	router.GET("/wsonvif", func(ctx *gin.Context) {
-		hldrs.RegisterEndPoint(hub, ctx, Onvif, "")
-		ctx.Writer.WriteHeader(http.StatusOK)
-	})
 	router.GET("/wsvideomerge", func(ctx *gin.Context) {
 		hldrs.RegisterEndPoint(hub, ctx, VideoMerge, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
-	router.GET("/wsfrtrain", func(ctx *gin.Context) {
-		hldrs.RegisterEndPoint(hub, ctx, FrTrain, "")
+	router.GET("/wsfacetrain", func(ctx *gin.Context) {
+		hldrs.RegisterEndPoint(hub, ctx, FaceTrain, "")
 		ctx.Writer.WriteHeader(http.StatusOK)
 	})
 	router.GET("/wsprobe", func(ctx *gin.Context) {

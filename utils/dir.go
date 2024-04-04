@@ -32,29 +32,17 @@ func CreateRequiredDirectories(config *models.Config) {
 		createDirIfNotExist(record)
 
 		// Create object detection folder
-		od := GetOdPath(dirPath)
-		createDirIfNotExist(od)
-
-		// Create facial recognition folder
-		fr := GetFrPath(dirPath)
-		createDirIfNotExist(fr)
-
-		// Create automatic plate license recognizer
-		alpr := GetAlprPath(dirPath)
-		createDirIfNotExist(alpr)
+		ai := GetAiPath(dirPath)
+		createDirIfNotExist(ai)
 	}
 
-	ml := GetFrMlPath(config)
+	ml := GetFacePath(config)
 	createDirIfNotExist(ml)
-	train := GetFrTrainPath(config)
+	train := GetFaceTrainPath(config)
 	createDirIfNotExist(train)
-	checkIfMlFolderEmpty(train)
+	checkIfFaceFolderEmpty(train)
 	test := path.Join(ml, "test")
 	createDirIfNotExist(test)
-
-	//create DeepStack backup directory
-	ds := getDeepStackBackupPath(config)
-	createDirIfNotExist(ds)
 }
 
 func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
@@ -70,19 +58,9 @@ func CreateSourceDefaultDirectories(config *models.Config, sourceId string) {
 		createDirIfNotExist(path.Join(record, sourceId, "ai"))
 
 		// Create object detection folder for the source
-		od := GetOdPath(dirPath)
-		createDirIfNotExist(path.Join(od, sourceId))
-		createDirIfNotExist(path.Join(od, sourceId, "images"))
-
-		// Create facial recognition folder for the source
-		fr := GetFrPath(dirPath)
-		createDirIfNotExist(path.Join(fr, sourceId))
-		createDirIfNotExist(path.Join(fr, sourceId, "images"))
-
-		// Create automatic plate license recognizer
-		alpr := GetAlprPath(dirPath)
-		createDirIfNotExist(path.Join(alpr, sourceId))
-		createDirIfNotExist(path.Join(alpr, sourceId, "images"))
+		ai := GetAiPath(dirPath)
+		createDirIfNotExist(path.Join(ai, sourceId))
+		createDirIfNotExist(path.Join(ai, sourceId, "images"))
 	}
 }
 
@@ -94,23 +72,23 @@ func GetRecordPath(dirPath string) string {
 	return path.Join(dirPath, "record")
 }
 
-func GetOdPath(dirPath string) string {
-	return path.Join(dirPath, "od")
+func GetAiPath(dirPath string) string {
+	return path.Join(dirPath, "ai")
 }
 
-func GetFrPath(dirPath string) string {
-	return path.Join(dirPath, "fr")
-}
-
-func GetAlprPath(dirPath string) string {
-	return path.Join(dirPath, "alpr")
-}
-
-// GetFrMlPath returns only first path from config.General.DirPaths
-func GetFrMlPath(config *models.Config) string {
+// GetFacePath returns only first path from config.General.DirPaths
+func GetFacePath(config *models.Config) string {
 	rootDirPath := GetDefaultDirPath(config)
-	fr := GetFrPath(rootDirPath)
-	return path.Join(fr, "ml")
+	face := GetAiPath(rootDirPath)
+	return path.Join(face, "face")
+}
+
+func GetFaceTrainPath(config *models.Config) string {
+	return path.Join(GetFacePath(config), "train")
+}
+
+func GetFaceTrainPathByPerson(config *models.Config, person string) string {
+	return path.Join(GetFaceTrainPath(config), person)
 }
 
 func GetAiClipPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
@@ -118,33 +96,15 @@ func GetAiClipPathBySource(config *models.Config, ffmpegModel models.FFmpegModel
 	return path.Join(GetRecordPath(sourceDirPath), ffmpegModel.GetSourceId(), "ai")
 }
 
-func GetOdImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
+func GetAiImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
 	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
-	return path.Join(GetOdPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
+	return path.Join(GetAiPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
 }
 
-func GetHourlyOdImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
+func GetHourlyAiImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
 	di := DateIndex{}
 	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetOdImagesPathBySource(config, ffmpegModel))
-}
-
-func GetFrImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
-	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
-	return path.Join(GetFrPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
-}
-func GetHourlyFrImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
-	di := DateIndex{}
-	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetFrImagesPathBySource(config, ffmpegModel))
-}
-
-func GetFrTrainPath(config *models.Config) string {
-	return path.Join(GetFrMlPath(config), "train")
-}
-
-func GetFrTrainPathByPerson(config *models.Config, person string) string {
-	return path.Join(GetFrTrainPath(config), person)
+	return di.GetIndexedPath(GetAiImagesPathBySource(config, ffmpegModel))
 }
 
 func GetRecordPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
@@ -158,30 +118,15 @@ func GetHourlyRecordPathBySource(config *models.Config, ffmpegModel models.FFmpe
 	return di.GetIndexedPath(GetRecordPathBySource(config, ffmpegModel))
 }
 
-func GetAlprImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel) string {
-	sourceDirPath := GetSourceDirPath(config, ffmpegModel)
-	return path.Join(GetAlprPath(sourceDirPath), ffmpegModel.GetSourceId(), "images")
-}
-func GetHourlyAlprImagesPathBySource(config *models.Config, ffmpegModel models.FFmpegModel, dateStr string) string {
-	di := DateIndex{}
-	di.SetValuesFrom(dateStr)
-	return di.GetIndexedPath(GetAlprImagesPathBySource(config, ffmpegModel))
-}
-
-func getDeepStackBackupPath(config *models.Config) string {
-	rootDirPath := GetDefaultDirPath(config)
-	return path.Join(rootDirPath, "deepstack")
-}
-
-func checkIfMlFolderEmpty(mlTrainDirPath string) error {
-	dirs, err := ioutil.ReadDir(mlTrainDirPath)
+func checkIfFaceFolderEmpty(faceTrainDirPath string) error {
+	dirs, err := ioutil.ReadDir(faceTrainDirPath)
 	if err != nil {
-		log.Println("an error occurred while checking the ml train directory, err: " + err.Error())
+		log.Println("an error occurred while checking the face train directory, err: " + err.Error())
 		return err
 	}
 	if len(dirs) == 0 {
 		staticPath := "static/train"
-		err = cp.Copy(staticPath, path.Join(mlTrainDirPath))
+		err = cp.Copy(staticPath, path.Join(faceTrainDirPath))
 		if err != nil {
 			log.Println("an error occurred while copying the ml train directory, err: " + err.Error())
 		}

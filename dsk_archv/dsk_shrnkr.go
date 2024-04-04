@@ -106,8 +106,8 @@ func deleteAllTempAiClipFiles(fullPath string) int {
 	return ret
 }
 
-func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, source *models.SourceModel) {
-	params := data.QueryParams{ClassName: "", NoPreparingVideoFile: false,
+func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, source *models.SourceModel) error {
+	params := data.QueryParams{Label: "", NoPreparingVideoFile: false,
 		Sort: models.SortInfo{Enabled: false}, Paging: models.PagingInfo{Enabled: false}}
 	params.SourceId = source.Id
 	params.T1 = oldest.CreateMinTime()
@@ -115,60 +115,32 @@ func deleteAllAiData(oldest *OldestSourceRecord, fc *cmn.Factory, source *models
 	deleteOptions := &data.DeleteOptions{DeleteImage: false, DeleteVideo: false}
 	rep := fc.CreateRepository()
 
-	ods, _ := rep.QueryOds(params)
-	if ods != nil {
-		for _, od := range ods {
-			deleteOptions.Id = od.Id
-			rep.DeleteOds(deleteOptions)
-		}
-	}
-	frs, _ := rep.QueryFrs(params)
-	if frs != nil {
-		for _, fr := range frs {
-			deleteOptions.Id = fr.Id
-			rep.DeleteFrs(deleteOptions)
-		}
-	}
-	alprs, _ := rep.QueryAlprs(params)
-	if alprs != nil {
-		for _, alpr := range alprs {
-			deleteOptions.Id = alpr.Id
-			rep.DeleteAlprs(deleteOptions)
+	ais, err := rep.QueryAis(params)
+	if ais != nil {
+		for _, ai := range ais {
+			deleteOptions.Id = ai.Id
+			err = rep.DeleteAis(deleteOptions)
 		}
 	}
 
 	// delete daily ai clips by source id
 	rootDailyAiPath := oldest.CreateDailyPathName(utils.GetAiClipPathBySource(fc.Config, source))
-	err := os.RemoveAll(rootDailyAiPath)
+	err = os.RemoveAll(rootDailyAiPath)
 	if err != nil {
 		log.Println("an error occurred while deleting daily AI Clips root path, err: " + err.Error())
 	} else {
 		log.Println("AI Clips parent folder has been deleted: " + rootDailyAiPath)
 	}
-	// delete daily od images by source id
-	rootDailyOdImagePath := oldest.CreateDailyPathName(utils.GetOdImagesPathBySource(fc.Config, source))
-	err = os.RemoveAll(rootDailyOdImagePath)
+	// delete daily AI images by source id
+	rootDailyAiImagePath := oldest.CreateDailyPathName(utils.GetAiImagesPathBySource(fc.Config, source))
+	err = os.RemoveAll(rootDailyAiImagePath)
 	if err != nil {
-		log.Println("an error occurred while deleting daily Od Images root path, err: " + err.Error())
+		log.Println("an error occurred while deleting daily AI Images root path, err: " + err.Error())
 	} else {
-		log.Println("Od Images parent folder has been deleted: " + rootDailyOdImagePath)
+		log.Println("AI Images parent folder has been deleted: " + rootDailyAiImagePath)
 	}
-	// delete daily fr images by source id
-	rootDailyFrImagePath := oldest.CreateDailyPathName(utils.GetFrImagesPathBySource(fc.Config, source))
-	err = os.RemoveAll(rootDailyFrImagePath)
-	if err != nil {
-		log.Println("an error occurred while deleting daily Fr Images root path, err: " + err.Error())
-	} else {
-		log.Println("Fr Images parent folder has been deleted: " + rootDailyFrImagePath)
-	}
-	// delete daily alpr images by source id
-	rootDailyAlprImagePath := oldest.CreateDailyPathName(utils.GetAlprImagesPathBySource(fc.Config, source))
-	err = os.RemoveAll(rootDailyAlprImagePath)
-	if err != nil {
-		log.Println("an error occurred while deleting daily Alpr Images root path, err: " + err.Error())
-	} else {
-		log.Println("Alpr Images parent folder has been deleted: " + rootDailyAlprImagePath)
-	}
+
+	return err
 }
 
 func (d *DiskShrinker) delete_() {

@@ -8,7 +8,8 @@ import (
 
 type QueryParams struct {
 	SourceId             string
-	ClassName            string
+	Module               string
+	Label                string
 	NoPreparingVideoFile bool
 	T1                   time.Time
 	T2                   time.Time
@@ -16,9 +17,10 @@ type QueryParams struct {
 	Paging               models.PagingInfo
 }
 
-func GetParamsByHour(sourceId string, dateStr string, sort models.SortInfo) *QueryParams {
+func GetParamsByHour(sourceId string, module string, dateStr string, sort models.SortInfo) *QueryParams {
 	params := &QueryParams{}
 	params.SourceId = sourceId
+	params.Module = module
 	params.Sort = sort
 	params.SetupHourlyTimes(dateStr)
 	return params
@@ -41,20 +43,8 @@ type DeleteOptions struct {
 }
 
 type Repository interface {
-	QueryOds(params QueryParams) ([]*OdDto, error)
-	CountOds(params QueryParams) (int64, error)
-
-	QueryFrs(params QueryParams) ([]*FrDto, error)
-	CountFrs(params QueryParams) (int64, error)
-
-	QueryAlprs(params QueryParams) ([]*AlprDto, error)
-	CountAlprs(params QueryParams) (int64, error)
-
-	RemoveOd(id string) error
-	RemoveFr(id string) error
-	RemoveAlpr(id string) error
-
-	DeleteOds(options *DeleteOptions) error
-	DeleteFrs(options *DeleteOptions) error
-	DeleteAlprs(options *DeleteOptions) error
+	QueryAis(params QueryParams) ([]*AiDto, error)
+	CountAis(params QueryParams) (int64, error)
+	RemoveAi(id string) error
+	DeleteAis(options *DeleteOptions) error
 }

@@ -57,20 +57,18 @@ type NodeDto struct {
 	GpuPowerLimit    string `json:"GpuPowerLimit"`
 	GpuPowerDraw     string `json:"GpuPowerDraw"`
 
-	TotalObjectDetection       int64  `json:"TotalObjectDetection"`
-	TotalFaceDetection         int64  `json:"TotalFaceDetection"`
-	TotalLicensePlateDetection int64  `json:"TotalLicensePlateDetection"`
-	TotalRegisteredFaces       int    `json:"TotalRegisteredFaces"`
-	RunningServices            string `json:"RunningServices"`
-	GdriveEnabled              bool   `json:"GdriveEnabled"`
-	TelegramEnabled            bool   `json:"TelegramEnabled"`
-	TotalUserCount             int    `json:"TotalUserCount"`
-	MsContainerFailedCount     int    `json:"MsContainerFailedCount"`
-	MsFeederFailedCount        int    `json:"MsFeederFailedCount"`
-	HlsFailedCount             int    `json:"HlsFailedCount"`
-	FfmpegReaderFailedCount    int    `json:"FfmpegReaderFailedCount"`
-	RecordFailedCount          int    `json:"RecordFailedCount"`
-	SnapshotFailedCount        int    `json:"SnapshotFailedCount"`
-	RecordStuckProcessCount    int    `json:"RecordStuckProcessCount"`
-	SourceStateConflictCount   int    `json:"SourceStateConflictCount"`
+	TotalAiDetection         int64  `json:"TotalAiDetection"`
+	TotalRegisteredFaces     int    `json:"TotalRegisteredFaces"`
+	RunningServices          string `json:"RunningServices"`
+	GdriveEnabled            bool   `json:"GdriveEnabled"`
+	TelegramEnabled          bool   `json:"TelegramEnabled"`
+	TotalUserCount           int    `json:"TotalUserCount"`
+	MsContainerFailedCount   int    `json:"MsContainerFailedCount"`
+	MsFeederFailedCount      int    `json:"MsFeederFailedCount"`
+	HlsFailedCount           int    `json:"HlsFailedCount"`
+	FfmpegReaderFailedCount  int    `json:"FfmpegReaderFailedCount"`
+	RecordFailedCount        int    `json:"RecordFailedCount"`
+	SnapshotFailedCount      int    `json:"SnapshotFailedCount"`
+	RecordStuckProcessCount  int    `json:"RecordStuckProcessCount"`
+	SourceStateConflictCount int    `json:"SourceStateConflictCount"`
 }

@@ -16,21 +16,21 @@ import (
 	"sort"
 )
 
-func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
-	router.GET("/frtrainpersons", func(ctx *gin.Context) {
+func RegisterFaceTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
+	router.GET("/facetrainpersons", func(ctx *gin.Context) {
 		config, _ := rb.ConfigRep.GetConfig()
-		trainPath := utils.GetFrTrainPath(config)
+		trainPath := utils.GetFaceTrainPath(config)
 		directories, err := ioutil.ReadDir(trainPath)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 
-		ret := make([]*models.FrTrainViewModel, 0)
+		ret := make([]*models.FaceTrainViewModel, 0)
 		for _, dir := range directories {
 			if !dir.IsDir() {
 				continue
 			}
-			item := &models.FrTrainViewModel{Name: dir.Name()}
+			item := &models.FaceTrainViewModel{Name: dir.Name()}
 			personDir := path.Join(trainPath, dir.Name())
 			personImages, err := ioutil.ReadDir(personDir)
 			if err != nil {
@@ -49,14 +49,14 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 	})
 
 	// it has potential security risk
-	router.GET("frtrainpersonimages/:person", func(ctx *gin.Context) {
+	router.GET("facetrainpersonimages/:person", func(ctx *gin.Context) {
 		person := ctx.Param("person")
 		config, err := rb.ConfigRep.GetConfig()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 
-		rootPath := utils.GetFrTrainPathByPerson(config, person)
+		rootPath := utils.GetFaceTrainPathByPerson(config, person)
 		directories, err := ioutil.ReadDir(rootPath)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -77,7 +77,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, items)
 	})
 
-	router.DELETE("frtrainpersonimage/:imgPath", func(ctx *gin.Context) {
+	router.DELETE("facetrainpersonimage/:imgPath", func(ctx *gin.Context) {
 		imgPath := ctx.Param("imgPath")
 		barr, err := base64.StdEncoding.DecodeString(imgPath)
 		if err != nil {
@@ -96,8 +96,8 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, true)
 	})
 
-	router.POST("frtrainpersonimage", func(ctx *gin.Context) {
-		viewModel := models.FrTrainScreenshotViewModel{}
+	router.POST("facetrainpersonimage", func(ctx *gin.Context) {
+		viewModel := models.FaceTrainScreenshotViewModel{}
 		err := ctx.BindJSON(&viewModel)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -116,7 +116,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			if err != nil {
 				continue
 			}
-			filename := path.Join(utils.GetFrTrainPathByPerson(config, viewModel.Name), utils.NewId()+".jpg")
+			filename := path.Join(utils.GetFaceTrainPathByPerson(config, viewModel.Name), utils.NewId()+".jpg")
 			f, err := os.Create(filename)
 			if err != nil {
 				continue
@@ -127,8 +127,8 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, true)
 	})
 
-	router.POST("frtrainpersonrename", func(ctx *gin.Context) {
-		viewModel := models.FrTrainRename{}
+	router.POST("facetrainpersonrename", func(ctx *gin.Context) {
+		viewModel := models.FaceTrainRename{}
 		err := ctx.BindJSON(&viewModel)
 		if err != nil || len(viewModel.NewName) == 0 || len(viewModel.OriginalName) == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -137,7 +137,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-		originalDirName := utils.GetFrTrainPathByPerson(config, viewModel.OriginalName)
+		originalDirName := utils.GetFaceTrainPathByPerson(config, viewModel.OriginalName)
 		if _, err := os.Stat(originalDirName); err != nil {
 			if os.IsNotExist(err) {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -148,7 +148,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
 
-		newDirName := utils.GetFrTrainPathByPerson(config, viewModel.NewName)
+		newDirName := utils.GetFaceTrainPathByPerson(config, viewModel.NewName)
 		err = os.Rename(originalDirName, newDirName)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -156,8 +156,8 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, true)
 	})
 
-	router.POST("frtrainpersonnew", func(ctx *gin.Context) {
-		viewModel := models.FrTrainName{}
+	router.POST("facetrainpersonnew", func(ctx *gin.Context) {
+		viewModel := models.FaceTrainName{}
 		err := ctx.BindJSON(&viewModel)
 		if err != nil || len(viewModel.Name) == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -171,7 +171,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-		dirName := utils.GetFrTrainPathByPerson(config, viewModel.Name)
+		dirName := utils.GetFaceTrainPathByPerson(config, viewModel.Name)
 		err = os.Mkdir(dirName, 0777)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -179,8 +179,8 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		ctx.JSON(http.StatusOK, true)
 	})
 
-	router.DELETE("frtrainpersondelete", func(ctx *gin.Context) {
-		viewModel := models.FrTrainName{}
+	router.DELETE("facetrainpersondelete", func(ctx *gin.Context) {
+		viewModel := models.FaceTrainName{}
 		if err := ctx.ShouldBindJSON(&viewModel); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -194,7 +194,7 @@ func RegisterFrTrainingEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-		dirName := utils.GetFrTrainPathByPerson(config, viewModel.Name)
+		dirName := utils.GetFaceTrainPathByPerson(config, viewModel.Name)
 		err = os.RemoveAll(dirName)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -16,9 +16,7 @@ type RepoBucket struct {
 	ConfigRep       *ConfigRepository
 	SourceRep       *SourceRepository
 	StreamRep       *StreamRepository
-	OdRep           *OdRepository
-	NdRep           *NetworkDiscoveryRepository
-	OvRep           *OnvifRepository
+	SmartVisionRep  *SmartVisionRepository
 	UserRep         *UserRepository
 	ServiceRep      *ServiceRepository
 	RtspTemplateRep *RtspTemplateRepository
@@ -26,6 +24,7 @@ type RepoBucket struct {
 	RecStuckRep     *RecStuckRepository
 	VariousRep      *VariousInfosRepository
 	CloudRep        *CloudRepository
+	AiModuleRep     *AiModuleRepository
 
 	users map[string]*models.UserSession
 }
@@ -37,9 +36,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.ConfigRep = &ConfigRepository{Connection: r.connMain}
 	r.SourceRep = &SourceRepository{Connection: r.connMain}
 	r.StreamRep = &StreamRepository{Connection: r.connMain}
-	r.OdRep = &OdRepository{Connection: r.connMain}
-	r.NdRep = &NetworkDiscoveryRepository{Connection: r.connMain}
-	r.OvRep = &OnvifRepository{Connection: r.connMain}
+	r.SmartVisionRep = &SmartVisionRepository{Connection: r.connMain}
 	r.UserRep = &UserRepository{Connection: r.connMain}
 	r.ServiceRep = &ServiceRepository{Connection: r.connMain}
 	r.RtspTemplateRep = &RtspTemplateRepository{Connection: r.connMain}
@@ -47,6 +44,7 @@ func (r *RepoBucket) Init() *RepoBucket {
 	r.RecStuckRep = &RecStuckRepository{Connection: r.connMain}
 	r.VariousRep = &VariousInfosRepository{Connection: r.connMain}
 	r.CloudRep = &CloudRepository{Connection: r.connMain}
+	r.AiModuleRep = &AiModuleRepository{Connection: r.connMain}
 
 	r.initUsers()
 	r.initSessionClearScheduler()

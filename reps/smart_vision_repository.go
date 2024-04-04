@@ -8,16 +8,16 @@ import (
 	"mngr/models"
 )
 
-type OdRepository struct {
+type SmartVisionRepository struct {
 	Connection *redis.Client
 }
 
-var redisKeyOds = "ods:"
+var redisKeySmartVisions = "smart_visions:"
 
-func (o *OdRepository) Get(id string) (*models.OdModel, error) {
+func (o *SmartVisionRepository) Get(id string) (*models.SmartVisionModel, error) {
 	conn := o.Connection
-	key := redisKeyOds + id
-	var p models.OdModel
+	key := redisKeySmartVisions + id
+	var p models.SmartVisionModel
 	err := conn.HGetAll(context.Background(), key).Scan(&p)
 	if err != nil {
 		log.Println("Error getting object detection model from redis: ", err)
@@ -26,10 +26,10 @@ func (o *OdRepository) Get(id string) (*models.OdModel, error) {
 	return &p, err
 }
 
-func (o *OdRepository) GetAll() ([]*models.OdModel, error) {
-	ret := make([]*models.OdModel, 0)
+func (o *SmartVisionRepository) GetAll() ([]*models.SmartVisionModel, error) {
+	ret := make([]*models.SmartVisionModel, 0)
 	conn := o.Connection
-	allKey := redisKeyOds + "*"
+	allKey := redisKeySmartVisions + "*"
 	keys, err := conn.Keys(context.Background(), allKey).Result()
 	if err != nil {
 		if err.Error() == "redis: nil" {
@@ -40,7 +40,7 @@ func (o *OdRepository) GetAll() ([]*models.OdModel, error) {
 		}
 	}
 	for _, key := range keys {
-		var p models.OdModel
+		var p models.SmartVisionModel
 		err := conn.HGetAll(context.Background(), key).Scan(&p)
 		if err != nil {
 			log.Println("Error getting object detection model from redis: ", err)
@@ -52,14 +52,14 @@ func (o *OdRepository) GetAll() ([]*models.OdModel, error) {
 	return ret, err
 }
 
-func (o *OdRepository) Save(model *models.OdModel) (*models.OdModel, error) {
+func (o *SmartVisionRepository) Save(model *models.SmartVisionModel) (*models.SmartVisionModel, error) {
 	conn := o.Connection
 	if len(model.Id) == 0 {
 		errMsg := "insert operation is not supported on mngr"
 		log.Println(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	_, err := conn.HSet(context.Background(), redisKeyOds+model.Id, Map(model)).Result()
+	_, err := conn.HSet(context.Background(), redisKeySmartVisions+model.Id, Map(model)).Result()
 	if err != nil {
 		log.Println("Error while adding object detection model: ", err)
 		return nil, err
@@ -67,9 +67,9 @@ func (o *OdRepository) Save(model *models.OdModel) (*models.OdModel, error) {
 	return model, nil
 }
 
-func (o *OdRepository) RemoveById(id string) error {
+func (o *SmartVisionRepository) RemoveById(id string) error {
 	conn := o.Connection
-	_, err := conn.Del(context.Background(), redisKeyOds+id).Result()
+	_, err := conn.Del(context.Background(), redisKeySmartVisions+id).Result()
 	if err != nil {
 		log.Println("Error while deleting object detection model: ", err)
 		return err

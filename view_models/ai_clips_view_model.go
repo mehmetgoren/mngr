@@ -13,13 +13,12 @@ type AiPreviewViewModel struct {
 }
 
 type AiObjectViewModel struct {
-	PredScore   float32 `json:"pred_score"`
-	PredClsIdx  int     `json:"pred_cls_idx"`
-	PredClsName string  `json:"pred_cls_name"`
+	Score float32 `json:"score"`
+	Label string  `json:"label"`
 }
 
 type AiClipViewModel struct {
-	AiType         int                  `json:"ai_type"`
+	Module         string               `json:"module"`
 	AiObjects      []*AiObjectViewModel `json:"ai_objects"`
 	ImageFileNames []string             `json:"image_file_names"`
 	Ids            []string             `json:"ids"`
@@ -51,7 +50,7 @@ func setAiPreviewViewModel(ret []*AiClipViewModel) {
 	for _, v := range ret {
 		m := map[string]bool{}
 		for _, d := range v.AiObjects {
-			m[d.PredClsName] = true
+			m[d.Label] = true
 		}
 		a := make([]string, 0)
 		for k, _ := range m {
@@ -61,11 +60,11 @@ func setAiPreviewViewModel(ret []*AiClipViewModel) {
 	}
 }
 
-func Map(sourceId string, dtos []data.AiDto) []*AiClipViewModel {
+func Map(sourceId string, dtos []*data.AiDto) []*AiClipViewModel {
 	ret := make([]*AiClipViewModel, 0)
 	dic := make(map[string]*AiClipViewModel)
 	for _, dto := range dtos {
-		aiClip := dto.GetAiClip()
+		aiClip := dto.AiClip
 		if aiClip == nil {
 			continue
 		}
@@ -79,14 +78,13 @@ func Map(sourceId string, dtos []data.AiDto) []*AiClipViewModel {
 			dic[key] = val
 			ret = append(ret, val)
 		}
-		val.AiType = dto.GetAiType()
-		val.ImageFileNames = append(val.ImageFileNames, dto.GetImageFileName())
+		val.Module = dto.Module
+		val.ImageFileNames = append(val.ImageFileNames, dto.ImageFileName)
 		do := &AiObjectViewModel{}
-		do.PredClsIdx = dto.GetPredClsIdx()
-		do.PredClsName = dto.GetPredClsName()
-		do.PredScore = dto.GetPredScore()
+		do.Label = dto.DetectedObject.Label
+		do.Score = dto.DetectedObject.Score
 		val.AiObjects = append(val.AiObjects, do)
-		val.Ids = append(val.Ids, dto.GetId())
+		val.Ids = append(val.Ids, dto.Id)
 		val.SourceId = sourceId
 	}
 	setAiPreviewViewModel(ret)
@@ -94,7 +92,7 @@ func Map(sourceId string, dtos []data.AiDto) []*AiClipViewModel {
 }
 
 type AiClipQueryViewModel struct {
-	AiType   int    `json:"ai_type"`
+	Module   string `json:"module"`
 	SourceId string `json:"source_id"`
 	Date     string `json:"date"`
 }

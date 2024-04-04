@@ -2,8 +2,6 @@ package view_models
 
 import (
 	"mngr/models"
-	"mngr/utils"
-	"time"
 )
 
 type ServiceViewModel struct {
@@ -16,10 +14,7 @@ type ServiceViewModel struct {
 func (s *ServiceViewModel) SetupButtonEnabled(containers map[string]*models.DockerContainer) {
 	serviceNotRunning := true
 	if s.InstanceType == models.Systemd {
-		now := utils.StringToTime(utils.TimeToString(time.Now(), true))
-		hb := utils.StringToTime(s.Heartbeat)
-		diff := now.Sub(hb)
-		serviceNotRunning = diff.Seconds() > 60
+		serviceNotRunning = false
 	} else if s.InstanceType == models.Container && len(s.InstanceName) > 0 {
 		container, ok := containers[s.InstanceName]
 		if ok {

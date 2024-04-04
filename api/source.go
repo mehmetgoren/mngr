@@ -67,8 +67,8 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 			ctx.Writer.WriteHeader(http.StatusOK)
 		}
 
-		//also remove Object Detection Model
-		if err := rb.OdRep.RemoveById(id); err != nil {
+		//also remove Smart Vision Model
+		if err := rb.SmartVisionRep.RemoveById(id); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -76,7 +76,7 @@ func RegisterSourceEndpoints(router *gin.Engine, rb *reps.RepoBucket) {
 
 		mc := eb.ModelChanged{SourceId: id}
 		mcJson, _ := utils.SerializeJson(mc)
-		dcEvent := eb.DataChangedEvent{Rb: rb, ModelName: "od", ParamsJson: mcJson, Op: eb.DELETE}
+		dcEvent := eb.DataChangedEvent{Rb: rb, ModelName: "smart_vision", ParamsJson: mcJson, Op: eb.DELETE}
 		dcEvent.Publish()
 
 		dataChangedPub := eb.DataChangedEvent{Rb: rb, ModelName: "source", ParamsJson: mcJson, Op: eb.DELETE}

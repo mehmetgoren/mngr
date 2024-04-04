@@ -5,33 +5,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lithammer/shortuuid/v3"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
 )
 
 var StartupTime = time.Now()
-
-func HandlePanic() {
-	if r := recover(); r != nil {
-		fmt.Println("RECOVER", r)
-		debug.PrintStack()
-	}
-}
-
-var re = regexp.MustCompile(`(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`)
-
-func ParseIp(address string) string {
-	return re.FindString(address)
-}
 
 func NewId() string {
 	return strings.ToLower(shortuuid.New()[:11])

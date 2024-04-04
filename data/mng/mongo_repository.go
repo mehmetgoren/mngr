@@ -22,14 +22,17 @@ func count(coll *mongo.Collection, filter bson.M) (int64, error) {
 	return count, nil
 }
 
-func createQuery(className string, params *data.QueryParams) (bson.M, *PagingOptions, bson.D) {
+func createQuery(label string, params *data.QueryParams) (bson.M, *PagingOptions, bson.D) {
 	q := bson.M{}
 	if len(params.SourceId) > 0 {
 		q["source_id"] = params.SourceId
 	}
+	if len(params.Module) > 0 {
+		q["module"] = params.Module
+	}
 	q["created_date"] = bson.M{"$gte": params.T1, "$lte": params.T2}
-	if len(params.ClassName) > 0 {
-		q[className] = primitive.Regex{Pattern: params.ClassName, Options: "i"}
+	if len(params.Label) > 0 {
+		q[label] = primitive.Regex{Pattern: params.Label, Options: "i"}
 	}
 	if params.NoPreparingVideoFile {
 		q["video_file.name"] = bson.M{"$exists": true, "$ne": ""}
@@ -50,18 +53,18 @@ func createQuery(className string, params *data.QueryParams) (bson.M, *PagingOpt
 	return q, po, sorts
 }
 
-func (m *MongoRepository) QueryOds(params data.QueryParams) ([]*data.OdDto, error) {
+func (m *MongoRepository) QueryAis(params data.QueryParams) ([]*data.AiDto, error) {
 	if params.Sort.Enabled {
-		if params.Sort.Field == "pred_cls_name" {
-			params.Sort.Field = "detected_object.pred_cls_name"
+		if params.Sort.Field == "label" {
+			params.Sort.Field = "detected_object.label"
 		}
-		if params.Sort.Field == "pred_score" {
-			params.Sort.Field = "detected_object.pred_score"
+		if params.Sort.Field == "score" {
+			params.Sort.Field = "detected_object.score"
 		}
 	}
 
-	q, p, s := createQuery("detected_object.pred_cls_name", &params)
-	entities, err := m.Db.Ods.GetByQuery(q, p, s)
+	q, p, s := createQuery("detected_object.label", &params)
+	entities, err := m.Db.Ais.GetByQuery(q, p, s)
 	if err != nil {
 		return nil, err
 	}
@@ -69,80 +72,19 @@ func (m *MongoRepository) QueryOds(params data.QueryParams) ([]*data.OdDto, erro
 		return nil, nil
 	}
 
-	mapper := &OdMapper{Config: m.Db.Config}
-	ret := make([]*data.OdDto, 0)
+	mapper := &AiMapper{Config: m.Db.Config}
+	ret := make([]*data.AiDto, 0)
 	for _, entity := range entities {
 		ret = append(ret, mapper.Map(entity))
 	}
 
 	return ret, nil
 }
-func (m *MongoRepository) CountOds(params data.QueryParams) (int64, error) {
+func (m *MongoRepository) CountAis(params data.QueryParams) (int64, error) {
 	params.Sort.Enabled = false
 	params.Paging.Enabled = false
-	f, _, _ := createQuery("detected_object.pred_cls_name", &params)
-	return count(m.Db.Ods.coll, f)
-}
-
-func (m *MongoRepository) QueryFrs(params data.QueryParams) ([]*data.FrDto, error) {
-	if params.Sort.Enabled {
-		if params.Sort.Field == "pred_cls_name" {
-			params.Sort.Field = "detected_face.pred_cls_name"
-		}
-		if params.Sort.Field == "pred_score" {
-			params.Sort.Field = "detected_face.pred_score"
-		}
-	}
-
-	q, p, s := createQuery("detected_face.pred_cls_name", &params)
-	entities, err := m.Db.Frs.GetByQuery(q, p, s)
-	if err != nil {
-		return nil, err
-	}
-
-	mapper := &FrMapper{Config: m.Db.Config}
-	ret := make([]*data.FrDto, 0)
-	for _, entity := range entities {
-		ret = append(ret, mapper.Map(entity))
-	}
-
-	return ret, nil
-}
-func (m *MongoRepository) CountFrs(params data.QueryParams) (int64, error) {
-	params.Sort.Enabled = false
-	params.Paging.Enabled = false
-	q, _, _ := createQuery("detected_face.pred_cls_name", &params)
-	return count(m.Db.Frs.coll, q)
-}
-
-func (m *MongoRepository) QueryAlprs(params data.QueryParams) ([]*data.AlprDto, error) {
-	if params.Sort.Enabled {
-		if params.Sort.Field == "pred_cls_name" {
-			params.Sort.Field = "detected_plate.plate"
-		}
-		if params.Sort.Field == "pred_score" {
-			params.Sort.Field = "detected_plate.confidence"
-		}
-	}
-	q, p, s := createQuery("detected_plate.plate", &params)
-	entities, err := m.Db.Alprs.GetByQuery(q, p, s)
-	if err != nil {
-		return nil, err
-	}
-
-	mapper := &AlprMapper{Config: m.Db.Config}
-	ret := make([]*data.AlprDto, 0)
-	for _, entity := range entities {
-		ret = append(ret, mapper.Map(entity))
-	}
-
-	return ret, nil
-}
-func (m *MongoRepository) CountAlprs(params data.QueryParams) (int64, error) {
-	params.Sort.Enabled = false
-	params.Paging.Enabled = false
-	q, _, _ := createQuery("detected_plate.plate", &params)
-	return count(m.Db.Alprs.coll, q)
+	f, _, _ := createQuery("detected_object.label", &params)
+	return count(m.Db.Ais.coll, f)
 }
 
 func deleteRec[T any](coll *mongo.Collection, options *data.DeleteOptions,
@@ -190,74 +132,26 @@ func deleteRec[T any](coll *mongo.Collection, options *data.DeleteOptions,
 	return nil
 }
 
-func (m *MongoRepository) DeleteOds(options *data.DeleteOptions) error {
-	getGroupId := func(t *OdEntity) string {
+func (m *MongoRepository) DeleteAis(options *data.DeleteOptions) error {
+	getGroupId := func(t *AiEntity) string {
 		return t.GroupId
 	}
-	getImageFileName := func(t *OdEntity) string {
+	getImageFileName := func(t *AiEntity) string {
 		return t.ImageFileName
 	}
-	getVideoFileName := func(t *OdEntity) string {
+	getVideoFileName := func(t *AiEntity) string {
 		return t.VideoFile.Name
 	}
-	return deleteRec[OdEntity](m.Db.Ods.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
+	return deleteRec[AiEntity](m.Db.Ais.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
 }
 
-func (m *MongoRepository) DeleteFrs(options *data.DeleteOptions) error {
-	getGroupId := func(t *FrEntity) string {
-		return t.GroupId
-	}
-	getImageFileName := func(t *FrEntity) string {
-		return t.ImageFileName
-	}
-	getVideoFileName := func(t *FrEntity) string {
-		return t.VideoFile.Name
-	}
-	return deleteRec[FrEntity](m.Db.Frs.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
-}
-
-func (m *MongoRepository) DeleteAlprs(options *data.DeleteOptions) error {
-	getGroupId := func(t *AlprEntity) string {
-		return t.GroupId
-	}
-	getImageFileName := func(t *AlprEntity) string {
-		return t.ImageFileName
-	}
-	getVideoFileName := func(t *AlprEntity) string {
-		return t.VideoFile.Name
-	}
-	return deleteRec[AlprEntity](m.Db.Alprs.GetCollection(), options, getGroupId, getImageFileName, getVideoFileName)
-}
-
-func (m *MongoRepository) RemoveOd(id string) error {
+func (m *MongoRepository) RemoveAi(id string) error {
 	objectId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	_, err = m.Db.Ods.DeleteOneById(objectId)
-
-	return err
-}
-
-func (m *MongoRepository) RemoveFr(id string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.Db.Frs.DeleteOneById(objectId)
-
-	return err
-}
-
-func (m *MongoRepository) RemoveAlpr(id string) error {
-	objectId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.Db.Alprs.DeleteOneById(objectId)
+	_, err = m.Db.Ais.DeleteOneById(objectId)
 
 	return err
 }

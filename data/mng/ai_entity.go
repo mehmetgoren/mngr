@@ -5,29 +5,18 @@ import (
 	"mngr/data"
 )
 
-type Color struct {
-	R int `json:"r" bson:"r"`
-	G int `json:"g" bson:"g"`
-	B int `json:"b" bson:"b"`
-}
-
-type Metadata struct {
-	Colors []Color `json:"colors" bson:"colors"`
-}
-
 type DetectedObject struct {
-	PredScore   float32   `json:"pred_score"  bson:"pred_score"`
-	PredClsIdx  int       `json:"pred_cls_idx" bson:"pred_cls_idx"`
-	PredClsName string    `json:"pred_cls_name" bson:"pred_cls_name"` //Index
-	X1          float32   `json:"x1" bson:"x1"`
-	Y1          float32   `json:"y1" bson:"y1"`
-	X2          float32   `json:"x2" bson:"x2"`
-	Y2          float32   `json:"y2" bson:"y2"`
-	Metadata    *Metadata `json:"metadata" bson:"metadata"`
+	Score float32 `json:"score"  bson:"score"`
+	Label string  `json:"label" bson:"label"` //Index
+	X1    float32 `json:"x1" bson:"x1"`
+	Y1    float32 `json:"y1" bson:"y1"`
+	X2    float32 `json:"x2" bson:"x2"`
+	Y2    float32 `json:"y2" bson:"y2"`
 }
 
-type OdEntity struct {
+type AiEntity struct {
 	Id             primitive.ObjectID `json:"_id" bson:"_id"`
+	Module         string             `json:"module" bson:"module"`       //Index
 	GroupId        string             `json:"group_id" bson:"group_id"`   //Index
 	SourceId       string             `json:"source_id" bson:"source_id"` //Index
 	CreatedAt      string             `json:"created_at" bson:"created_at"`
