@@ -20,9 +20,13 @@ func RegisterAiModulesEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerC
 		ctx.BindJSON(&aiModules)
 		rb.AiModuleRep.SaveAiModule(aiModules)
 
+		ctx.JSON(http.StatusOK, aiModules)
+	})
+
+	router.POST("/aimodulerestartsenseai", func(ctx *gin.Context) {
 		restartServiceInstance(dockerClient)
 
-		ctx.JSON(http.StatusOK, aiModules)
+		ctx.JSON(http.StatusOK, gin.H{})
 	})
 
 	router.DELETE("/aimodule/:name", func(ctx *gin.Context) {
