@@ -14,7 +14,7 @@ type VideoFile struct {
 }
 
 type FFmpegReaderModel struct {
-	Name   string `json:"name"`
-	Img    string `json:"img"`
-	Source string `json:"source"`
+	Name        string `json:"name"`
+	Base64Image string `json:"base64_image"`
+	SourceId    string `json:"source_id"`
 }
