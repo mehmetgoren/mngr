@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func RegisterHubEndpoints(router *gin.Engine, rb *reps.RepoBucket, holders *ws.Holders, factory *cmn.Factory) {
+func RegisterDesimaEndpoints(router *gin.Engine, rb *reps.RepoBucket, holders *ws.Holders, factory *cmn.Factory) {
 	router.POST("/loginbytoken", func(ctx *gin.Context) {
 		var lu models.LoginUserByTokenViewModel
 		if err := ctx.BindJSON(&lu); err != nil {
@@ -73,7 +73,7 @@ func RegisterHubEndpoints(router *gin.Engine, rb *reps.RepoBucket, holders *ws.H
 			nodeDto.OperatingSystem = me.Platform
 		}
 		config, _ := rb.ConfigRep.GetConfig()
-		nodeDto.WebAppAddress = config.Hub.WebAppAddress
+		nodeDto.WebAppAddress = config.Desima.WebAppAddress
 		setHardwareInfo(nodeDto, config)
 		setGpuInfo(nodeDto)
 		setAiInfo(nodeDto, config, factory)

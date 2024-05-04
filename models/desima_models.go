@@ -1,7 +1,7 @@
 package models
 
 type NodeActivationRequest struct {
-	HubToken      string `json:"HubToken"`
+	DesimaToken   string `json:"DesimaToken"`
 	NodeAddress   string `json:"NodeAddress"`
 	NodeToken     string `json:"NodeToken"`
 	WebAppAddress string `json:"WebAppAddress"`
@@ -13,7 +13,7 @@ type NodeActivationResponse struct {
 
 type NodeDto struct {
 	Id              string `json:"Id"`
-	HubToken        string `json:"HubToken"`
+	DesimaToken     string `json:"DesimaToken"`
 	NodeAddress     string `json:"NodeAddress"`
 	NodeToken       string `json:"NodeToken"`
 	WebAppAddress   string `json:"WebAppAddress"`

@@ -132,7 +132,7 @@ func main() {
 	api.RegisterOthersEndpoints(router, rb, global)
 	api.RegisterCloudEndpoints(router, rb)
 	api.RegisterAiDataEndpoints(router, factory)
-	api.RegisterHubEndpoints(router, rb, holders, factory)
+	api.RegisterDesimaEndpoints(router, rb, holders, factory)
 	api.RegisterAiModulesEndpoints(router, rb, dockerClient)
 
 	ws.RegisterApiEndpoints(router, rb)
@@ -141,7 +141,7 @@ func main() {
 	port := utils.ParsePort()
 	portStr := strconv.Itoa(port)
 	log.Println("web server port is " + portStr)
-	go CheckHubContinuous(config, rb, port)
+	go CheckDesimaContinuous(config, rb, port)
 	err = router.Run(":" + portStr)
 	if err != nil {
 		log.Println(err.Error())

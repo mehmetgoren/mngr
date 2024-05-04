@@ -40,7 +40,7 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 
 		if len(p.AppAddress) > 0 {
 			c, _ := rb.ConfigRep.GetConfig()
-			if len(c.Hub.WebAppAddress) == 0 {
+			if len(c.Desima.WebAppAddress) == 0 {
 				address := p.AppAddress
 				address = strings.ReplaceAll(address, "#/", "")
 				splits := strings.Split(address, "?")
@@ -50,7 +50,7 @@ func RegisterServiceEndpoints(router *gin.Engine, rb *reps.RepoBucket, dockerCli
 						address = address[:len(address)-1]
 					}
 				}
-				c.Hub.WebAppAddress = address
+				c.Desima.WebAppAddress = address
 				err := rb.ConfigRep.SaveConfig(c)
 				if err != nil {
 					log.Println("Error while saving config: ", err.Error())

@@ -164,38 +164,38 @@ func CheckSourceDirPaths(config *models.Config, rb *reps.RepoBucket) {
 	}
 }
 
-func CheckHubContinuous(config *models.Config, rb *reps.RepoBucket, port int) {
-	if !config.Hub.Enabled || len(config.Hub.Address) == 0 && len(config.Hub.Token) == 0 {
-		log.Println("Hub integration is disabled")
+func CheckDesimaContinuous(config *models.Config, rb *reps.RepoBucket, port int) {
+	if !config.Desima.Enabled || len(config.Desima.Address) == 0 && len(config.Desima.Token) == 0 {
+		log.Println("Desima integration is disabled")
 		return
 	}
-	log.Println("Hub integration is enabled")
-	maxRetry := config.Hub.MaxRetry
+	log.Println("Desima integration is enabled")
+	maxRetry := config.Desima.MaxRetry
 	if maxRetry < 1 {
 		maxRetry = 100
 	}
 	count := 0
 	for {
-		if checkHub(config, rb, port) {
+		if checkDesima(config, rb, port) {
 			if fetchRtspTemplates(config, rb) {
-				log.Println("RTSP templates fetched from hub")
+				log.Println("RTSP templates fetched from Desima")
 				break
 			} else {
-				log.Println("Failed to fetch RTSP templates from hub, retrying in 1 minute")
+				log.Println("Failed to fetch RTSP templates from Desima, retrying in 1 minute")
 			}
 		}
-		if count > config.Hub.MaxRetry {
-			log.Println("Hub max retry count reached, aborting")
+		if count > config.Desima.MaxRetry {
+			log.Println("Desima max retry count reached, aborting")
 			break
 		}
 		time.Sleep(time.Minute)
 		count++
-		log.Println("Hub integration retry count: " + strconv.Itoa(count))
+		log.Println("Desima integration retry count: " + strconv.Itoa(count))
 	}
-	log.Println("Hub integration completed")
+	log.Println("Desima integration completed")
 }
 
-func checkHub(config *models.Config, rb *reps.RepoBucket, port int) bool {
+func checkDesima(config *models.Config, rb *reps.RepoBucket, port int) bool {
 	ip, err := utils.GetExternalIP()
 	if err != nil {
 		log.Println(err.Error())
@@ -224,12 +224,12 @@ func checkHub(config *models.Config, rb *reps.RepoBucket, port int) bool {
 
 	requestModel := &models.NodeActivationRequest{
 		NodeAddress:   "http://" + ip + ":" + strconv.Itoa(port),
-		HubToken:      config.Hub.Token,
+		DesimaToken:   config.Desima.Token,
 		NodeToken:     adminUser.Token,
-		WebAppAddress: config.Hub.WebAppAddress,
+		WebAppAddress: config.Desima.WebAppAddress,
 	}
 
-	url := config.Hub.Address + "/api/v1/node/activate"
+	url := config.Desima.Address + "/api/v1/node/activate"
 	jsonBytes, err := json.Marshal(requestModel)
 	if err != nil {
 		log.Println(err.Error())
@@ -269,7 +269,7 @@ func checkHub(config *models.Config, rb *reps.RepoBucket, port int) bool {
 }
 
 func fetchRtspTemplates(config *models.Config, rb *reps.RepoBucket) bool {
-	url := config.Hub.Address + "/api/v1/node/getrtsptemplates"
+	url := config.Desima.Address + "/api/v1/node/getrtsptemplates"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Println("an error an error occurred while creating a request", err.Error())
@@ -380,14 +380,14 @@ func CheckMissingConfigValues(config *models.Config, rb *reps.RepoBucket) {
 		config.Snapshot.ProcessCount = 4
 	}
 
-	if len(config.Hub.Address) == 0 {
-		config.Hub.Address = "http://localhost:5268"
+	if len(config.Desima.Address) == 0 {
+		config.Desima.Address = "http://localhost:5268"
 	}
-	if len(config.Hub.WebAppAddress) == 0 {
-		config.Hub.WebAppAddress = "http://localhost:8080"
+	if len(config.Desima.WebAppAddress) == 0 {
+		config.Desima.WebAppAddress = "http://localhost:8080"
 	}
-	if config.Hub.MaxRetry == 0 {
-		config.Hub.MaxRetry = 100
+	if config.Desima.MaxRetry == 0 {
+		config.Desima.MaxRetry = 100
 	}
 
 	if !reflect.DeepEqual(originalConfig, config) {
